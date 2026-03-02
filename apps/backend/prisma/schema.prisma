@@ -6,9 +6,194 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id  Int @id @default(autoincrement())
+  name  String
+  password  String
+  role  Role
+  isActive  Boolean
+  createdAt DateTime
+}
+
+model Table {
+  id Int @id @default(autoincrement())
+  number Int
+  status TableStatus
+  createdAt DateTime
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+  dailyOrderNumber Int
+  table Table @relation(fields: [tableId], references: [id])
+  tableId Int
+  waiter User @relation(fields: [waiterId], references: [id])
+  waiterId Int
+  status OrderStatus
+  createdAt DateTime
+  closeAt DateTime
+}
+
+model SubOrder {
+  id Int @id @default(autoincrement())
+  order Order @relation(fields: [orderId], references: [id])
+  orderId Int
+  label String
+  status OrderStatus
+  subtotal Int
+  total Int
+  paidAt DateTime
+  createdAt DateTime
+  updateAt DateTime
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  name String
+  price Int
+  isActive Boolean
+  createdAt DateTime
+  updateAt DateTime
+  category Category @relation(fields: [categoryid], references: [id])
+  categoryid Int
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  name String
+  isActive Boolean
+  createdAt DateTime
+}
+
+model Ingredient {
+  id Int @id @default(autoincrement())
+  name String
+  unit Unit
+  stock Int
+  minStockAlert Int
+  isActive Boolean
+  createdAt DateTime
+}
+
+model Recipe {
+  id Int @id @default(autoincrement())
+  product Product @relation(fields: [productId], references: [id])
+  productId Int
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId Int
+  quantityRequired Int
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+  subOrder SubOrder @relation(fields: [subOrderId], references: [id])
+  subOrderId Int
+  product Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity Int
+  unitPriceSnapshot Int
+  totalPriceSnapshot Int
+  notes String
+}
+
+model OrderItemModifier {
+  id Int @id @default(autoincrement())
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
+  orderItemId Int
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId Int
+  quantity Int
+  type OrderItemModifierType
+}
+
+model InventoryMovement {
+  id Int @id @default(autoincrement())
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId Int
+  quantity Int
+  type InventoryMovementType
+  subOrder SubOrder @relation(fields: [subOrderId], references: [id])
+  subOrderId Int 
+  createdAt DateTime
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Shift {
+  id Int @id @default(autoincrement())
+  openedBy User @relation(fields: [openedById], references: [id])
+  openedById Int
+  closedBy User @relation(fields: [closedById], references: [id])
+  closedById Int
+  openedAt DateTime
+  closedAt DateTime
+  expectedRevenue Float
+  declaredCash Float
+  difference Float
+}
+
+model Payment {
+  id Int @id @default(autoincrement())
+  subOrder SubOrder @relation(fields: [subOrderId], references: [id])
+  subOrderId Int
+  amount Int
+  method PaymentMethod
+  cashier User @relation(fields: [cashierId], references: [id])
+  cashierId Int
+  shift Shift @relation(fields: [shiftId], references: [id])
+  shiftId Int
+  createdAt DateTime
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  MOBILE_PAYMENT
+}
+
+enum InventoryMovementType {
+  SALE_DEDUCTION
+  MANUAL_ADJUSTMENT
+  WASTE
+  RESTOCK
+}
+
+enum OrderItemModifierType {
+  EXTRA
+  REMOVE
+}
+
+enum Unit {
+  UNIT
+  GRAM
+  KILOGRAM
+  MILLILITER
+  LITER
+}
+
+enum OrderStatus {
+  OPEN
+  SENT_TO_CASHIER
+  PAID
+  CANCELLED
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  OUT_OF_SERVICE
+}
+
+enum Role {
+  ADMIN
+  CASHIER
+  WAITER
 }
