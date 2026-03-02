@@ -18,40 +18,60 @@ model User {
   name  String
   password  String
   role  Role
-  isActive  Boolean
-  createdAt DateTime
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  waiterOrders Order[] @relation("WaiterOrders")
+  cashierPayments Payment[] @relation("CashierPayments")
+
+  openedShifts  Shift[] @relation("ShiftOpenedBy")
+  closedShifts  Shift[] @relation("ShiftClosedBy")
+
+  movements InventoryMovement[]
 }
 
 model Table {
   id Int @id @default(autoincrement())
   number Int
   status TableStatus
-  createdAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model Order {
   id Int @id @default(autoincrement())
   dailyOrderNumber Int
+  bussinessDate DateTime
+  status OrderStatus
+  createdAt DateTime @default(now())
+  closeAt DateTime?
+
   table Table @relation(fields: [tableId], references: [id])
   tableId Int
-  waiter User @relation(fields: [waiterId], references: [id])
+
+  waiter User @relation("WaiterOrders",fields: [waiterId], references: [id])
   waiterId Int
-  status OrderStatus
-  createdAt DateTime
-  closeAt DateTime
+
+  subOrders SubOrder[]
+
+  @@unique([dailyOrderNumber, bussinessDate]) 
 }
 
 model SubOrder {
   id Int @id @default(autoincrement())
-  order Order @relation(fields: [orderId], references: [id])
-  orderId Int
   label String
-  status OrderStatus
+  status OrderStatus @default(OPEN)
   subtotal Int
   total Int
-  paidAt DateTime
-  createdAt DateTime
-  updateAt DateTime
+  paidAt DateTime?
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+  orderId Int
+
+  orderItems OrderItem[]
+  payments Payment[]
 }
 
 model Product {
@@ -59,17 +79,23 @@ model Product {
   name String
   price Int
   isActive Boolean
-  createdAt DateTime
-  updateAt DateTime
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
   category Category @relation(fields: [categoryid], references: [id])
   categoryid Int
+
+  recipes Recipe[]
+  orderItems OrderItem[]
 }
 
 model Category {
   id Int @id @default(autoincrement())
   name String
   isActive Boolean
-  createdAt DateTime
+  createdAt DateTime @default(now())
+
+  products Product[]
 }
 
 model Ingredient {
@@ -79,77 +105,101 @@ model Ingredient {
   stock Int
   minStockAlert Int
   isActive Boolean
-  createdAt DateTime
+  createdAt DateTime @default(now())
+
+  recipes Recipe[]
+  orderItemModifiers OrderItemModifier[]
+  inventoryMovements InventoryMovement[]
 }
 
 model Recipe {
   id Int @id @default(autoincrement())
+  quantityRequired Decimal @db.Decimal(10, 3)
+
   product Product @relation(fields: [productId], references: [id])
   productId Int
+
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
   ingredientId Int
-  quantityRequired Int
+
+  @@unique([productId, ingredientId])
 }
 
 model OrderItem {
   id Int @id @default(autoincrement())
-  subOrder SubOrder @relation(fields: [subOrderId], references: [id])
-  subOrderId Int
-  product Product @relation(fields: [productId], references: [id])
-  productId Int
   quantity Int
   unitPriceSnapshot Int
   totalPriceSnapshot Int
   notes String
+
+  subOrder SubOrder @relation(fields: [subOrderId], references: [id])
+  subOrderId Int
+  
+  product Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  modifiers OrderItemModifier[]
 }
 
 model OrderItemModifier {
   id Int @id @default(autoincrement())
+  quantity Decimal @db.Decimal(10, 3)
+  type OrderItemModifierType
+
   orderItem OrderItem @relation(fields: [orderItemId], references: [id])
   orderItemId Int
+
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
   ingredientId Int
-  quantity Int
-  type OrderItemModifierType
 }
 
 model InventoryMovement {
   id Int @id @default(autoincrement())
+  createdAt DateTime
+  type InventoryMovementType
+  quantity Decimal @db.Decimal(10, 3)
+
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
   ingredientId Int
-  quantity Int
-  type InventoryMovementType
+  
   subOrder SubOrder @relation(fields: [subOrderId], references: [id])
-  subOrderId Int 
-  createdAt DateTime
+  subOrderId Int?
+  
   user User @relation(fields: [userId], references: [id])
   userId Int
 }
 
 model Shift {
   id Int @id @default(autoincrement())
-  openedBy User @relation(fields: [openedById], references: [id])
+  openedAt DateTime @default(now())
+  closedAt DateTime?
+  expectedRevenue Int?
+  declaredCash Int?
+  difference Int?
+
+  openedBy User @relation("ShiftOpenedBy",fields: [openedById], references: [id])
   openedById Int
-  closedBy User @relation(fields: [closedById], references: [id])
-  closedById Int
-  openedAt DateTime
-  closedAt DateTime
-  expectedRevenue Float
-  declaredCash Float
-  difference Float
+
+  closedBy User? @relation("ShiftClosedBy",fields: [closedById], references: [id])
+  closedById Int?
+
+  payments Payment[]
 }
 
 model Payment {
   id Int @id @default(autoincrement())
-  subOrder SubOrder @relation(fields: [subOrderId], references: [id])
-  subOrderId Int
+  createdAt DateTime
   amount Int
   method PaymentMethod
-  cashier User @relation(fields: [cashierId], references: [id])
+
+  subOrder SubOrder @relation(fields: [subOrderId], references: [id])
+  subOrderId Int
+
+  cashier User @relation("CashierPayments",fields: [cashierId], references: [id])
   cashierId Int
+  
   shift Shift @relation(fields: [shiftId], references: [id])
   shiftId Int
-  createdAt DateTime
 }
 
 enum PaymentMethod {
