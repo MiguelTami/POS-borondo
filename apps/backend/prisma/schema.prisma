@@ -36,6 +36,8 @@ model Table {
   number Int @unique
   status TableStatus
   createdAt DateTime @default(now())
+
+  orders Order[]
 }
 
 model Order {
@@ -73,6 +75,7 @@ model SubOrder {
 
   orderItems OrderItem[]
   payments Payment[]
+  InventoryMovements InventoryMovement[]
 }
 
 model Product {
@@ -83,8 +86,8 @@ model Product {
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
 
-  category Category @relation(fields: [categoryid], references: [id])
-  categoryid Int
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
 
   recipes Recipe[]
   orderItems OrderItem[]
@@ -205,8 +208,6 @@ model Payment {
   
   shift Shift @relation(fields: [shiftId], references: [id])
   shiftId Int
-
-  @@unique([subOrderId])
 }
 
 enum PaymentMethod {
