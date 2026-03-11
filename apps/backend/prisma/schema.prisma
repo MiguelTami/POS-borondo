@@ -82,7 +82,7 @@ model Product {
   id Int @id @default(autoincrement())
   name String
   price Decimal @db.Decimal(10, 2)
-  isActive Boolean
+  isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
 
@@ -96,7 +96,7 @@ model Product {
 model Category {
   id Int @id @default(autoincrement())
   name String
-  isActive Boolean
+  isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -109,7 +109,7 @@ model Ingredient {
   unit Unit
   stock Decimal @db.Decimal(10, 3)
   minStockAlert Int
-  isActive Boolean
+  isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
