@@ -14,9 +14,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "^7.4.2",
+    "@prisma/client": "^6.19.2",
     "express": "^5.2.1",
     "pg": "^8.19.0",
-    "prisma": "^7.4.2"
+    "prisma": "^6.19.2"
   }
 }
