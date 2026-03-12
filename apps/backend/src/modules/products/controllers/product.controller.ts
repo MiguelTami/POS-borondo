@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { ProductsService } from './product.service'
-import { CreateProductDTO, UpdateProductDTO } from './product.types'
+import { ProductsService } from '../services/product.service'
+import { CreateProductDTO, UpdateProductDTO } from '../types/product.types'
 
 export class ProductsController {
 

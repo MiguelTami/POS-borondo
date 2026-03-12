@@ -1,9 +1,9 @@
-import { ProductsRepository } from "./product.repository";
+import { ProductsRepository } from "../repositories/product.repository";
 import { 
     CreateProductDTO, 
     ProductResponse, 
     DeleteProductResponse, 
-    UpdateProductDTO } from "./product.types";
+    UpdateProductDTO } from '../types/product.types';
 
 export class ProductsService {
 

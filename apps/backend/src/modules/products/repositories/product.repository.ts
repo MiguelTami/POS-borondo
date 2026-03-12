@@ -1,5 +1,5 @@
-import { prisma }   from '../../config/prisma';
-import { CreateProductDTO, UpdateProductDTO } from './product.types'
+import { prisma }   from '../../../config/prisma';
+import { CreateProductDTO, UpdateProductDTO } from '../types/product.types'
 
 export class ProductsRepository {
 

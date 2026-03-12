@@ -107,7 +107,7 @@ model Ingredient {
   id Int @id @default(autoincrement())
   name String
   unit Unit
-  stock Decimal @db.Decimal(10, 3)
+  stock Decimal @db.Decimal(10, 3) @default(0)
   minStockAlert Int
   isActive Boolean @default(true)
   createdAt DateTime @default(now())
