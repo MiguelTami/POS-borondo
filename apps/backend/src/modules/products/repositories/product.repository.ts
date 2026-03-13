@@ -1,13 +1,28 @@
 import { prisma }   from '../../../config/prisma';
-import { CreateProductDTO, UpdateProductDTO } from '../types/product.types'
+import { Prisma } from "@prisma/client";
+import { CreateProductDTO, UpdateProductDTO, GetProductQueryDTO } from '../types/product.types'
 
 export class ProductsRepository {
 
-    async findAllActive() {
+    async findAllActive(filters: GetProductQueryDTO) {
+        const where: Prisma.ProductWhereInput = {
+            ...(filters.categoryId && {
+            categoryId: filters.categoryId
+            }),
+
+            ...(filters.isActive !== undefined && {
+            isActive: filters.isActive
+            }),
+
+            ...(filters.search && {
+            name: {
+                contains: filters.search,
+                mode: "insensitive"
+            }
+            })
+        }
         return prisma.product.findMany({
-            where: {
-                isActive: true,
-            },
+            where,
             include: {
                 category: true,
             },

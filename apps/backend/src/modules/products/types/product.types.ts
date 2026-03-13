@@ -25,3 +25,9 @@ export interface ProductResponse {
 export interface DeleteProductResponse {
   message: string;
 }
+
+export interface GetProductQueryDTO {
+  categoryId?: number,
+  isActive?: boolean,
+  search?: string
+}

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { ProductsService } from '../services/product.service'
-import { CreateProductDTO, UpdateProductDTO } from '../types/product.types'
+import { CreateProductDTO, UpdateProductDTO, GetProductQueryDTO } from '../types/product.types'
 
 export class ProductsController {
 
@@ -11,10 +11,22 @@ export class ProductsController {
     }
 
     getProducts = async (req: Request, res: Response) => {
+        const filters: GetProductQueryDTO = {
+        categoryId: req.query.categoryId
+        ? Number(req.query.categoryId)
+        : undefined,
 
+        isActive: req.query.isActive
+        ? req.query.isActive === "true"
+        : undefined,
+
+        search: req.query.search
+        ? String(req.query.search)
+        : undefined
+  }
         try {
             
-            const products = await this.service.getProducts();
+            const products = await this.service.getProducts(filters);
 
             res.status(200).json(products);
 

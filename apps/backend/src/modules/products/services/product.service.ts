@@ -3,7 +3,9 @@ import {
     CreateProductDTO, 
     ProductResponse, 
     DeleteProductResponse, 
-    UpdateProductDTO } from '../types/product.types';
+    UpdateProductDTO,
+    GetProductQueryDTO
+ } from '../types/product.types';
 
 export class ProductsService {
 
@@ -13,8 +15,8 @@ export class ProductsService {
         this.repository = new ProductsRepository();
     }
 
-    async getProducts() {
-        const products = await this.repository.findAllActive();
+    async getProducts(filters: GetProductQueryDTO) {
+        const products = await this.repository.findAllActive(filters);
 
         return products
     }
