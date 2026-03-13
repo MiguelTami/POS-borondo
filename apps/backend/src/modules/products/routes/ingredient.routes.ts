@@ -9,6 +9,6 @@ router.get('/:id', controller.getIngredientById);
 router.post('/', controller.createIngredient);
 router.patch('/:id', controller.updateIngredient);
 router.delete('/:id', controller.disactivateIngredient);
-router.patch('/:id/activate', controller.activateIngredient);
+router.patch('/:id/reactivate', controller.activateIngredient);
 
 export default router;

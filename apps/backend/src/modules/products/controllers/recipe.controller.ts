@@ -10,6 +10,19 @@ export class RecipesController {
         this.service = new RecipesService()
     };
 
+    getIngredientsRecipe = async (req: Request, res: Response) => {
+        try {
+            const productId = Number(req.params.productId)
+            const ingredientsList = await this.service.getIngredientsRecipe(productId)
+
+            res.status(200).json(ingredientsList)
+        } catch (error) {
+           res.status(500).json({
+                message: 'Error fetching ingredients from Recipe'
+            }) 
+        }
+    }
+
     createIngredientRecipe = async (req: Request, res: Response) => {
         try {
             const productId = Number(req.params.productId);
@@ -34,12 +47,26 @@ export class RecipesController {
             const productId = req.params.productId;
             const recipeId = req.params.recipeId;
             
-            const recipeUpdated = await this.service.updateIngredientRecipe(recipeId, productId, data)
+            const recipeUpdated = await this.service.updateIngredientRecipe(recipeId, data)
 
             res.status(200).json(recipeUpdated)
         } catch (error) {
             res.status(500).json({
                 message: 'Error updating Recipe'
+            })
+        }
+    }
+
+    deleteIngredientrecipe = async (req: Request, res: Response) => {
+        try {
+            const recipeId = req.params.recipeId
+            
+            const result = await this.service.deleteIngredientRecipe(recipeId)
+
+            res.status(200).json(result)
+        } catch (error) {
+            res.status(500).json({
+                message: 'Error deleting ingredient from Recipe'
             })
         }
     }

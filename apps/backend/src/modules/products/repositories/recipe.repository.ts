@@ -8,6 +8,15 @@ export class RecipesRepository{
             where: {id}
         })
     }
+
+    async getIngredientsRecipe(productId: number) {
+        return prisma.recipe.findMany({
+            where: {productId},
+            include: {
+                ingredient: true
+            }
+        })
+    }
     
     async createIngredientRecipe(productId: number, data: CreateRecipeDTO) {
         return prisma.recipe.create({
@@ -31,6 +40,12 @@ export class RecipesRepository{
                 ingredient: true,
                 product: true
             }
+        })
+    }
+
+    async deleteIngredientRecipe(recipeId: number) {
+        return prisma.recipe.delete({
+            where: {id: recipeId}
         })
     }
 }

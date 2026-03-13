@@ -1,5 +1,5 @@
 import { RecipesRepository } from "../repositories/recipe.repository";
-import { RecipeResponse, CreateRecipeDTO, UpdateRecipeDTO } from "../types/recipe.types";
+import { RecipeResponse, CreateRecipeDTO, UpdateRecipeDTO, DeleteRecipe } from "../types/recipe.types";
 
 export class RecipesService {
 
@@ -8,6 +8,10 @@ export class RecipesService {
     constructor() {
         this.repository = new RecipesRepository()
     };
+
+    async getIngredientsRecipe(productId: number) {
+        return await this.repository.getIngredientsRecipe(productId)
+    }
 
     async createIngredientRecipe(productId: number, data: CreateRecipeDTO): Promise<RecipeResponse> {
         const ingredientRecipe = await this.repository.createIngredientRecipe(productId, data)
@@ -25,12 +29,8 @@ export class RecipesService {
         }
     };
 
-    async updateIngredientRecipe(recipeId: number, productId: number, data: UpdateRecipeDTO): Promise<RecipeResponse> {
+    async updateIngredientRecipe(recipeId: number, data: UpdateRecipeDTO): Promise<RecipeResponse> {
         const recipe = await this.repository.findById(recipeId);
-
-        if (!recipe || recipe.productId !== productId) {
-            throw new Error('Recipe does not belong to this product')
-        }
 
         const recipeUpdated = await this.repository.updateIngredientRecipe(recipeId, data)
 
@@ -46,5 +46,12 @@ export class RecipesService {
             quantityRequired: recipeUpdated.quantityRequired
         }
 
+    }
+
+    async deleteIngredientRecipe(recipeId: number): Promise<DeleteRecipe> {
+        await this.repository.deleteIngredientRecipe(recipeId)
+        return {
+            message: 'The ingredient was deleted from the recipe succesfully'
+        }
     }
 }
