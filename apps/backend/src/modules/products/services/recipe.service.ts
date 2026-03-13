@@ -25,13 +25,26 @@ export class RecipesService {
         }
     };
 
-    async updateIngredientRecipe(recipeId: number, productId: number, data: UpdateRecipeDTO) {
+    async updateIngredientRecipe(recipeId: number, productId: number, data: UpdateRecipeDTO): Promise<RecipeResponse> {
         const recipe = await this.repository.findById(recipeId);
 
         if (!recipe || recipe.productId !== productId) {
             throw new Error('Recipe does not belong to this product')
         }
 
-        return this.repository.updateIngredientRecipe(recipeId, data)
+        const recipeUpdated = await this.repository.updateIngredientRecipe(recipeId, data)
+
+        return {
+            product: {
+                id: recipeUpdated.product.id,
+                name: recipeUpdated.product.name
+            },
+            ingredient: {
+                id: recipeUpdated.ingredient.id,
+                name: recipeUpdated.ingredient.name
+            },
+            quantityRequired: recipeUpdated.quantityRequired
+        }
+
     }
 }
