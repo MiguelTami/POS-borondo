@@ -1,7 +1,6 @@
 import { Decimal } from "@prisma/client/runtime/library";
 
 export interface CreateRecipeDTO {
-    productId: number,
     ingredientId: number,
     quantityRequired: number | Decimal
 }

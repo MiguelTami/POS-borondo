@@ -9,8 +9,8 @@ export class RecipesService {
         this.repository = new RecipesRepository()
     };
 
-    async createIngredientRecipe(data: CreateRecipeDTO): Promise<RecipeResponse> {
-        const ingredientRecipe = await this.repository.createIngredientRecipe(data)
+    async createIngredientRecipe(productId: number, data: CreateRecipeDTO): Promise<RecipeResponse> {
+        const ingredientRecipe = await this.repository.createIngredientRecipe(productId, data)
 
         return {
             product: {

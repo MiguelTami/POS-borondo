@@ -9,9 +9,13 @@ export class RecipesRepository{
         })
     }
     
-    async createIngredientRecipe(data: CreateRecipeDTO) {
+    async createIngredientRecipe(productId: number, data: CreateRecipeDTO) {
         return prisma.recipe.create({
-            data: data,
+            data: {
+                productId: productId,
+                ingredientId: data.ingredientId,
+                quantityRequired: data.quantityRequired
+            },
             include: {
                 ingredient: true,
                 product: true

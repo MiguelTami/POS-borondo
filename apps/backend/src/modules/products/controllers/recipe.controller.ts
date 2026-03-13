@@ -12,8 +12,13 @@ export class RecipesController {
 
     createIngredientRecipe = async (req: Request, res: Response) => {
         try {
-            const data: CreateRecipeDTO = req.body;
-            const ingredientRecipe = await this.service.createIngredientRecipe(data);
+            const productId = Number(req.params.productId);
+            const info = req.body;
+            const data: CreateRecipeDTO = {
+                ingredientId: info.ingredientId,
+                quantityRequired: info.quantityRequired
+            }
+            const ingredientRecipe = await this.service.createIngredientRecipe(productId,data);
 
             res.status(201).json(ingredientRecipe)
         } catch (error) {
