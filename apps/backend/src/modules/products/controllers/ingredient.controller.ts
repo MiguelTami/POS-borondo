@@ -24,7 +24,7 @@ export class IngredientsController {
 
     getIngredientById = async (req: Request, res: Response) => {
         try {
-            const ingredientId = Number(req.params.id)
+            const ingredientId = Number(req.params.ingredientId)
             const ingredient = await this.service.getIngredientById(ingredientId)
 
             res.status(200).json(ingredient)
@@ -50,7 +50,7 @@ export class IngredientsController {
 
     updateIngredient = async (req: Request, res: Response) => {
         try {
-            const ingredientId = Number(req.params.id);
+            const ingredientId = Number(req.params.ingredientId);
             const dataIngredient: UpdateIngredientDTO = req.body;
 
             const ingredientUpdated = await this.service.updateIngredient(ingredientId, dataIngredient)
@@ -65,7 +65,7 @@ export class IngredientsController {
 
     disactivateIngredient = async (req: Request, res: Response) => {
         try {
-            const ingredientId = Number(req.params.id);
+            const ingredientId = Number(req.params.ingredientId);
             const result = await this.service.disactivateIngredient(ingredientId)
 
             res.status(200).json(result)
@@ -78,7 +78,7 @@ export class IngredientsController {
 
     activateIngredient = async (req: Request, res: Response) => {
         try {
-            const ingredientId = Number(req.params.id);
+            const ingredientId = Number(req.params.ingredientId);
             const result = await this.service.activateIngredient(ingredientId)
 
             res.status(200).json(result)

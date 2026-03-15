@@ -52,13 +52,24 @@ export class ProductsRepository {
         })
     }
 
-    async deleteProduct(productId: number) {
+    async desactivateProduct(productId: number) {
         return prisma.product.update({
             where: {
                 id: productId
             },
             data: {
                 isActive: false
+            }
+        })
+    }
+
+    async reactivateProduct(productId: number) {
+        return prisma.product.update({
+            where: {
+                id: productId
+            },
+            data: {
+                isActive: true
             }
         })
     }

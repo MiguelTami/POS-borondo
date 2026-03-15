@@ -42,10 +42,17 @@ export class ProductsService {
         }
     }
 
-    async deleteProduct(id: number): Promise<DeleteProductResponse> {
-        await this.repository.deleteProduct(id)
+    async desactivateProduct(id: number): Promise<DeleteProductResponse> {
+        await this.repository.desactivateProduct(id)
         return {
-            message: 'Product deleted succesfully'
+            message: 'Product desactivated succesfully'
+        }
+    }
+
+    async reactivateProduct(id: number): Promise<DeleteProductResponse> {
+        await this.repository.reactivateProduct(id)
+        return {
+            message: 'Product reactivated succesfully'
         }
     }
 

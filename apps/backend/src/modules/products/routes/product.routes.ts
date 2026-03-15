@@ -5,9 +5,10 @@ const router = Router();
 const controller = new ProductsController();
 
 router.get("/", controller.getProducts);
-router.get("/:id", controller.getProductById);
+router.get("/:productId", controller.getProductById);
 router.post("/", controller.createProduct);
-router.delete("/:id", controller.deleteProduct);
-router.patch("/:id", controller.updateProduct);
+router.delete("/:productId", controller.desactivateProduct);
+router.patch("/:productId/reactivate", controller.reactivateProduct);
+router.patch("/:productId", controller.updateProduct);
 
 export default router;
