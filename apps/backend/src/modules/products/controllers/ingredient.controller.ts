@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { IngredientsService } from '../services/ingredient.service'
-import { IngredientResponse, CreateIngredientDTO, UpdateIngredientDTO } from '../types/ingredient.types';
+import { CreateIngredientDTO, UpdateIngredientDTO } from '../types/ingredient.types';
 
 export class IngredientsController {
 

@@ -1,5 +1,5 @@
 import { prisma }   from '../../../config/prisma';
-import { CreateIngredientDTO, IngredientResponse, UpdateIngredientDTO } from '../types/ingredient.types';
+import { CreateIngredientDTO, UpdateIngredientDTO } from '../types/ingredient.types';
 
 export class IngredientsRepository {
 
