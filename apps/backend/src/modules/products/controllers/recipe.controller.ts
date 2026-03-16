@@ -12,7 +12,7 @@ export class RecipesController {
 
     getIngredientsRecipe = async (req: Request, res: Response) => {
         try {
-            const productId = Number(req.params.productId)
+            const productId = req.params.productId
             const ingredientsList = await this.service.getIngredientsRecipe(productId)
 
             res.status(200).json(ingredientsList)
@@ -25,7 +25,7 @@ export class RecipesController {
 
     createIngredientRecipe = async (req: Request, res: Response) => {
         try {
-            const productId = Number(req.params.productId);
+            const productId = req.params.productId;
             const info = req.body;
             const data: CreateRecipeDTO = {
                 ingredientId: info.ingredientId,
@@ -44,7 +44,6 @@ export class RecipesController {
     updateIngredientRecipe = async (req: Request, res: Response) => {
         try {
             const data: UpdateRecipeDTO = req.body;
-            const productId = req.params.productId;
             const recipeId = req.params.recipeId;
             
             const recipeUpdated = await this.service.updateIngredientRecipe(recipeId, data)

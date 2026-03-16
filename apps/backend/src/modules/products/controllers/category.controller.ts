@@ -37,7 +37,7 @@ export class CategoriesController {
 
     getCategoryById = async (req: Request, res: Response) => {
         try {
-            const categoryId: number = Number(req.params.categoryId)
+            const categoryId: number = req.params.categoryId
             const category = await this.service.getCategoryById(categoryId)
 
             res.status(200).json(category)
@@ -50,7 +50,7 @@ export class CategoriesController {
 
     updateCategory = async (req: Request, res: Response) => {
         try {
-            const categoryId: number = Number(req.params.categoryId)
+            const categoryId: number = req.params.categoryId
             const data: UpdateCategoryDTO = req.body
 
             const categotyUpdated = await this.service.updateCategory(categoryId, data)

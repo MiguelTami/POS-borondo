@@ -39,7 +39,7 @@ export class ProductsController {
 
     getProductById = async (req: Request, res: Response) => {
         try {
-            const productId = Number(req.params.productId);
+            const productId = req.params.productId;
             const product = await this.service.getProductById(productId);
 
             res.status(200).json(product)
@@ -67,7 +67,7 @@ export class ProductsController {
 
     desactivateProduct = async (req: Request, res: Response) => {
         try {
-            const productId = Number(req.params.productId)
+            const productId = req.params.productId
             const result = await this.service.desactivateProduct(productId)
 
             res.status(200).json(result)
@@ -80,7 +80,7 @@ export class ProductsController {
 
     reactivateProduct = async (req: Request, res: Response) => {
         try {
-            const productId = Number(req.params.productId)
+            const productId = req.params.productId
             const result = await this.service.reactivateProduct(productId)
 
             res.status(200).json(result)
@@ -93,7 +93,7 @@ export class ProductsController {
 
     updateProduct = async (req: Request, res: Response) => {
         try {
-            const productId = Number(req.params.productId);
+            const productId = req.params.productId;
             const data: UpdateProductDTO = req.body;
 
             const updatedProduct = await this.service.updateProduct(productId, data)
