@@ -34,7 +34,10 @@ export class ProductsRepository {
 
     async findProductById(id: number) {
         return prisma.product.findUnique({
-            where: {id}
+            where: {id},
+            include: {
+                category: true,
+            }
         })
     }
 

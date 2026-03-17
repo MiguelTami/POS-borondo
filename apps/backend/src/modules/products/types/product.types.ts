@@ -8,7 +8,6 @@ export interface UpdateProductDTO {
   name?: string;
   price?: number;
   categoryId?: number;
-  isActive?: boolean;
 }
 
 export interface ProductResponse {

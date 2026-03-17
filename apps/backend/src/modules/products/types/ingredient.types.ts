@@ -4,14 +4,14 @@ import { Decimal } from '@prisma/client/runtime/library';
 export interface CreateIngredientDTO {
     name: string;
     unit: Unit;
+    stock?: number;
     minStockAlert: number
 }
 
 export interface UpdateIngredientDTO {
     name?: string;
     unit?: Unit;
-    minStockAlert?: number;
-    isActive?: boolean
+    minStockAlert?: number
 }
 
 export interface IngredientResponse {

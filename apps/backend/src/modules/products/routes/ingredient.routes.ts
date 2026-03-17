@@ -9,7 +9,7 @@ const router = Router();
 const controller = new IngredientsController();
 
 router.get('/', controller.getActiveIngredients);
-router.get('/all', controller.getAllIngredients);
+router.get('/all', controller.getAllIngredients); 
 router.get('/:ingredientId', validate(ingredientIdParamSchema, 'params'), controller.getIngredientById);
 router.post('/', validate(createIngredientSchema), controller.createIngredient);
 router.patch('/:ingredientId', validate(ingredientIdParamSchema, 'params'), validate(updateIngredientSchema), controller.updateIngredient);
