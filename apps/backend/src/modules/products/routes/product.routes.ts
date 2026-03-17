@@ -20,7 +20,7 @@ router.delete('/:productId', validate(productIdParamSchema, 'params'), controlle
 router.patch('/:productId/reactivate', validate(productIdParamSchema, 'params'), controller.reactivateProduct);
 router.patch('/:productId', validate(productIdParamSchema, 'params'), validate(updateProductSchema), controller.updateProduct);
 
-router.get('/', validate(recipeIdParamSchema, 'params'), recipeController.getIngredientsRecipe) //products/:productId/recipes
-router.post('/', validate(createRecipeSchema, 'params'), validate(createRecipeSchema), recipeController.createIngredientRecipe) //products/:productId/recipes
+router.get('/:productId/recipes', validate(recipeIdParamSchema, 'params'), recipeController.getIngredientsRecipe) //products/:productId/recipes
+router.post('/:productId/recipes', validate(createRecipeSchema, 'params'), validate(createRecipeSchema), recipeController.createIngredientRecipe) //products/:productId/recipes
 
 export default router;

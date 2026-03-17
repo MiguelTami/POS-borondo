@@ -1,5 +1,4 @@
 import { prisma } from '../../../config/prisma';
-import { UpdateCategoryDTO } from '../types/category.types';
 
 export class CategoriesRepository {
     async createCategory (name: string) {
@@ -23,10 +22,10 @@ export class CategoriesRepository {
         })
     }
 
-    async updateCategory (id: number, data: UpdateCategoryDTO)  {
+    async updateCategory (id: number, name: string)  {
         return prisma.category.update({
             where: {id},
-            data: data
+            data: {name}
         })
     }
 

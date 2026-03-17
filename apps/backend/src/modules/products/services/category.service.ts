@@ -1,5 +1,5 @@
 import { CategoriesRepository } from '../repositories/category.repository';
-import { CategoryResponse, UpdateCategoryDTO, DeleteCategoryResponse } from '../types/category.types';
+import { CategoryResponse, DeleteCategoryResponse } from '../types/category.types';
 
 export class CategoriesService {
 
@@ -27,8 +27,8 @@ export class CategoriesService {
         return category
     }
 
-    async updateCategory (id: number, data: UpdateCategoryDTO): Promise<CategoryResponse> {
-        const categoryUpdated = await this.repository.updateCategory(id, data)
+    async updateCategory (id: number, name: string): Promise<CategoryResponse> {
+        const categoryUpdated = await this.repository.updateCategory(id, name)
 
         return categoryUpdated
     }
@@ -42,7 +42,7 @@ export class CategoriesService {
     }
 
     async reactivateCategory (id: number): Promise<DeleteCategoryResponse> {
-        await this.repository.desactivateCategory(id)
+        await this.repository.reactivateCategory(id)
         
         return {
             message: 'Category reactivated successfully'

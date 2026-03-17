@@ -1,6 +1,5 @@
 import { CategoriesService } from '../services/category.service';
 import { Request, Response } from 'express'
-import { UpdateCategoryDTO } from '../types/category.types';
 
 export class CategoriesController {
 
@@ -12,11 +11,13 @@ export class CategoriesController {
 
     createCategory = async (req: Request, res: Response) => {
         try {
-            const categoryName: string = req.body
+            const categoryName: string = req.body.name
+            console.log(categoryName)
             const categoryCreated = await this.service.createCategory(categoryName)
 
             res.status(201).json(categoryCreated)
         } catch (error) {
+            console.error(error.message)
             res.status(500).json({
                 message: 'Error creating category'
             })
@@ -29,6 +30,7 @@ export class CategoriesController {
 
             res.status(200).json(categories)
         } catch (error) {
+            console.error(error.message)
             res.status(500).json({
                 message: 'Error fetching categories'
             })
@@ -51,12 +53,13 @@ export class CategoriesController {
     updateCategory = async (req: Request, res: Response) => {
         try {
             const categoryId: number = req.params.categoryId
-            const data: UpdateCategoryDTO = req.body
+            const name: string = req.body.name
 
-            const categotyUpdated = await this.service.updateCategory(categoryId, data)
+            const categotyUpdated = await this.service.updateCategory(categoryId, name)
 
             res.status(200).json(categotyUpdated)
         } catch (error) {
+            console.error(error.message)
             res.status(500).json({
                 message: 'Error updating category'
             })
@@ -81,9 +84,9 @@ export class CategoriesController {
         try {
             const categoryId: number = req.params.categoryId
 
-            const categoryDesactivated = await this.service.desactivateCategory(categoryId)
+            const categoryReactivated = await this.service.reactivateCategory(categoryId)
             
-            res.status(200).json(categoryDesactivated)
+            res.status(200).json(categoryReactivated)
         } catch (error) {
             res.status(500).json({
                 message: 'Error reactivating category'
