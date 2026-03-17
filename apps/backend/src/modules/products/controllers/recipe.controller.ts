@@ -50,6 +50,7 @@ export class RecipesController {
 
             res.status(200).json(recipeUpdated)
         } catch (error) {
+            console.error(error.message)
             res.status(500).json({
                 message: 'Error updating Recipe'
             })

@@ -17,7 +17,8 @@ export interface RecipeResponse {
     },
     ingredient: {
         id: number,
-        name: string
+        name: string,
+        unit: string
     },
     quantityRequired: number | Decimal
 }

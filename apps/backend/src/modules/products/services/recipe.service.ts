@@ -31,7 +31,8 @@ export class RecipesService {
             },
             ingredient: {
                 id: ingredientRecipe.ingredient.id,
-                name: ingredientRecipe.ingredient.name
+                name: ingredientRecipe.ingredient.name,
+                unit: ingredientRecipe.ingredient.unit
             },
             quantityRequired: ingredientRecipe.quantityRequired
         }
@@ -39,9 +40,11 @@ export class RecipesService {
 
     async updateIngredientRecipe(recipeId: number, data: UpdateRecipeDTO): Promise<RecipeResponse> {
 
-        const ingredient = await this.ingredientRepository.getIngredientById(data.ingredientId);
-        if (!ingredient || !ingredient.isActive) {
-            throw new Error('El ingrediente no existe o está inactivo');
+        if (data.ingredientId !== undefined) {
+            const ingredient = await this.ingredientRepository.getIngredientById(data.ingredientId);
+            if (!ingredient || !ingredient.isActive) {
+                throw new Error('El ingrediente no existe o está inactivo');
+            }
         }
 
         const recipeUpdated = await this.repository.updateIngredientRecipe(recipeId, data)
@@ -53,7 +56,8 @@ export class RecipesService {
             },
             ingredient: {
                 id: recipeUpdated.ingredient.id,
-                name: recipeUpdated.ingredient.name
+                name: recipeUpdated.ingredient.name,
+                unit: recipeUpdated.ingredient.unit
             },
             quantityRequired: recipeUpdated.quantityRequired
         }
