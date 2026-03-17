@@ -11,7 +11,7 @@ export class CategoriesController {
 
     createCategory = async (req: Request, res: Response) => {
         try {
-            const categoryName: string = req.body.name
+            const categoryName: string = req.validatedBody.name
             console.log(categoryName)
             const categoryCreated = await this.service.createCategory(categoryName)
 
@@ -52,7 +52,7 @@ export class CategoriesController {
 
     getCategoryById = async (req: Request, res: Response) => {
         try {
-            const categoryId: number = req.params.categoryId
+            const categoryId: number = req.validatedParams.categoryId
             const category = await this.service.getCategoryById(categoryId)
 
             res.status(200).json(category)
@@ -65,8 +65,8 @@ export class CategoriesController {
 
     updateCategory = async (req: Request, res: Response) => {
         try {
-            const categoryId: number = req.params.categoryId
-            const name: string = req.body.name
+            const categoryId: number = req.validatedParams.categoryId
+            const name: string = req.validatedBody.name
 
             const categotyUpdated = await this.service.updateCategory(categoryId, name)
 
@@ -81,7 +81,7 @@ export class CategoriesController {
 
     desactivateCategory = async (req: Request, res: Response) => {
         try {
-            const categoryId: number = req.params.categoryId
+            const categoryId: number = req.validatedParams.categoryId
 
             const categoryDesactivated = await this.service.desactivateCategory(categoryId)
             
@@ -95,7 +95,7 @@ export class CategoriesController {
 
     reactivateCategory = async (req: Request, res: Response) => {
         try {
-            const categoryId: number = req.params.categoryId
+            const categoryId: number = req.validatedParams.categoryId
 
             const categoryReactivated = await this.service.reactivateCategory(categoryId)
             

@@ -36,7 +36,7 @@ export class IngredientsController {
 
     getIngredientById = async (req: Request, res: Response) => {
         try {
-            const ingredientId = req.params.ingredientId
+            const ingredientId = req.validatedParams.ingredientId
             const ingredient = await this.service.getIngredientById(ingredientId)
 
             res.status(200).json(ingredient)
@@ -49,7 +49,7 @@ export class IngredientsController {
 
     createIngredient = async (req: Request, res: Response) => {
         try {
-            const data: CreateIngredientDTO = req.body
+            const data: CreateIngredientDTO = req.validatedBody
             const ingredient = await this.service.createIngredient(data)
 
             res.status(201).json(ingredient)
@@ -62,8 +62,8 @@ export class IngredientsController {
 
     updateIngredient = async (req: Request, res: Response) => {
         try {
-            const ingredientId = req.params.ingredientId;
-            const dataIngredient: UpdateIngredientDTO = req.body;
+            const ingredientId = req.validatedParams.ingredientId;
+            const dataIngredient: UpdateIngredientDTO = req.validatedBody;
 
             const ingredientUpdated = await this.service.updateIngredient(ingredientId, dataIngredient)
 
@@ -77,7 +77,7 @@ export class IngredientsController {
 
     disactivateIngredient = async (req: Request, res: Response) => {
         try {
-            const ingredientId = req.params.ingredientId;
+            const ingredientId = req.validatedParams.ingredientId;
             const result = await this.service.disactivateIngredient(ingredientId)
 
             res.status(200).json(result)
@@ -90,7 +90,7 @@ export class IngredientsController {
 
     activateIngredient = async (req: Request, res: Response) => {
         try {
-            const ingredientId = req.params.ingredientId;
+            const ingredientId = req.validatedParams.ingredientId;
             const result = await this.service.activateIngredient(ingredientId)
 
             res.status(200).json(result)

@@ -6,9 +6,7 @@ export const createProductSchema = z.object({
   price: z.number().positive("Price must be greater than 0"),
 
   categoryId: z.number().int(),
-
-  isActive: z.boolean().optional()
-})
+}).strict()
 
 export const updateProductSchema = z.object({
   name: z.string().min(1).optional(),
@@ -16,6 +14,4 @@ export const updateProductSchema = z.object({
   price: z.number().positive().optional(),
 
   categoryId: z.number().int().optional(),
-
-  isActive: z.boolean().optional()
-})
+}).strict()

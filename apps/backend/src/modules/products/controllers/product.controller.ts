@@ -11,19 +11,7 @@ export class ProductsController {
     }
 
     getProducts = async (req: Request, res: Response) => {
-        const filters: GetProductQueryDTO = {
-        categoryId: req.query.categoryId
-        ? Number(req.query.categoryId)
-        : undefined,
-
-        isActive: req.query.isActive
-        ? req.query.isActive === "true"
-        : undefined,
-
-        search: req.query.search
-        ? String(req.query.search)
-        : undefined
-  }
+        const filters = (req as any).validatedQuery as GetProductQueryDTO
         try {
             
             const products = await this.service.getProducts(filters);
@@ -39,11 +27,12 @@ export class ProductsController {
 
     getProductById = async (req: Request, res: Response) => {
         try {
-            const productId = req.params.productId;
+            const productId = req.validatedParams.productId;
             const product = await this.service.getProductById(productId);
 
             res.status(200).json(product)
         } catch (error) {
+            console.error(error.message)
             res.status(500).json({
                 message: 'Error fetching product'
             })
@@ -53,7 +42,7 @@ export class ProductsController {
     createProduct = async (req: Request, res: Response) => {
         try {
             
-            const data: CreateProductDTO = req.body;
+            const data: CreateProductDTO = req.validatedBody;
             const product = await this.service.createProduct(data);
 
             res.status(201).json(product)
@@ -68,12 +57,13 @@ export class ProductsController {
 
     desactivateProduct = async (req: Request, res: Response) => {
         try {
-            const productId = req.params.productId
+            const productId = req.validatedParams.productId
             const result = await this.service.desactivateProduct(productId)
 
             res.status(200).json(result)
         } catch (error) {
-           res.status(500).json({
+            console.error(error.message)
+            res.status(500).json({
                 message: "Error deleting product"
             }); 
         }
@@ -81,12 +71,13 @@ export class ProductsController {
 
     reactivateProduct = async (req: Request, res: Response) => {
         try {
-            const productId = req.params.productId
+            const productId = req.validatedParams.productId
             const result = await this.service.reactivateProduct(productId)
 
             res.status(200).json(result)
         } catch (error) {
-           res.status(500).json({
+            console.error(error.message)
+            res.status(500).json({
                 message: "Error reactivating product"
             }); 
         }
@@ -94,8 +85,8 @@ export class ProductsController {
 
     updateProduct = async (req: Request, res: Response) => {
         try {
-            const productId = req.params.productId;
-            const data: UpdateProductDTO = req.body;
+            const productId = req.validatedParams.productId;
+            const data: UpdateProductDTO = req.validatedBody;
 
             const updatedProduct = await this.service.updateProduct(productId, data)
 

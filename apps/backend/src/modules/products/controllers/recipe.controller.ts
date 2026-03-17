@@ -12,7 +12,7 @@ export class RecipesController {
 
     getIngredientsRecipe = async (req: Request, res: Response) => {
         try {
-            const productId = req.params.productId
+            const productId = req.validatedParams.productId
             const ingredientsList = await this.service.getIngredientsRecipe(productId)
 
             res.status(200).json(ingredientsList)
@@ -25,8 +25,8 @@ export class RecipesController {
 
     createIngredientRecipe = async (req: Request, res: Response) => {
         try {
-            const productId = req.params.productId;
-            const info = req.body;
+            const productId = req.validatedParams.productId;
+            const info = req.validatedBody;
             const data: CreateRecipeDTO = {
                 ingredientId: info.ingredientId,
                 quantityRequired: info.quantityRequired
@@ -43,9 +43,9 @@ export class RecipesController {
 
     updateIngredientRecipe = async (req: Request, res: Response) => {
         try {
-            const data: UpdateRecipeDTO = req.body;
-            const recipeId = req.params.recipeId;
-            
+            const data: UpdateRecipeDTO = req.validatedBody;
+            const recipeId = req.validatedParams.recipeId;
+
             const recipeUpdated = await this.service.updateIngredientRecipe(recipeId, data)
 
             res.status(200).json(recipeUpdated)
@@ -58,7 +58,7 @@ export class RecipesController {
 
     deleteIngredientrecipe = async (req: Request, res: Response) => {
         try {
-            const recipeId = req.params.recipeId
+            const recipeId = req.validatedParams.recipeId
             
             const result = await this.service.deleteIngredientRecipe(recipeId)
 
