@@ -1,4 +1,5 @@
 import { ProductsRepository } from "../repositories/product.repository";
+import { CategoriesRepository } from "../repositories/category.repository";
 import { 
     CreateProductDTO, 
     ProductResponse, 
@@ -10,9 +11,11 @@ import {
 export class ProductsService {
 
     private repository: ProductsRepository;
+    private categoryRepository: CategoriesRepository;
 
     constructor() {
         this.repository = new ProductsRepository();
+        this.categoryRepository = new CategoriesRepository();
     }
 
     async getProducts(filters: GetProductQueryDTO) {
@@ -28,6 +31,11 @@ export class ProductsService {
     }
 
     async createProduct(data: CreateProductDTO): Promise<ProductResponse> {
+        const category = await this.categoryRepository.getCategoryById(data.categoryId);
+        if (!category || !category.isActive) {
+            throw new Error('La categoría no existe o está inactiva');
+        }
+
         const product = await this.repository.createProduct(data);
 
         return {
@@ -57,6 +65,12 @@ export class ProductsService {
     }
 
     async updateProduct(productId: number, data: UpdateProductDTO): Promise<ProductResponse> {
+        if (data.categoryId) {
+            const category = await this.categoryRepository.getCategoryById(data.categoryId);
+            if (!category || !category.isActive) {
+                throw new Error('La categoría no existe o está inactiva');
+            }
+}
         const updatedProduct = await this.repository.updateProduct(productId, data);
 
         return {

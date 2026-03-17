@@ -1,12 +1,15 @@
 import { RecipesRepository } from "../repositories/recipe.repository";
+import { IngredientsRepository } from "../repositories/ingredient.repository";
 import { RecipeResponse, CreateRecipeDTO, UpdateRecipeDTO, DeleteRecipe } from "../types/recipe.types";
 
 export class RecipesService {
 
     private repository : RecipesRepository;
+    private ingredientRepository : IngredientsRepository;
 
     constructor() {
-        this.repository = new RecipesRepository()
+        this.repository = new RecipesRepository();
+        this.ingredientRepository = new IngredientsRepository();
     };
 
     async getIngredientsRecipe(productId: number) {
@@ -14,6 +17,11 @@ export class RecipesService {
     }
 
     async createIngredientRecipe(productId: number, data: CreateRecipeDTO): Promise<RecipeResponse> {
+
+        const ingredient = await this.ingredientRepository.getIngredientById(data.ingredientId);
+        if (!ingredient || !ingredient.isActive) {
+            throw new Error('El ingrediente no existe o está inactivo');
+        }
         const ingredientRecipe = await this.repository.createIngredientRecipe(productId, data)
 
         return {
@@ -30,7 +38,11 @@ export class RecipesService {
     };
 
     async updateIngredientRecipe(recipeId: number, data: UpdateRecipeDTO): Promise<RecipeResponse> {
-        const recipe = await this.repository.findById(recipeId);
+
+        const ingredient = await this.ingredientRepository.getIngredientById(data.ingredientId);
+        if (!ingredient || !ingredient.isActive) {
+            throw new Error('El ingrediente no existe o está inactivo');
+        }
 
         const recipeUpdated = await this.repository.updateIngredientRecipe(recipeId, data)
 
