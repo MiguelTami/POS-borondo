@@ -95,7 +95,7 @@ model Product {
 
 model Category {
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
   isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -105,7 +105,7 @@ model Category {
 
 model Ingredient {
   id Int @id @default(autoincrement())
-  name String
+  name String @unique
   unit Unit
   stock Decimal @db.Decimal(10, 3) @default(0)
   minStockAlert Int
