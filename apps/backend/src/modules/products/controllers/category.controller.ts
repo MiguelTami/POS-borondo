@@ -24,9 +24,22 @@ export class CategoriesController {
         }
     }
 
-    getCategories = async (req: Request, res: Response) => {
+    getActiveCategories = async (req: Request, res: Response) => {
         try {
-            const categories = await this.service.getCategories()
+            const categories = await this.service.getActiveCategories()
+
+            res.status(200).json(categories)
+        } catch (error) {
+            console.error(error.message)
+            res.status(500).json({
+                message: 'Error fetching categories'
+            })
+        }
+    }
+
+    getAllCategories = async (req: Request, res: Response) => {
+        try {
+            const categories = await this.service.getAllCategories()
 
             res.status(200).json(categories)
         } catch (error) {

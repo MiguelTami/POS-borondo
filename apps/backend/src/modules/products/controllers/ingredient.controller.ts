@@ -10,9 +10,9 @@ export class IngredientsController {
         this.service = new IngredientsService()
     }
 
-    getIngredients = async (req: Request, res: Response) => {
+    getActiveIngredients = async (req: Request, res: Response) => {
         try {
-            const ingredients = await this.service.getIngredients()
+            const ingredients = await this.service.getActiveIngredients()
 
             res.status(200).json(ingredients)
         } catch (error) {
@@ -20,6 +20,18 @@ export class IngredientsController {
                 message: 'Error fetching ingredients'
             })
         }        
+    }
+
+    getAllIngredients = async (req: Request, res: Response) => {
+        try {
+            const ingredients = await this.service.getAllIngredients()
+
+            res.status(200).json(ingredients)
+        } catch (error) {
+            res.status(500).json({
+                message: 'Error fetching ingredients'
+            })
+        }
     }
 
     getIngredientById = async (req: Request, res: Response) => {

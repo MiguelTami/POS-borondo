@@ -3,9 +3,15 @@ import { CreateIngredientDTO, UpdateIngredientDTO } from '../types/ingredient.ty
 
 export class IngredientsRepository {
 
-    async getIngredients () {
+    async getActiveIngredients () {
         return prisma.ingredient.findMany({
             where: {isActive: true},
+            orderBy: {name: 'asc'}
+        })
+    }
+
+    async getAllIngredients () {
+        return prisma.ingredient.findMany({
             orderBy: {name: 'asc'}
         })
     }

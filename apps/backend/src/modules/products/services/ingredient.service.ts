@@ -9,8 +9,12 @@ export class IngredientsService {
         this.repository = new IngredientsRepository();
     }
 
-    async getIngredients() {
-        return await this.repository.getIngredients()
+    async getActiveIngredients() {
+        return await this.repository.getActiveIngredients()
+    }
+
+    async getAllIngredients() {
+        return await this.repository.getAllIngredients()
     }
 
     async getIngredientById(id: number) {

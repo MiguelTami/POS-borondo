@@ -15,8 +15,14 @@ export class CategoriesService {
         return categoryName
     }
 
-    async getCategories () {
-        const categories = await this.repository.getCategories()
+    async getActiveCategories () {
+        const categories = await this.repository.getActiveCategories()
+
+        return categories
+    }
+
+    async getAllCategories () {
+        const categories = await this.repository.getAllCategories()
 
         return categories
     }

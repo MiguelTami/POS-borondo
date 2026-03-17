@@ -8,7 +8,8 @@ const controller = new CategoriesController()
 const router = Router()
 
 router.post('/', validate(createCategorySchema), controller.createCategory) // /categories
-router.get('/', controller.getCategories) // /categories
+router.get('/', controller.getActiveCategories) // /categories
+router.get('/all', controller.getAllCategories) // /categories/all      
 router.get('/:categoryId', validate(categoryIdParamSchema, 'params'), controller.getCategoryById) // /categories/:categoryId
 router.patch('/:categoryId', validate(categoryIdParamSchema, 'params'), validate(updateCategorySchema), controller.updateCategory) // /categories/:categoryId
 router.delete('/:categoryId', validate(categoryIdParamSchema, 'params'), controller.desactivateCategory) // /categories/:categoryId
