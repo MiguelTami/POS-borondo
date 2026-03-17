@@ -1,16 +1,18 @@
 import { Router } from "express";
 import { IngredientsController } from "../controllers/ingredient.controller";
-import { validateParams } from "../../../shared/validations/middlewares/validateParams";
-import { ingredientIdParamSchema } from "../../../shared/validations/schemas/params.schemas";
+import { validate } from "../../../middlewares/validate.middleware";
+import { createIngredientSchema, updateIngredientSchema } from "../schemas/ingredient.schema";
+import { ingredientIdParamSchema } from "../../../shared/validations/schemas/params.schema";
+
 
 const router = Router();
 const controller = new IngredientsController();
 
 router.get('/', controller.getIngredients);
-router.get('/:ingredientId', validateParams(ingredientIdParamSchema), controller.getIngredientById);
-router.post('/', controller.createIngredient);
-router.patch('/:ingredientId', validateParams(ingredientIdParamSchema), controller.updateIngredient);
-router.delete('/:ingredientId', validateParams(ingredientIdParamSchema), controller.disactivateIngredient);
-router.patch('/:ingredientId/reactivate', validateParams(ingredientIdParamSchema), controller.activateIngredient);
+router.get('/:ingredientId', validate(ingredientIdParamSchema, 'params'), controller.getIngredientById);
+router.post('/', validate(createIngredientSchema), controller.createIngredient);
+router.patch('/:ingredientId', validate(ingredientIdParamSchema, 'params'), validate(updateIngredientSchema), controller.updateIngredient);
+router.delete('/:ingredientId', validate(ingredientIdParamSchema, 'params'), controller.disactivateIngredient);
+router.patch('/:ingredientId/reactivate', validate(ingredientIdParamSchema, 'params'), controller.activateIngredient);
 
 export default router;

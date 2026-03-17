@@ -63,7 +63,7 @@ export class CategoriesController {
         }
     }
 
-    desactivatecategory = async (req: Request, res: Response) => {
+    desactivateCategory = async (req: Request, res: Response) => {
         try {
             const categoryId: number = req.params.categoryId
 
@@ -77,7 +77,7 @@ export class CategoriesController {
         }
     }
 
-    reactivatecategory = async (req: Request, res: Response) => {
+    reactivateCategory = async (req: Request, res: Response) => {
         try {
             const categoryId: number = req.params.categoryId
 

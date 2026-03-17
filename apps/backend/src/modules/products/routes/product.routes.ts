@@ -1,16 +1,26 @@
 import { Router } from "express";
 import { ProductsController } from "../controllers/product.controller";
-import { validateParams } from "../../../shared/validations/middlewares/validateParams";
-import { productIdParamSchema } from "../../../shared/validations/schemas/params.schemas";
+import { RecipesController } from "../controllers/recipe.controller";
+import { validate } from "../../../middlewares/validate.middleware";
+import { createProductSchema, updateProductSchema } from "../schemas/product.schema";
+import { productIdParamSchema } from "../../../shared/validations/schemas/params.schema";
+import { recipeIdParamSchema } from "../../../shared/validations/schemas/params.schema";
+import { getProductsQuerySchema } from "../schemas/product.query.schema";
+import { createRecipeSchema } from "../schemas/recipes.schema";
+
 
 const router = Router();
 const controller = new ProductsController();
+const recipeController = new RecipesController();
 
-router.get("/", controller.getProducts);
-router.get("/:productId", validateParams(productIdParamSchema), controller.getProductById);
-router.post("/", controller.createProduct);
-router.delete("/:productId", validateParams(productIdParamSchema), controller.desactivateProduct);
-router.patch("/:productId/reactivate", validateParams(productIdParamSchema), controller.reactivateProduct);
-router.patch("/:productId", validateParams(productIdParamSchema), controller.updateProduct);
+router.get('/', validate(getProductsQuerySchema, 'query'), controller.getProducts);
+router.get('/:productId', validate(productIdParamSchema, 'params'), controller.getProductById);
+router.post('/', validate(createProductSchema), controller.createProduct);
+router.delete('/:productId', validate(productIdParamSchema, 'params'), controller.desactivateProduct);
+router.patch('/:productId/reactivate', validate(productIdParamSchema, 'params'), controller.reactivateProduct);
+router.patch('/:productId', validate(productIdParamSchema, 'params'), validate(updateProductSchema), controller.updateProduct);
+
+router.get('/', validate(recipeIdParamSchema, 'params'), recipeController.getIngredientsRecipe) //products/:productId/recipes
+router.post('/', validate(createRecipeSchema, 'params'), validate(createRecipeSchema), recipeController.createIngredientRecipe) //products/:productId/recipes
 
 export default router;

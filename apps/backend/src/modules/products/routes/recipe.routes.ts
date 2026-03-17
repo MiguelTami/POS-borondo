@@ -1,14 +1,13 @@
 import { RecipesController } from "../controllers/recipe.controller";
 import { Router } from 'express'
-import { validateParams } from "../../../shared/validations/middlewares/validateParams";
-import { recipeIdParamSchema } from "../../../shared/validations/schemas/params.schemas";
+import { validate } from "../../../middlewares/validate.middleware";
+import { recipeIdParamSchema } from "../../../shared/validations/schemas/params.schema";
+import { updateRecipeSchema } from "../schemas/recipes.schema";
 
 const router = Router();
 const controller = new RecipesController();
 
-router.get('/', validateParams(recipeIdParamSchema), controller.getIngredientsRecipe) //products/:productId/recipes
-router.post('/', controller.createIngredientRecipe) //products/:productId/recipes
-router.patch('/:recipeId', validateParams(recipeIdParamSchema), controller.updateIngredientRecipe) //recipes/:recipeId
-router.delete('/:recipeId', validateParams(recipeIdParamSchema), controller.deleteIngredientrecipe) //recipes/:recipeId
+router.patch('/:recipeId', validate(recipeIdParamSchema, 'params'), validate(updateRecipeSchema), controller.updateIngredientRecipe) //recipes/:recipeId
+router.delete('/:recipeId', validate(recipeIdParamSchema, 'params'), controller.deleteIngredientrecipe) //recipes/:recipeId
 
 export default router
