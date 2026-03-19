@@ -14,8 +14,8 @@ export const validate =
       if (property === "query") req.validatedQuery = parsed
       if (property === "params") req.validatedParams = parsed
 
-      console.log('RAW query:', req.query)
-      console.log('VALIDATED query:', req.validatedQuery)
+      // console.log('RAW query:', req.query)
+      // console.log('VALIDATED query:', req.validatedQuery)
 
       next()
     } catch (error: any) {
