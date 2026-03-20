@@ -35,7 +35,7 @@ export class TablesController {
 
     getTableById = async (req: Request, res: Response) => {
         try {
-            const id: number = req.validatedParams.id;
+            const id: number = req.validatedParams.tableId;
             const table = await this.service.getTableById(id);
             if (!table) {
                 return res.status(404).json({ error: "Table not found" });
@@ -48,18 +48,19 @@ export class TablesController {
 
     updateTable = async (req: Request, res: Response) => {
         try {
-            const id: number = req.validatedParams.id;
+            const id: number = req.validatedParams.tableId;
             const data: UpdateTableDTO = req.validatedBody;
             const table = await this.service.updateTable(id, data);
             res.json(table);
         } catch (error) {
+            console.error(error.message);
             res.status(500).json({ error: "Failed to update table" });
         }
     }
 
     deleteTable = async (req: Request, res: Response) => {
         try {
-            const id: number = req.validatedParams.id;
+            const id: number = req.validatedParams.tableId;
             await this.service.deleteTable(id);
             res.status(204).send();
         } catch (error) {

@@ -10,8 +10,8 @@ const controller = new TablesController();
 
 router.post("/", validate(createTableSchema), controller.createTable);
 router.get("/", validate(getTablesQuerySchema, 'query'), controller.getTables);
-router.get("/:id", validate(tableIdParamSchema, 'params'), controller.getTableById);
-router.patch("/:id", validate(tableIdParamSchema, 'params'), validate(updateTableSchema), controller.updateTable);
-router.delete("/:id", validate(tableIdParamSchema, 'params'), controller.deleteTable);
+router.get("/:tableId", validate(tableIdParamSchema, 'params'), controller.getTableById);
+router.patch("/:tableId", validate(tableIdParamSchema, 'params'), validate(updateTableSchema), controller.updateTable);
+router.delete("/:tableId", validate(tableIdParamSchema, 'params'), controller.deleteTable);
 
 export default router

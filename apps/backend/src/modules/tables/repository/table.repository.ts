@@ -6,7 +6,7 @@ export class TablesRepository {
     async getTables(filters: GetTablesQueryDTO) {
         const where: any = {
             ...(filters.status && { status: filters.status }),
-            ...(filters.search && { number: { contains: filters.search } }),
+            ...(filters.number && { number: filters.number }),
             ...(filters.hasOpenOrder !== undefined && { hasOpenOrder: filters.hasOpenOrder })
         };
 

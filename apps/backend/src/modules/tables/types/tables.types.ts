@@ -15,7 +15,6 @@ export interface TableResponse {
 export interface GetTablesQueryDTO {
   page?: number;
   limit?: number;
-  search?: string;
   status?: TableStatus;
   number?: number;
   hasOpenOrder?: boolean;

@@ -1,3 +1,4 @@
+import { number } from "joi";
 import { z } from "zod"
 
 const TableStatusEnum = z.enum(["AVAILABLE", "OCCUPIED", "RESERVED", "OUT_OF_SERVICE"]);
@@ -5,7 +6,7 @@ const TableStatusEnum = z.enum(["AVAILABLE", "OCCUPIED", "RESERVED", "OUT_OF_SER
 export const getTablesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(10),
-  search: z.string().optional(),
+  number: z.coerce.number().int().positive().optional(),
 
   status: TableStatusEnum.optional(),
 
