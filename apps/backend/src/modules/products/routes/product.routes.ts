@@ -4,7 +4,6 @@ import { RecipesController } from "../controllers/recipe.controller";
 import { validate } from "../../../middlewares/validate.middleware";
 import { createProductSchema, updateProductSchema } from "../schemas/product.schema";
 import { productIdParamSchema } from "../../../shared/validations/schemas/params.schema";
-import { recipeIdParamSchema } from "../../../shared/validations/schemas/params.schema";
 import { getProductsQuerySchema } from "../schemas/product.query.schema";
 import { createRecipeSchema } from "../schemas/recipes.schema";
 

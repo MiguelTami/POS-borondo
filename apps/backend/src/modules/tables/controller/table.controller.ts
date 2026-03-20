@@ -1,6 +1,6 @@
 import { TablesService } from "../service/table.service";
 import { Request, Response } from "express";
-import { UpdateTableDTO } from "../types/tables.types";
+import { GetTablesQueryDTO, UpdateTableDTO } from "../types/tables.types";
 
 export class TablesController {
 
@@ -9,6 +9,19 @@ export class TablesController {
     constructor() {
         this.service = new TablesService();
     }
+
+    getTables = async (req: Request, res: Response) => {
+        const filters = (req as any).validatedQuery as GetTablesQueryDTO;
+        try {
+            
+            const tables = await this.service.getTables(filters);
+            res.json(tables);
+        } catch (error) {
+            res.status(500).json({ error: "Failed to fetch tables" });
+        }
+        
+    }
+
 
     createTable = async (req: Request, res: Response) => {
         try {
@@ -33,14 +46,14 @@ export class TablesController {
         }
     }
 
-    updateTableStatus = async (req: Request, res: Response) => {
+    updateTable = async (req: Request, res: Response) => {
         try {
             const id: number = req.validatedParams.id;
             const data: UpdateTableDTO = req.validatedBody;
-            const table = await this.service.updateTableStatus(id, data);
+            const table = await this.service.updateTable(id, data);
             res.json(table);
         } catch (error) {
-            res.status(500).json({ error: "Failed to update table status" });
+            res.status(500).json({ error: "Failed to update table" });
         }
     }
 

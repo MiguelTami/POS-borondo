@@ -28,5 +28,7 @@ export interface DeleteProductResponse {
 export interface GetProductQueryDTO {
   categoryId?: number,
   isActive?: boolean,
-  search?: string
+  search?: string,
+  page?: number,
+  limit?: number
 }

@@ -11,3 +11,14 @@ export interface TableResponse {
     status: TableStatus;
     createdAt: Date;
 }
+
+export interface GetTablesQueryDTO {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: TableStatus;
+  number?: number;
+  hasOpenOrder?: boolean;
+  sortBy?: 'number' | 'status' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+}

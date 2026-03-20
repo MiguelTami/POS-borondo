@@ -1,5 +1,5 @@
 import { TablesRepository } from "../repository/table.repository";
-import { UpdateTableDTO } from "../types/tables.types";
+import { GetTablesQueryDTO, UpdateTableDTO } from "../types/tables.types";
 
 export class TablesService {
 
@@ -7,6 +7,10 @@ export class TablesService {
 
     constructor() {
         this.repository = new TablesRepository();
+    }
+
+    async getTables(filters: GetTablesQueryDTO) {
+        return this.repository.getTables(filters);
     }
 
     async createTable (number: number) {
@@ -17,8 +21,8 @@ export class TablesService {
         return this.repository.getTableById(id);
     }
 
-    async updateTableStatus (id: number, data: UpdateTableDTO) {
-        return this.repository.updateTableStatus(id, data);
+    async updateTable (id: number, data: UpdateTableDTO) {
+        return this.repository.updateTable(id, data);
     }
 
     async deleteTable (id: number) {
