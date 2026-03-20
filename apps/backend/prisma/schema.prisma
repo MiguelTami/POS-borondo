@@ -34,7 +34,7 @@ model User {
 model Table {
   id Int @id @default(autoincrement())
   number Int @unique
-  status TableStatus
+  status TableStatus @default(AVAILABLE)
   createdAt DateTime @default(now())
 
   orders Order[]
@@ -44,7 +44,7 @@ model Order {
   id Int @id @default(autoincrement())
   dailyOrderNumber Int
   businessDate DateTime
-  status OrderStatus
+  status OrderStatus @default(OPEN)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   closeAt DateTime?
