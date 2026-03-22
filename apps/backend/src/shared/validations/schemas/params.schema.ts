@@ -19,3 +19,19 @@ export const recipeIdParamSchema = z.object({
 export const tableIdParamSchema = z.object({
   tableId: z.coerce.number().int().positive()
 })
+
+export const orderIdParamSchema = z.object({
+  orderId: z.coerce.number().int().positive()
+})
+
+export const subOrderIdParamSchema = z.object({
+  subOrderId: z.coerce.number().int().positive()
+})
+
+export const itemIdParamSchema = z.object({
+  itemId: z.coerce.number().int().positive()
+})
+
+export const modifierIdParamSchema = z.object({
+  modifierId: z.coerce.number().int().positive()
+})

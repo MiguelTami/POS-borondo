@@ -60,6 +60,11 @@ model Order {
   @@unique([dailyOrderNumber, businessDate]) 
 }
 
+model DailyOrderCounter {
+  businessDate DateTime @id
+  lastOrderNumber Int
+}
+
 model SubOrder {
   id Int @id @default(autoincrement())
   label String
