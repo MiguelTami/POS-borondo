@@ -11,5 +11,5 @@ export const updateOrderSchema = z.object({
 }).strict()
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+  status: z.enum(["OPEN", "SENT_TO_CASHIER", "PAID", "CANCELLED"]),
 }).strict()

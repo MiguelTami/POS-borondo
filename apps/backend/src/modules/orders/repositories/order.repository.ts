@@ -18,12 +18,24 @@ export class OrderRepository {
             businessDate,
             dailyOrderNumber: counter.lastOrderNumber
             },
-            include: {
-            table: true,
-            waiter: {
-                select: { id: true, name: true, role: true },
-            },
-            },
+             select: {
+                id: true,
+                dailyOrderNumber: true,
+                businessDate: true,
+                status: true,
+                table: {
+                    select: {
+                        number: true,
+                        status: true
+                    }
+                },
+                waiter: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            }
         });
         });
     }

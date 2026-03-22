@@ -1,4 +1,4 @@
-import { OrderStatus, Role } from "@prisma/client";
+import { OrderStatus, TableStatus } from "@prisma/client";
 
 export interface CreateOrderDTO {
     tableId: number;
@@ -20,12 +20,11 @@ export interface OrderResponse {
     businessDate: Date;
     status: OrderStatus;
     table: {
-        id: number;
         number: number;
+        status: TableStatus;
     };
     waiter: {
         id: number;
         name: string;
-        role: Role;
     };
 }
