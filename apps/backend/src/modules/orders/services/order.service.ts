@@ -1,15 +1,15 @@
 import { OrderRepository } from "../repositories/order.repository";
 import { prisma } from "../../../config/prisma";
+import { CreateOrderDTO } from "../types/order.types";
 
 export class OrderService {
-  private orderRepository: OrderRepository;
+  private repository: OrderRepository;
 
   constructor() {
-    this.orderRepository = new OrderRepository();
+    this.repository = new OrderRepository();
   }
 
-  async createOrder(data: { tableId: number; waiterId: number }) {
-    // 1. Validaciones
+  async createOrder(data: CreateOrderDTO) {
     const [table, waiter] = await Promise.all([
       prisma.table.findUnique({ where: { id: data.tableId } }),
       prisma.user.findUnique({ where: { id: data.waiterId } }),
@@ -23,20 +23,9 @@ export class OrderService {
       throw new Error("El usuario no existe o no tiene rol de mesonero");
     }
 
-    // Calcular el inicio del día del negocio actual (ignorando la hora local)
-    // Esto se puede ajustar dependiendo de la zona horaria del restaurante
     const now = new Date();
-    const businessDate = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-    );
+    const businessDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-    // 2. Creación con la transacción que maneja concurrencia y contadores
-    const order = await this.orderRepository.createOrder({
-      tableId: data.tableId,
-      waiterId: data.waiterId,
-      businessDate,
-    });
-
-    return order;
+    return this.repository.createOrder(data, businessDate);
   }
 }

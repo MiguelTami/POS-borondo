@@ -1,28 +1,22 @@
 import { prisma } from "../../../config/prisma";
+import { CreateOrderDTO } from "../types/order.types";
 
 export class OrderRepository {
-  async createOrder(data: {
-    tableId: number;
-    waiterId: number;
-    businessDate: Date;
-  }) {
-    // Usamos una transacción interactiva de Prisma para garantizar atomicidad y evitar colisiones
-    return await prisma.$transaction(async (tx) => {
-      // 1. Incrementamos o creamos el contador atómicamente
+
+  async createOrder(data: CreateOrderDTO, businessDate: Date) {
+    return prisma.$transaction(async (tx) => {
       const counter = await tx.dailyOrderCounter.upsert({
-        where: { businessDate: data.businessDate },
+        where: { businessDate },
         update: { lastOrderNumber: { increment: 1 } },
-        create: { businessDate: data.businessDate, lastOrderNumber: 1 },
+        create: { businessDate, lastOrderNumber: 1 },
       });
 
-      // 2. Creamos la orden con el número obtenido
-      const order = await tx.order.create({
+      return tx.order.create({
         data: {
           tableId: data.tableId,
           waiterId: data.waiterId,
-          businessDate: data.businessDate,
-          dailyOrderNumber: counter.lastOrderNumber,
-          status: "OPEN",
+          businessDate,
+          dailyOrderNumber: counter.lastOrderNumber
         },
         include: {
           table: true,
@@ -31,8 +25,6 @@ export class OrderRepository {
           },
         },
       });
-
-      return order;
     });
   }
 }
