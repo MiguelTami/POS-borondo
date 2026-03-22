@@ -11,8 +11,8 @@ export class OrderController {
 
     createOrder = async (req: Request, res: Response) => {
         try {
-            const data: CreateOrderDTO = (req as any).validatedBody || req.body;
-            const order = await this.service.createOrder(data);
+            const data: CreateOrderDTO = req.validatedBody;
+            const order: OrderResponse = await this.service.createOrder(data);
 
             res.status(201).json(order);
         } catch (error: any) {

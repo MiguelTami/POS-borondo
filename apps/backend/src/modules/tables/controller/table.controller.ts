@@ -29,6 +29,7 @@ export class TablesController {
             const table = await this.service.createTable(number);
         res.status(201).json(table);
         } catch (error) {
+            console.error(error.message);
             res.status(500).json({ error: "Failed to create table" });
         }       
     }
