@@ -15,6 +15,6 @@ router.patch("/:orderId", validate(orderIdParamSchema, 'params'), validate(updat
 router.delete("/:orderId", validate(orderIdParamSchema, 'params'), controller.deleteOrder);
 router.patch("/:orderId/status", validate(orderIdParamSchema, 'params'), validate(updateOrderStatusSchema, 'body'), controller.updateOrderStatus);
 
-router.use("/:orderId", validate(orderIdParamSchema, 'params'), subOrderRoutes);
+router.use("/:orderId/sub-orders", validate(orderIdParamSchema, 'params'), subOrderRoutes);
 
 export default router;
