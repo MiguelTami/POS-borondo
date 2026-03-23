@@ -19,6 +19,10 @@ export class OrderService {
         throw new Error("Mesa no encontrada");
         }
 
+        if (table.status !== "AVAILABLE") {
+        throw new Error("La mesa no está disponible");
+        }
+
         if (!waiter || waiter.role !== "WAITER") {
         throw new Error("El usuario no existe o no tiene rol de mesonero");
         }
@@ -43,9 +47,32 @@ export class OrderService {
 
     async updateOrder(id: number, data: UpdateOrderDTO): Promise<OrderResponse> {
         const order = await this.repository.getOrderById(id);
+
         if (!order) {
             throw new Error("Orden no encontrada");
         }
+
+        const [table, waiter] = await Promise.all([
+        data.tableId ? prisma.table.findUnique({ where: { id: data.tableId } }) : null,
+        data.waiterId ? prisma.user.findUnique({ where: { id: data.waiterId } }) : null,
+        ]);
+        
+        if(data.tableId !== undefined) {
+            if (!table) {
+                throw new Error("Mesa no encontrada");
+            }
+
+            if (table.status !== "AVAILABLE") {
+                throw new Error("La mesa no está disponible");
+            }
+        }
+        
+        if(data.waiterId !== undefined) {
+            if (!waiter || waiter.role !== "WAITER") {
+                throw new Error("El usuario no existe o no tiene rol de mesonero");
+            }
+        }
+
         return this.repository.updateOrder(id, data);
     }
 

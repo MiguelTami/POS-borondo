@@ -17,7 +17,7 @@ export class OrderController {
             res.status(201).json(order);
         } catch (error: any) {
             console.error(error.message);
-            if (error.message === "Mesa no encontrada" || error.message.includes("rol de mesonero")) {
+            if (error.message === "Mesa no encontrada" || error.message.includes("rol de mesonero") || error.message === "La mesa no está disponible") {
                 return res.status(400).json({ error: error.message });
             }
 
@@ -63,6 +63,9 @@ export class OrderController {
             console.error(error.message);
             if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "Mesa no encontrada" || error.message.includes("rol de mesonero") || error.message === "La mesa no está disponible") {
+                return res.status(400).json({ error: error.message });
             }
 
             res.status(500).json({ error: "Failed to update order" });
