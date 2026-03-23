@@ -85,11 +85,10 @@ export class OrderController {
         }
     }
 
-    updateOrderStatus = async (req: Request, res: Response) => {
+    payOrder = async (req: Request, res: Response) => {
         try {
             const id = req.validatedParams.orderId;
-            const status = req.validatedBody.status;
-            const updatedOrder = await this.service.updateOrderStatus(id, status);
+            const updatedOrder = await this.service.payOrder(id);
 
             res.status(200).json(updatedOrder);
         } catch (error: any) {
@@ -97,8 +96,30 @@ export class OrderController {
             if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
+            if (error.message === "No se puede pagar una orden que ya ha sido cancelada") {
+                return res.status(400).json({ error: error.message });
+            }
 
-            res.status(500).json({ error: "Failed to update order status" });
+            res.status(500).json({ error: "Failed to pay order" });
+        }
+    }
+
+    cancelOrder = async (req: Request, res: Response) => {
+        try {
+            const id = req.validatedParams.orderId;
+            const updatedOrder = await this.service.cancelOrder(id);
+
+            res.status(200).json(updatedOrder);
+        } catch (error: any) {
+            console.error(error.message);
+            if (error.message === "Orden no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "No se puede cancelar una orden que ya ha sido pagada") {
+                return res.status(400).json({ error: error.message });
+            }
+
+            res.status(500).json({ error: "Failed to cancel order" });
         }
     }
 }

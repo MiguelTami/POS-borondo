@@ -1,5 +1,5 @@
 import { prisma } from "../../../config/prisma";
-import { CreateOrderDTO, UpdateOrderDTO, updateStatusDTO } from "../types/order.types";
+import { CreateOrderDTO, UpdateOrderDTO } from "../types/order.types";
 
 export class OrderRepository {
 
@@ -82,17 +82,29 @@ export class OrderRepository {
         });
     }
 
-    async updateOrderStatus(id: number, status: updateStatusDTO["status"]) {
+    async payOrder(id: number) {
         return prisma.order.update({
             where: { id },
-            data: { status },
+            data: { status: "PAID" },
             include: {
                 table: true,
                 waiter: {
                     select: { id: true, name: true, role: true },
                 },
-            },
+            }
         });
     }
 
+    async cancelOrder(id: number) {
+        return prisma.order.update({
+            where: { id },
+            data: { status: "CANCELLED" },
+            include: {
+                table: true,
+                waiter: {
+                    select: { id: true, name: true, role: true },
+                },
+            }
+        });
+    }
 }

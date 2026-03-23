@@ -5,10 +5,6 @@ export interface CreateOrderDTO {
     waiterId: number;
 }
 
-export interface updateStatusDTO {
-    status: OrderStatus;
-}
-
 export interface UpdateOrderDTO {
     tableId?: number;
     waiterId?: number;

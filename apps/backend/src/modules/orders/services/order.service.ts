@@ -1,6 +1,6 @@
 import { OrderRepository } from "../repositories/order.repository";
 import { prisma } from "../../../config/prisma";
-import { CreateOrderDTO, OrderResponse, UpdateOrderDTO, updateStatusDTO } from "../types/order.types";
+import { CreateOrderDTO, OrderResponse, UpdateOrderDTO } from "../types/order.types";
 
 export class OrderService {
     private repository: OrderRepository;
@@ -57,11 +57,27 @@ export class OrderService {
         await prisma.order.delete({ where: { id } });
     }
 
-    async updateOrderStatus(id: number, status: updateStatusDTO["status"]): Promise<OrderResponse> {
+    async payOrder(id: number): Promise<OrderResponse> {
         const order = await this.repository.getOrderById(id);
         if (!order) {
             throw new Error("Orden no encontrada");
         }
-        return this.repository.updateOrderStatus(id, status);
-    }   
+
+        if (order.status === "CANCELLED") {
+            throw new Error("No se puede pagar una orden que ya ha sido cancelada");
+        }
+        return this.repository.payOrder(id);
+    }
+
+    async cancelOrder(id: number): Promise<OrderResponse> {
+        const order = await this.repository.getOrderById(id);
+        if (!order) {
+            throw new Error("Orden no encontrada");
+        }
+
+        if (order.status === "PAID") {
+            throw new Error("No se puede cancelar una orden que ya ha sido pagada");
+        }
+        return this.repository.cancelOrder(id);
+    }  
 }

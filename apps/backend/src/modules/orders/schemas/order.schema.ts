@@ -9,7 +9,3 @@ export const updateOrderSchema = z.object({
   tableId: z.number().int().positive("Table ID must be a positive integer").optional(),
   waiterId: z.number().int().positive("Waiter ID must be a positive integer").optional(),
 }).strict()
-
-export const updateOrderStatusSchema = z.object({
-  status: z.enum(["OPEN", "SENT_TO_CASHIER", "PAID", "CANCELLED"]),
-}).strict()
