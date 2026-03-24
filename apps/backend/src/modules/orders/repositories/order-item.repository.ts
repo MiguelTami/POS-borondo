@@ -1,0 +1,32 @@
+import { prisma } from "../../../config/prisma";
+import { CreateOrderItemDTO } from "../types/order-item.types";
+
+export class OrderItemRepository {
+
+    async createOrderItem(subOrderId: number, data: CreateOrderItemDTO) {
+        return prisma.orderItem.create({
+            data: {
+                subOrderId,
+                productId: data.productId,
+                quantity: data.quantity,
+                notes: data.notes,
+                unitPriceSnapshot: data.unitPrice,
+                totalPriceSnapshot: data.totalPrice
+            },
+            include: {
+                product: true,
+                subOrder: true
+            }
+        });
+    }
+
+    async getOrderItems(subOrderId: number) {
+        return prisma.orderItem.findMany({
+            where: { subOrderId },
+            include: {
+                product: true,
+                subOrder: true
+            }
+        });
+    }
+}

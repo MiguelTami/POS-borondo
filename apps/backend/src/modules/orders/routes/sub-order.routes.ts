@@ -3,6 +3,7 @@ import { SubOrderController } from "../controllers/sub-order.controller";
 import { validate } from "../../../middlewares/validate.middleware";
 import { createSubOrderSchema, updateSubOrderSchema } from "../schemas/sub-order.schema";
 import { subOrderIdParamSchema } from "../../../shared/validations/schemas/params.schema";
+import orderItemRoutes from "./order-item.routes";
 
 const router = Router({ mergeParams: true });
 const controller = new SubOrderController();
@@ -15,5 +16,8 @@ router.delete("/:subOrderId", validate(subOrderIdParamSchema, 'params'), control
 router.patch("/:subOrderId/send-to-cashier", validate(subOrderIdParamSchema, 'params'), controller.sendSubOrderToCashier);
 router.patch("/:subOrderId/pay", validate(subOrderIdParamSchema, 'params'), controller.paySubOrder);
 router.patch("/:subOrderId/cancel", validate(subOrderIdParamSchema, 'params'), controller.cancelSubOrder);
+
+
+router.use("/:subOrderId/items", validate(subOrderIdParamSchema, 'params'), orderItemRoutes);
 
 export default router;
