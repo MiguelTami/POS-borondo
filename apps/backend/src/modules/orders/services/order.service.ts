@@ -46,11 +46,7 @@ export class OrderService {
     }
 
     async updateOrder(id: number, data: UpdateOrderDTO): Promise<OrderResponse> {
-        const order = await this.repository.getOrderById(id);
-
-        if (!order) {
-            throw new Error("Orden no encontrada");
-        }
+        await this.getOrderById(id);
 
         const [table, waiter] = await Promise.all([
         data.tableId ? prisma.table.findUnique({ where: { id: data.tableId } }) : null,
@@ -77,18 +73,12 @@ export class OrderService {
     }
 
     async deleteOrder(id: number) {
-        const order = await this.repository.getOrderById(id);
-        if (!order) {
-            throw new Error("Orden no encontrada");
-        }
+        await this.getOrderById(id);
         await prisma.order.delete({ where: { id } });
     }
 
     async payOrder(id: number): Promise<OrderResponse> {
-        const order = await this.repository.getOrderById(id);
-        if (!order) {
-            throw new Error("Orden no encontrada");
-        }
+        const order = await this.getOrderById(id);
 
         if (order.status === "CANCELLED") {
             throw new Error("No se puede pagar una orden que ya ha sido cancelada");
@@ -97,10 +87,7 @@ export class OrderService {
     }
 
     async cancelOrder(id: number): Promise<OrderResponse> {
-        const order = await this.repository.getOrderById(id);
-        if (!order) {
-            throw new Error("Orden no encontrada");
-        }
+        const order = await this.getOrderById(id);
 
         if (order.status === "PAID") {
             throw new Error("No se puede cancelar una orden que ya ha sido pagada");

@@ -16,7 +16,7 @@ export class SubOrderController {
             res.status(201).json(subOrder);
         } catch (error) {
             console.error(error.message);
-            if (error.message === "Order no encontrada") {
+            if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: "Order not found" });
             }
             res.status(500).json({ error: "Failed to create sub-order" });
@@ -30,7 +30,7 @@ export class SubOrderController {
             res.status(200).json(subOrders);
         } catch (error) {
             console.error(error.message);
-            if (error.message === "Order no encontrada") {
+            if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: "Order not found" });
             }
             res.status(500).json({ error: "Failed to retrieve sub-orders" });
