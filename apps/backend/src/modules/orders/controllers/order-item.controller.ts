@@ -1,6 +1,6 @@
 import { OrderItemService } from "../services/order-item.service";
 import { Request, Response } from "express";
-import { CreateItemRequest, UpdateItemRequest } from "../types/order-item.types";
+import { CreateItemRequest, UpdateItemRequest, ResponseOrderItem } from "../types/order-item.types";
 
 export class OrderItemController {
 
@@ -10,7 +10,7 @@ export class OrderItemController {
         this.service = new OrderItemService();
     }
 
-    createOrderItem = async (req: Request, res: Response) => {
+    createOrderItem = async (req: Request, res: Response<ResponseOrderItem>) => {
         const subOrderId = req.validatedParams.subOrderId;
         const data: CreateItemRequest = req.validatedBody;
 
@@ -26,7 +26,7 @@ export class OrderItemController {
         }
     }
 
-    getOrderItems = async (req: Request, res: Response) => {
+    getOrderItems = async (req: Request, res: Response<ResponseOrderItem[]>) => {
         const subOrderId = req.validatedParams.subOrderId;
         const orderId = req.validatedParams.orderId;
 
@@ -45,7 +45,7 @@ export class OrderItemController {
         }    
     }
 
-    getOrderItemById = async (req: Request, res: Response) => {
+    getOrderItemById = async (req: Request, res: Response<ResponseOrderItem>) => {
         const id = req.validatedParams.itemId;
         const subOrderId = req.validatedParams.subOrderId;
         const orderId = req.validatedParams.orderId;
@@ -68,7 +68,7 @@ export class OrderItemController {
         }
     }
 
-    updateOrderItem = async (req: Request, res: Response) => {
+    updateOrderItem = async (req: Request, res: Response<ResponseOrderItem>) => {
         const id = req.validatedParams.itemId;
         const subOrderId = req.validatedParams.subOrderId;
         const orderId = req.validatedParams.orderId;

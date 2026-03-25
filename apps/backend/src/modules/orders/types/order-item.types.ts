@@ -30,15 +30,16 @@ export interface ResponseOrderItem {
     id: number;
     quantity: number;
     notes?: string;
-    unitPrice: number;
-    totalPrice: number;
+    unitPriceSnapshot: number;
+    totalPriceSnapshot: number;
+    subOrderId: number;
+    productId: number;
     product: {
-        id: number;
         name: string;
-        price: number;
     };
     subOrder: {
-        id: number;
         label: string;
+        status: string;
+        orderId: number;
     };
 }

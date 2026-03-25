@@ -1,7 +1,7 @@
 import { OrderItemRepository } from "../repositories/order-item.repository";
 import { SubOrderService } from "./sub-order.service";
 import { ProductsRepository } from "../../products/repositories/product.repository";
-import { CreateOrderItemDTO, CreateItemRequest, UpdateOrderItemDTO } from "../types/order-item.types";
+import { CreateOrderItemDTO, CreateItemRequest, ResponseOrderItem, UpdateOrderItemDTO } from "../types/order-item.types";
 
 export class OrderItemService {
     
@@ -15,7 +15,7 @@ export class OrderItemService {
         this.subOrderService = new SubOrderService();
     }
 
-    async createOrderItem(subOrderId: number, data: CreateItemRequest) {
+    async createOrderItem(subOrderId: number, data: CreateItemRequest): Promise<ResponseOrderItem> {
         const product = await this.productRepository.findProductById(data.productId);
         if (!product) {
             throw new Error("Product not found");
@@ -33,12 +33,12 @@ export class OrderItemService {
         return this.repository.createOrderItem(subOrderId, createData);  
     }
 
-    async getOrderItems(orderId: number, subOrderId: number) {
+    async getOrderItems(orderId: number, subOrderId: number): Promise<ResponseOrderItem[]> {
         await this.subOrderService.getSubOrderById(orderId, subOrderId);
         return this.repository.getOrderItems(subOrderId);
     }
 
-    async getOrderItemById(id: number, orderId: number, subOrderId: number) {
+    async getOrderItemById(id: number, orderId: number, subOrderId: number): Promise<ResponseOrderItem> {
         const orderItem = await this.repository.getOrderItemById(id);
         if (!orderItem) {
             throw new Error("Order item no encontrada");
@@ -52,7 +52,7 @@ export class OrderItemService {
         return orderItem;
     }
 
-    async updateOrderItem(id: number, orderId: number, subOrderId: number, data: UpdateOrderItemDTO) {
+    async updateOrderItem(id: number, orderId: number, subOrderId: number, data: UpdateOrderItemDTO): Promise<ResponseOrderItem> {
         const orderItem = await this.getOrderItemById(id, orderId, subOrderId);
 
         if (!data.productId && !data.quantity) {
