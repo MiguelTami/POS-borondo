@@ -1,4 +1,5 @@
 import { OrderItemRepository } from "../repositories/order-item.repository";
+import { SubOrderService } from "./sub-order.service";
 import { ProductsRepository } from "../../products/repositories/product.repository";
 import { CreateOrderItemDTO, CreateItemRequest } from "../types/order-item.types";
 
@@ -6,10 +7,12 @@ export class OrderItemService {
     
     private repository: OrderItemRepository;
     private productRepository: ProductsRepository;
+    private subOrderService: SubOrderService;
 
     constructor() {
         this.repository = new OrderItemRepository();
         this.productRepository = new ProductsRepository();
+        this.subOrderService = new SubOrderService();
     }
 
     async createOrderItem(subOrderId: number, data: CreateItemRequest) {
@@ -30,7 +33,22 @@ export class OrderItemService {
         return this.repository.createOrderItem(subOrderId, createData);  
     }
 
-    async getOrderItems(subOrderId: number) {
+    async getOrderItems(orderId: number, subOrderId: number) {
+        await this.subOrderService.getSubOrderById(orderId, subOrderId);
         return this.repository.getOrderItems(subOrderId);
+    }
+
+    async getOrderItemById(id: number, orderId: number, subOrderId: number) {
+        const orderItem = await this.repository.getOrderItemById(id);
+        if (!orderItem) {
+            throw new Error("Order item no encontrada");
+        }
+        if (orderItem.subOrderId !== subOrderId) {
+            throw new Error("Order item no pertenece a la suborden");
+        }
+        if (orderItem.subOrder.orderId !== orderId) {
+            throw new Error("Order item no pertenece a la orden");
+        }
+        return orderItem;
     }
 }

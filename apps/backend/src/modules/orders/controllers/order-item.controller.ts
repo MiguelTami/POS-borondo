@@ -19,19 +19,52 @@ export class OrderItemController {
             
             res.status(201).json(orderItem);
         } catch (error) {
+            if (error.message === "Product not found") {
+                return res.status(404).json({ error: error.message });
+            }
             res.status(400).json({ error: error.message });
         }
     }
 
     getOrderItems = async (req: Request, res: Response) => {
         const subOrderId = req.validatedParams.subOrderId;
+        const orderId = req.validatedParams.orderId;
 
         try {
-            const orderItems = await this.service.getOrderItems(subOrderId);
+            const orderItems = await this.service.getOrderItems(orderId, subOrderId);
             
             res.status(200).json(orderItems);
         } catch (error) {
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: error.message });
+            }
             res.status(400).json({ error: error.message });
         }    
+    }
+
+    getOrderItemById = async (req: Request, res: Response) => {
+        const id = req.validatedParams.itemId;
+        const subOrderId = req.validatedParams.subOrderId;
+        const orderId = req.validatedParams.orderId;
+
+        try {
+            const orderItem = await this.service.getOrderItemById(id, orderId, subOrderId);
+
+            res.status(200).json(orderItem);
+        } catch (error) {
+            if (error.message === "Order item no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "Order item no pertenece a la suborden") {
+                return res.status(403).json({ error: error.message });
+            }
+            if (error.message === "Order item no pertenece a la orden") {
+                return res.status(403).json({ error: error.message });
+            }
+            res.status(400).json({ error: error.message });
+        }
     }
 }

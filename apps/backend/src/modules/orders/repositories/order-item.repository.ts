@@ -29,4 +29,14 @@ export class OrderItemRepository {
             }
         });
     }
+
+    async getOrderItemById(id: number) {
+        return prisma.orderItem.findUnique({
+            where: { id },
+            include: {
+                product: true,
+                subOrder: true
+            }
+        });
+    }
 }
