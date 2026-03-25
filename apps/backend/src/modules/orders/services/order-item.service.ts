@@ -1,7 +1,7 @@
 import { OrderItemRepository } from "../repositories/order-item.repository";
 import { SubOrderService } from "./sub-order.service";
 import { ProductsRepository } from "../../products/repositories/product.repository";
-import { CreateOrderItemDTO, CreateItemRequest } from "../types/order-item.types";
+import { CreateOrderItemDTO, CreateItemRequest, UpdateOrderItemDTO } from "../types/order-item.types";
 
 export class OrderItemService {
     
@@ -51,4 +51,31 @@ export class OrderItemService {
         }
         return orderItem;
     }
+
+    async updateOrderItem(id: number, orderId: number, subOrderId: number, data: UpdateOrderItemDTO) {
+        const orderItem = await this.getOrderItemById(id, orderId, subOrderId);
+
+        if (!data.productId && !data.quantity) {
+            return this.repository.updateOrderItem(id, data);
+        }
+
+        let finalUnitPrice = Number(orderItem.unitPriceSnapshot);
+        let finalQuantity = orderItem.quantity;
+
+        if (data.productId) {
+            const product = await this.productRepository.findProductById(data.productId);
+
+            finalUnitPrice = Number(product.price);
+            data.unitPriceSnapshot = finalUnitPrice;
+        }
+
+        if (data.quantity) {
+            finalQuantity = data.quantity;
+        }
+
+        data.totalPriceSnapshot = finalUnitPrice * finalQuantity;
+
+        return this.repository.updateOrderItem(id, data);
+    }
+
 }

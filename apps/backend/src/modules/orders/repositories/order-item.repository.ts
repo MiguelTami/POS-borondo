@@ -1,5 +1,5 @@
 import { prisma } from "../../../config/prisma";
-import { CreateOrderItemDTO } from "../types/order-item.types";
+import { CreateOrderItemDTO, UpdateOrderItemDTO } from "../types/order-item.types";
 
 export class OrderItemRepository {
 
@@ -33,6 +33,17 @@ export class OrderItemRepository {
     async getOrderItemById(id: number) {
         return prisma.orderItem.findUnique({
             where: { id },
+            include: {
+                product: true,
+                subOrder: true
+            }
+        });
+    }
+
+    async updateOrderItem(id: number, data: UpdateOrderItemDTO) {
+        return prisma.orderItem.update({
+            where: { id },
+            data,
             include: {
                 product: true,
                 subOrder: true

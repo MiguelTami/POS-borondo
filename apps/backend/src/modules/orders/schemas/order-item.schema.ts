@@ -5,3 +5,9 @@ export const createOrderItemSchema = z.object({
     quantity: z.number().int().positive("Quantity must be a positive integer"),
     notes: z.string().optional()
 }).strict()
+
+export const updateOrderItemSchema = z.object({
+    productId: z.number().int().positive("Product ID must be a positive integer").optional(),
+    quantity: z.number().int().positive("Quantity must be a positive integer").optional(),
+    notes: z.string().optional()
+}).strict()

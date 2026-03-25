@@ -1,6 +1,6 @@
 import { OrderItemService } from "../services/order-item.service";
 import { Request, Response } from "express";
-import { CreateItemRequest } from "../types/order-item.types";
+import { CreateItemRequest, UpdateItemRequest } from "../types/order-item.types";
 
 export class OrderItemController {
 
@@ -67,4 +67,29 @@ export class OrderItemController {
             res.status(400).json({ error: error.message });
         }
     }
+
+    updateOrderItem = async (req: Request, res: Response) => {
+        const id = req.validatedParams.itemId;
+        const subOrderId = req.validatedParams.subOrderId;
+        const orderId = req.validatedParams.orderId;
+        const data: UpdateItemRequest = req.validatedBody;
+
+        try {
+            const orderItem = await this.service.updateOrderItem(id, orderId, subOrderId, data);
+
+            res.status(200).json(orderItem);
+        } catch (error) {
+            if (error.message === "Order item no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "Order item no pertenece a la suborden") {
+                return res.status(403).json({ error: error.message });
+            }
+            if (error.message === "Order item no pertenece a la orden") {
+                return res.status(403).json({ error: error.message });
+            }
+            res.status(400).json({ error: error.message });
+        }
+    }
+
 }

@@ -6,9 +6,23 @@ export interface CreateOrderItemDTO {
     totalPrice: number;
 }
 
+export interface UpdateOrderItemDTO {
+    productId?: number;
+    quantity?: number;
+    notes?: string;
+    unitPriceSnapshot?: number;
+    totalPriceSnapshot?: number;
+}
+
 export interface CreateItemRequest {
     productId: number;
     quantity: number;
+    notes?: string;
+}
+
+export interface UpdateItemRequest {
+    productId?: number;
+    quantity?: number;
     notes?: string;
 }
 
