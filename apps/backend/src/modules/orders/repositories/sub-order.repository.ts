@@ -47,11 +47,10 @@ export class SubOrderRepository {
         });
     }
 
-    async getSubOrderById(orderId: number, subOrderId: number) {
+    async getSubOrderById(subOrderId: number) {
         return prisma.subOrder.findUnique({
             where: {
-                id: subOrderId,
-                orderId
+                id: subOrderId
             },
             include: {
                 order: true,
@@ -60,11 +59,10 @@ export class SubOrderRepository {
         });
     }
 
-    async updateSubOrder(orderId: number, subOrderId: number, label: string) {
+    async updateSubOrder(subOrderId: number, label: string) {
         return prisma.subOrder.update({
             where: {
                 id: subOrderId,
-                orderId
             },
             data: {
                 label
@@ -72,20 +70,18 @@ export class SubOrderRepository {
         });
     }
 
-    async deleteSubOrder(orderId: number, subOrderId: number) {
+    async deleteSubOrder(subOrderId: number) {
         return prisma.subOrder.delete({
             where: {
                 id: subOrderId,
-                orderId
             }
         });
     }
 
-    async sendSubOrderToCashier(orderId: number, subOrderId: number) {
+    async sendSubOrderToCashier(subOrderId: number) {
         return prisma.subOrder.update({
             where: {
                 id: subOrderId,
-                orderId
             },
             data: {
                 status: 'SENT_TO_CASHIER'
@@ -93,11 +89,10 @@ export class SubOrderRepository {
         });
     }
 
-    async paySubOrder(orderId: number, subOrderId: number) {
+    async paySubOrder(subOrderId: number) {
         return prisma.subOrder.update({
             where: {
                 id: subOrderId,
-                orderId
             },
             data: {
                 status: 'PAID'
@@ -105,11 +100,10 @@ export class SubOrderRepository {
         });
     }
 
-    async cancelSubOrder(orderId: number, subOrderId: number) {
+    async cancelSubOrder(subOrderId: number) {
         return prisma.subOrder.update({
             where: {
                 id: subOrderId,
-                orderId
             },
             data: {
                 status: 'CANCELLED'

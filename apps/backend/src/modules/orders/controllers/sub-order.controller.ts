@@ -16,6 +16,9 @@ export class SubOrderController {
             res.status(201).json(subOrder);
         } catch (error) {
             console.error(error.message);
+            if (error.message === "Order no encontrada") {
+                return res.status(404).json({ error: "Order not found" });
+            }
             res.status(500).json({ error: "Failed to create sub-order" });
         }
     }
@@ -27,6 +30,9 @@ export class SubOrderController {
             res.status(200).json(subOrders);
         } catch (error) {
             console.error(error.message);
+            if (error.message === "Order no encontrada") {
+                return res.status(404).json({ error: "Order not found" });
+            }
             res.status(500).json({ error: "Failed to retrieve sub-orders" });
         }
     }
@@ -38,6 +44,12 @@ export class SubOrderController {
             res.status(200).json(subOrder);
         } catch (error) {
             console.error(error.message);
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: "Sub-order not found" });
+            }
+            if (error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: "Sub-order does not belong to the order" });
+            }
             res.status(500).json({ error: "Failed to retrieve sub-order" });
         }
     }
@@ -50,6 +62,12 @@ export class SubOrderController {
             res.status(200).json(subOrder);
         } catch (error) {
             console.error(error.message);
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: "Sub-order not found" });
+            }
+            if (error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: "Sub-order does not belong to the order" });
+            }
             res.status(500).json({ error: "Failed to update sub-order" });
         }
     }
@@ -61,6 +79,12 @@ export class SubOrderController {
             res.status(200).json({ message: "Sub-order deleted successfully" });
         } catch (error) {
             console.error(error.message);
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: "Sub-order not found" });
+            }
+            if (error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: "Sub-order does not belong to the order" });
+            }
             res.status(500).json({ error: "Failed to delete sub-order" });
         }
     }
@@ -72,6 +96,12 @@ export class SubOrderController {
             res.status(200).json(subOrder);
         } catch (error) {
             console.error(error.message);
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: "Sub-order not found" });
+            }
+            if (error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: "Sub-order does not belong to the order" });
+            }
             res.status(500).json({ error: "Failed to send sub-order to cashier" });
         }
     }
@@ -83,6 +113,13 @@ export class SubOrderController {
             res.status(200).json(subOrder);
         } catch (error) {
             console.error(error.message);
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: "Sub-order not found" });
+            }
+            if (error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: "Sub-order does not belong to the order" });
+            }
+
             res.status(500).json({ error: "Failed to pay sub-order" });
         }
     }
@@ -94,6 +131,12 @@ export class SubOrderController {
             res.status(200).json(subOrder);
         } catch (error) {
             console.error(error.message);
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: "Sub-order not found" });
+            }
+            if (error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: "Sub-order does not belong to the order" });
+            }
             res.status(500).json({ error: "Failed to cancel sub-order" });
         }
     }
