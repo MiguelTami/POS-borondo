@@ -14,5 +14,6 @@ router.post("/", validate(orderIdAndSubOrderIdSchema, 'params') ,validate(create
 router.get("/", validate(orderIdAndSubOrderIdSchema, 'params'), controller.getOrderItems);
 router.get("/:itemId", validate(combinedParamsSchema, 'params'), controller.getOrderItemById);
 router.patch("/:itemId", validate(combinedParamsSchema, 'params'), validate(updateOrderItemSchema, 'body'), controller.updateOrderItem);
+router.delete("/:itemId", validate(combinedParamsSchema, 'params'), controller.deleteOrderItem);
 
 export default router;

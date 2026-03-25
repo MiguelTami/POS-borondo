@@ -78,4 +78,8 @@ export class OrderItemService {
         return this.repository.updateOrderItem(id, data);
     }
 
+    async deleteOrderItem(id: number, orderId: number, subOrderId: number) {
+        await this.getOrderItemById(id, orderId, subOrderId);
+        return this.repository.deleteOrderItem(id);
+    }
 }

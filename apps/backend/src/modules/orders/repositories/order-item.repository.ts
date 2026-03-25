@@ -50,4 +50,10 @@ export class OrderItemRepository {
             }
         });
     }
+
+    async deleteOrderItem(id: number) {
+        return prisma.orderItem.delete({
+            where: { id }
+        });
+    }
 }
