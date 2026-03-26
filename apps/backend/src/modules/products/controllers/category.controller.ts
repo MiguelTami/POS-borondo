@@ -12,12 +12,15 @@ export class CategoriesController {
     createCategory = async (req: Request, res: Response) => {
         try {
             const categoryName: string = req.validatedBody.name
-            console.log(categoryName)
             const categoryCreated = await this.service.createCategory(categoryName)
 
             res.status(201).json(categoryCreated)
         } catch (error) {
-            console.error(error.message)
+            if (error.message === 'La categoría ya existe') {
+                return res.status(409).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: 'Error creating category'
             })
@@ -30,7 +33,11 @@ export class CategoriesController {
 
             res.status(200).json(categories)
         } catch (error) {
-            console.error(error.message)
+            if (error.message === 'No hay categorías activas') {
+                return res.status(404).json({
+                    error: error.message
+                });
+            }
             res.status(500).json({
                 message: 'Error fetching categories'
             })
@@ -43,7 +50,11 @@ export class CategoriesController {
 
             res.status(200).json(categories)
         } catch (error) {
-            console.error(error.message)
+            if (error.message === 'No hay categorías registradas') {
+                return res.status(404).json({
+                    error: error.message
+                });
+            }
             res.status(500).json({
                 message: 'Error fetching categories'
             })
@@ -57,6 +68,11 @@ export class CategoriesController {
 
             res.status(200).json(category)
         } catch (error) {
+            if (error.message === 'Categoría no encontrada') {
+                return res.status(404).json({
+                    error: error.message
+                });
+            }
             res.status(500).json({
                 message: 'Error fetching category'
             })
@@ -72,7 +88,16 @@ export class CategoriesController {
 
             res.status(200).json(categotyUpdated)
         } catch (error) {
-            console.error(error.message)
+            if (error.message === 'La categoría no existe') {
+                return res.status(404).json({
+                    message: error.message
+                });
+            }
+            if (error.message.startsWith('Ya existe una categoría con el nombre')) {
+                return res.status(409).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: 'Error updating category'
             })
@@ -87,6 +112,16 @@ export class CategoriesController {
             
             res.status(200).json(categoryDesactivated)
         } catch (error) {
+            if (error.message === 'La categoría no existe') {
+                return res.status(404).json({
+                    message: error.message
+                });
+            }
+            if (error.message === 'La categoría ya está inactiva') {
+                return res.status(400).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: 'Error desactivating category'
             })
@@ -101,6 +136,16 @@ export class CategoriesController {
             
             res.status(200).json(categoryReactivated)
         } catch (error) {
+            if (error.message === 'La categoría no existe') {
+                return res.status(404).json({
+                    message: error.message
+                });
+            }
+            if (error.message === 'La categoría ya está activa') {
+                return res.status(400).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: 'Error reactivating category'
             })

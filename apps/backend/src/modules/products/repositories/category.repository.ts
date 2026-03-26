@@ -15,6 +15,12 @@ export class CategoriesRepository {
         })
     }
 
+    async getCategoryByName (name: string) {
+        return prisma.category.findFirst({
+            where: {name}
+        })
+    }
+
     async getActiveCategories () {
         return prisma.category.findMany({
             where: { isActive: true },
