@@ -18,7 +18,12 @@ export class IngredientsService {
     }
 
     async getIngredientById(id: number) {
-        return await this.repository.getIngredientById(id)
+        const ingredient = await this.repository.getIngredientById(id)
+
+        if (!ingredient) {
+            throw new Error('Ingrediente no encontrado')
+        }
+        return ingredient
     }
 
     async createIngredient(data: CreateIngredientDTO): Promise<IngredientResponse> {

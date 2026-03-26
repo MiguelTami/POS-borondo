@@ -41,6 +41,11 @@ export class IngredientsController {
 
             res.status(200).json(ingredient)
         } catch (error) {
+            if (error.message === 'Ingrediente no encontrado') {
+                return res.status(404).json({
+                    message: 'Ingrediente no encontrado'
+                })
+            }
             res.status(500).json({
                 message: 'Error fetching ingredient'
             })
