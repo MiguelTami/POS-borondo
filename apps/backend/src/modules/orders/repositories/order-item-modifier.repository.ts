@@ -204,4 +204,12 @@ export class OrderItemModifierRepository {
         };
 
     }
+
+    async deleteOrderItemModifier(id: number) {
+        await prisma.orderItemModifier.delete({
+            where: {
+                id
+            }
+        });
+    }
 }

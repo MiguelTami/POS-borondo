@@ -60,4 +60,9 @@ export class OrderItemModifierService {
         } 
         return this.repository.updateOrderItemModifier(id, data);
     }
+
+    async deleteOrderItemModifier(id: number, orderItemId: number, orderId: number, subOrderId: number) {
+        await this.getOrderItemModifierById(id, orderItemId, orderId, subOrderId);
+        return this.repository.deleteOrderItemModifier(id);
+    }
 }

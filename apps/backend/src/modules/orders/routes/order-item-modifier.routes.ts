@@ -14,5 +14,6 @@ router.post("/", validate(parentsParamsSchema, 'params'), validate(createOrderIt
 router.get("/", validate(parentsParamsSchema, 'params'), controller.getOrderItemModifiers);
 router.get("/:modifierId", validate(combinedParamsSchema, 'params'), controller.getOrderItemModifierById);
 router.patch("/:modifierId", validate(combinedParamsSchema, 'params'), validate(updateOrderItemModifierSchema, 'body'), controller.updateOrderItemModifier);
+router.delete("/:modifierId", validate(combinedParamsSchema, 'params'), controller.deleteOrderItemModifier);
 
 export default router;
