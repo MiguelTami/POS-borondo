@@ -22,6 +22,12 @@ export class IngredientsRepository {
         })
     }
 
+    async getIngredientByName (name: string) {
+        return prisma.ingredient.findFirst({
+            where: {name}
+        })
+    }
+
     async createIngredient (data: CreateIngredientDTO) {
         return prisma.ingredient.create({
             data: {

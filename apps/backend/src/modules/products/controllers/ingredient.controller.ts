@@ -16,6 +16,11 @@ export class IngredientsController {
 
             res.status(200).json(ingredients)
         } catch (error) {
+            if (error.message === 'No hay ingredientes activos') {
+                return res.status(404).json({
+                    message: error.message
+                })
+            }
             res.status(500).json({
                 message: 'Error fetching ingredients'
             })
@@ -28,6 +33,11 @@ export class IngredientsController {
 
             res.status(200).json(ingredients)
         } catch (error) {
+            if (error.message === 'No hay ingredientes registrados') {
+                return res.status(404).json({
+                    message: error.message
+                })
+            }
             res.status(500).json({
                 message: 'Error fetching ingredients'
             })
@@ -43,7 +53,7 @@ export class IngredientsController {
         } catch (error) {
             if (error.message === 'Ingrediente no encontrado') {
                 return res.status(404).json({
-                    message: 'Ingrediente no encontrado'
+                    message: error.message
                 })
             }
             res.status(500).json({
@@ -59,6 +69,11 @@ export class IngredientsController {
 
             res.status(201).json(ingredient)
         } catch (error) {
+            if (error.message.startsWith('Ya existe un ingrediente con el nombre')) {
+                return res.status(400).json({
+                    message: error.message
+                })
+            }
             res.status(500).json({
                 message: 'Error creating ingredient'
             })
@@ -74,7 +89,16 @@ export class IngredientsController {
 
             res.status(200).json(ingredientUpdated)
         } catch (error) {
-            console.error(error.message);
+            if (error.message === 'Ingrediente no encontrado') {
+                return res.status(404).json({
+                    message: error.message
+                })
+            }
+            if (error.message.startsWith('Ya existe un ingrediente con el nombre')) {
+                return res.status(400).json({
+                    message: error.message
+                })
+            }
             res.status(500).json({
                 message: 'Error updating ingredient'
             })
@@ -88,6 +112,11 @@ export class IngredientsController {
 
             res.status(200).json(result)
         } catch (error) {
+            if (error.message === 'Ingrediente no encontrado' || error.message === 'El ingrediente ya está inactivo') {
+                return res.status(400).json({
+                    message: error.message
+                })
+            }
             res.status(500).json({
                 message: 'Error deactivating ingredient'
             })
@@ -101,6 +130,11 @@ export class IngredientsController {
 
             res.status(200).json(result)
         } catch (error) {
+            if (error.message === 'Ingrediente no encontrado' || error.message === 'El ingrediente ya está activo') {
+                return res.status(400).json({
+                    message: error.message
+                })
+            }
             res.status(500).json({
                 message: 'Error activating ingredient'
             })
