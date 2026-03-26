@@ -1,4 +1,6 @@
 import { OrderItemModifierService } from "../services/order-item-modifier.service";
+import { Request, Response } from "express";
+import { OrderItemModifierResponse } from "../types/order-item-modifier.types";
 
 export class OrderItemModifierController {
 
@@ -6,5 +8,30 @@ export class OrderItemModifierController {
 
     constructor() {
         this.service = new OrderItemModifierService();
+    }
+
+    createOrderItemModifier = async (req: Request, res: Response<OrderItemModifierResponse>) => {
+        const orderId= req.validatedParams.orderId;
+        const subOrderId = req.validatedParams.subOrderId;
+        const orderItemId = req.validatedParams.itemId;
+        
+        const data = req.validatedBody;
+
+        try {
+            const result = await this.service.createOrderItemModifier(orderItemId, orderId, subOrderId, data);
+
+            res.status(201).json(result);
+        } catch (error) {
+            if (error.message === "Ingrediente no encontrado" || error.message === "Order item no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "No hay suficiente stock del ingrediente para agregar esta modificación") {
+                return res.status(400).json({ error: error.message });
+            }
+            if (error.message === "Order item no pertenece a la suborden" || error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: error.message });
+            }
+            res.status(400).json({ error: error.message });
+        }
     }
 }
