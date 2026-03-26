@@ -1,5 +1,5 @@
 import { prisma } from "../../../config/prisma";
-import { CreateOrderItemModifier, OrderItemModifierResponse } from "../types/order-item-modifier.types";
+import { CreateOrderItemModifier, OrderItemModifierResponse, UpdateOrderItemModifier } from "../types/order-item-modifier.types";
 
 export class OrderItemModifierRepository {
     
@@ -144,7 +144,7 @@ export class OrderItemModifierRepository {
         if (!orderItemModifier) {
             return null;
         }
-        
+
         return {
             ...orderItemModifier,
             quantity: orderItemModifier.quantity.toNumber(),
@@ -153,5 +153,55 @@ export class OrderItemModifierRepository {
                 stock: orderItemModifier.ingredient.stock.toNumber()
             }
         };
+    }
+
+    async updateOrderItemModifier(id: number, data: UpdateOrderItemModifier): Promise<OrderItemModifierResponse> {
+        const orderItemModifier = await prisma.orderItemModifier.update({
+            where: {
+                id
+            },
+            data,
+            select: {
+                id: true,
+                quantity: true,
+                type: true,
+                ingredientId: true,
+                ingredient: {
+                    select: {
+                        name: true,
+                        unit: true,
+                        stock: true
+                    }
+                },
+                orderItemId: true,
+                orderItem: {
+                    select: {
+                        subOrderId: true,
+                        product: {
+                            select: {
+                                name: true
+                            }
+                        },
+                        subOrder: {
+                            select: {
+                                label: true,
+                                status: true,
+                                orderId: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return {
+            ...orderItemModifier,
+            quantity: orderItemModifier.quantity.toNumber(),
+            ingredient: {
+                ...orderItemModifier.ingredient,
+                stock: orderItemModifier.ingredient.stock.toNumber()
+            }
+        };
+
     }
 }

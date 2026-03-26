@@ -6,6 +6,12 @@ export interface CreateOrderItemModifier {
     ingredientId: number;
 }
 
+export interface UpdateOrderItemModifier {
+    quantity?: number;
+    type?: OrderItemModifierType;
+    ingredientId?: number;
+}
+
 export interface OrderItemModifierResponse {
     id: number;
     quantity: number;

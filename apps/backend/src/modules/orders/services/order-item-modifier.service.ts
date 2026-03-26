@@ -1,5 +1,5 @@
 import { OrderItemModifierRepository } from "../repositories/order-item-modifier.repository";
-import { CreateOrderItemModifier, OrderItemModifierResponse } from "../types/order-item-modifier.types";
+import { CreateOrderItemModifier, OrderItemModifierResponse, UpdateOrderItemModifier } from "../types/order-item-modifier.types";
 import { IngredientsService } from "../../products/services/ingredient.service";
 import { OrderItemService } from "./order-item.service";
 
@@ -50,5 +50,14 @@ export class OrderItemModifierService {
             throw new Error('Order item modifier no pertenece a la orden')
         }
         return orderItemModifier;
+    }
+
+    async updateOrderItemModifier(id: number, orderItemId: number, orderId: number, subOrderId: number, data: UpdateOrderItemModifier): Promise<OrderItemModifierResponse> {
+        const orderItemModifier = await this.getOrderItemModifierById(id, orderItemId, orderId, subOrderId);
+        const ingredient = await this.ingredientsService.getIngredientById(data.ingredientId || orderItemModifier.ingredientId);
+        if (Number(data.quantity) > Number(ingredient.stock)) {
+            throw new Error('No hay suficiente stock del ingrediente para agregar esta modificación')
+        } 
+        return this.repository.updateOrderItemModifier(id, data);
     }
 }
