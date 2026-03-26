@@ -17,6 +17,11 @@ export class RecipesController {
 
             res.status(200).json(ingredientsList)
         } catch (error) {
+            if (error.message === 'El producto está inactivo' || 
+                error.message === 'Producto no encontrado' ||
+                error.message === 'EL producto no tiene ingredientes asociados') {
+                return res.status(400).json({ message: error.message });
+            }
            res.status(500).json({
                 message: 'Error fetching ingredients from Recipe'
             }) 
@@ -35,6 +40,12 @@ export class RecipesController {
 
             res.status(201).json(ingredientRecipe)
         } catch (error) {
+            if (error.message === 'El ingrediente está inactivo' || 
+                error.message === 'Ingrediente no encontrado' || 
+                error.message === 'El producto está inactivo' ||
+                error.message === 'Producto no encontrado') {
+                return res.status(400).json({ message: error.message });
+            }
             res.status(500).json({
                 message: 'Error creating Recipe'
             })
@@ -50,6 +61,11 @@ export class RecipesController {
 
             res.status(200).json(recipeUpdated)
         } catch (error) {
+            if (error.message === 'El ingrediente está inactivo' ||
+                error.message === 'Ingrediente no encontrado' ||
+                error.message === 'Receta no encontrada') {
+                return res.status(400).json({ message: error.message });
+            }
             console.error(error.message)
             res.status(500).json({
                 message: 'Error updating Recipe'
@@ -65,6 +81,9 @@ export class RecipesController {
 
             res.status(200).json(result)
         } catch (error) {
+            if (error.message === 'Receta no encontrada') {
+                return res.status(400).json({ message: error.message });
+            }
             res.status(500).json({
                 message: 'Error deleting ingredient from Recipe'
             })

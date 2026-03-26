@@ -1,26 +1,58 @@
 import { RecipesRepository } from "../repositories/recipe.repository";
-import { IngredientsRepository } from "../repositories/ingredient.repository";
+import { IngredientsService } from "./ingredient.service";
+import { ProductsService } from "./product.service";
 import { RecipeResponse, CreateRecipeDTO, UpdateRecipeDTO, DeleteRecipe } from "../types/recipe.types";
 
 export class RecipesService {
 
     private repository : RecipesRepository;
-    private ingredientRepository : IngredientsRepository;
+    private ingredientService : IngredientsService;
+    private productService : ProductsService;
+
 
     constructor() {
         this.repository = new RecipesRepository();
-        this.ingredientRepository = new IngredientsRepository();
+        this.ingredientService = new IngredientsService();
+        this.productService = new ProductsService();
+
     };
 
+    async getRecipeById(id: number) {
+        const recipe = await this.repository.getRecipeById(id);
+        if (!recipe) {
+            throw new Error('Receta no encontrada');
+        }
+        return recipe;
+    }
+
+
     async getIngredientsRecipe(productId: number) {
+        const product = await this.productService.getProductById(productId);
+        
+        if (!product.isActive) {
+            throw new Error('El producto está inactivo');
+        }
+
+        const ingredientsList = await this.repository.getIngredientsRecipe(productId);
+
+        if (ingredientsList.length === 0) {
+            throw new Error('EL producto no tiene ingredientes asociados');
+        }
+
         return await this.repository.getIngredientsRecipe(productId)
     }
 
     async createIngredientRecipe(productId: number, data: CreateRecipeDTO): Promise<RecipeResponse> {
 
-        const ingredient = await this.ingredientRepository.getIngredientById(data.ingredientId);
-        if (!ingredient || !ingredient.isActive) {
-            throw new Error('El ingrediente no existe o está inactivo');
+        const product = await this.productService.getProductById(productId);
+
+        if (!product.isActive) {
+            throw new Error('El producto está inactivo');
+        }
+        
+        const ingredient = await this.ingredientService.getIngredientById(data.ingredientId);
+        if (!ingredient.isActive) {
+            throw new Error('El ingrediente está inactivo');
         }
         const ingredientRecipe = await this.repository.createIngredientRecipe(productId, data)
 
@@ -40,10 +72,12 @@ export class RecipesService {
 
     async updateIngredientRecipe(recipeId: number, data: UpdateRecipeDTO): Promise<RecipeResponse> {
 
+        await this.getRecipeById(recipeId);
+        
         if (data.ingredientId !== undefined) {
-            const ingredient = await this.ingredientRepository.getIngredientById(data.ingredientId);
+            const ingredient = await this.ingredientService.getIngredientById(data.ingredientId);
             if (!ingredient || !ingredient.isActive) {
-                throw new Error('El ingrediente no existe o está inactivo');
+                throw new Error('El ingrediente está inactivo');
             }
         }
 
@@ -65,9 +99,11 @@ export class RecipesService {
     }
 
     async deleteIngredientRecipe(recipeId: number): Promise<DeleteRecipe> {
+        await this.getRecipeById(recipeId);
+
         await this.repository.deleteIngredientRecipe(recipeId)
         return {
-            message: 'The ingredient was deleted from the recipe succesfully'
+            message: 'El ingrediente fue eliminado de la receta exitosamente'
         }
     }
 }

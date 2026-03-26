@@ -3,7 +3,7 @@ import { CreateRecipeDTO, UpdateRecipeDTO } from '../types/recipe.types';
 
 export class RecipesRepository{
 
-    async findById(id: number) {
+    async getRecipeById(id: number) {
         return prisma.recipe.findUnique({
             where: {id}
         })
