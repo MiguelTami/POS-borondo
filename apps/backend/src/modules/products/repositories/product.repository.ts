@@ -4,7 +4,7 @@ import { CreateProductDTO, UpdateProductDTO, GetProductQueryDTO } from '../types
 
 export class ProductsRepository {
 
-    async findAllActive(filters: GetProductQueryDTO) {
+    async getActiveCategories(filters: GetProductQueryDTO) {
         const where: Prisma.ProductWhereInput = {
             ...(filters.categoryId && {
             categoryId: filters.categoryId
@@ -32,7 +32,13 @@ export class ProductsRepository {
         });
     }
 
-    async findProductById(id: number) {
+    async getProductByName(name: string) {
+        return prisma.product.findFirst({
+            where: { name }
+        });
+    }
+
+    async getProductById(id: number) {
         return prisma.product.findUnique({
             where: {id},
             include: {

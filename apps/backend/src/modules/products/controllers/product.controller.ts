@@ -19,6 +19,11 @@ export class ProductsController {
             res.status(200).json(products);
 
         } catch (error) {
+            if (error.message === 'No se encontraron productos con los filtros proporcionados') {
+                return res.status(404).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: 'Error fetching products'
             });
@@ -32,7 +37,12 @@ export class ProductsController {
 
             res.status(200).json(product)
         } catch (error) {
-            console.error(error.message)
+            if (error.message === 'Producto no encontrado') {
+                return res.status(404).json({
+                    message: error.message
+                });
+            }
+
             res.status(500).json({
                 message: 'Error fetching product'
             })
@@ -48,7 +58,16 @@ export class ProductsController {
             res.status(201).json(product)
 
         } catch (error) {
-            console.error(error.message)
+            if (error.message === 'La categoría no existe' || error.message === 'La categoría está inactiva') {
+                return res.status(400).json({
+                    message: error.message
+                });
+            }
+            if (error.message.startsWith('Ya existe un producto con el nombre')) {
+                return res.status(409).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: "Error creating product"
             });
@@ -62,7 +81,16 @@ export class ProductsController {
 
             res.status(200).json(result)
         } catch (error) {
-            console.error(error.message)
+            if (error.message === 'Producto no encontrado') {
+                return res.status(404).json({
+                    message: error.message
+                });
+            }
+            if (error.message === 'El producto ya está inactivo') {
+                return res.status(400).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: "Error deleting product"
             }); 
@@ -76,7 +104,16 @@ export class ProductsController {
 
             res.status(200).json(result)
         } catch (error) {
-            console.error(error.message)
+            if (error.message === 'Producto no encontrado') {
+                return res.status(404).json({
+                    message: error.message
+                });
+            }
+            if (error.message === 'El producto ya está activo') {
+                return res.status(400).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: "Error reactivating product"
             }); 
@@ -92,6 +129,21 @@ export class ProductsController {
 
             res.status(200).json(updatedProduct)
         } catch (error) {
+            if (error.message === 'Producto no encontrado') {
+                return res.status(404).json({
+                    message: error.message
+                });
+            }
+            if (error.message === 'La categoría no existe' || error.message === 'La categoría está inactiva') {
+                return res.status(400).json({
+                    message: error.message
+                });
+            }
+            if (error.message.startsWith('Ya existe un producto con el nombre')) {
+                return res.status(409).json({
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 message: "Error updating product"
             });

@@ -14,4 +14,4 @@ export const getProductsQuerySchema = z.object({
   categoryId: z.coerce.number().int().optional(),
   
   isActive: booleanFromQuery.optional()
-})
+}).strict()
