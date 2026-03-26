@@ -101,4 +101,57 @@ export class OrderItemModifierRepository {
             }
         }));
     }
+
+    async getOrderItemModifierById(id: number): Promise<OrderItemModifierResponse> {
+        const orderItemModifier = await prisma.orderItemModifier.findUnique({
+            where: {
+                id
+            },
+            select: {
+                id: true,
+                quantity: true,
+                type: true,
+                ingredientId: true,
+                ingredient: {
+                    select: {
+                        name: true,
+                        unit: true,
+                        stock: true
+                    }
+                },
+                orderItemId: true,
+                orderItem: {
+                    select: {
+                        subOrderId: true,
+                        product: {
+                            select: {
+                                name: true
+                            }
+                        },
+                        subOrder: {
+                            select: {
+                                label: true,
+                                status: true,
+                                orderId: true
+                            }
+                        }
+                    }
+                }
+            }
+
+        });
+
+        if (!orderItemModifier) {
+            return null;
+        }
+        
+        return {
+            ...orderItemModifier,
+            quantity: orderItemModifier.quantity.toNumber(),
+            ingredient: {
+                ...orderItemModifier.ingredient,
+                stock: orderItemModifier.ingredient.stock.toNumber()
+            }
+        };
+    }
 }

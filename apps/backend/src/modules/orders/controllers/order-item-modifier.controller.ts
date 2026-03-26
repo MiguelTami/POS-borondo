@@ -55,4 +55,25 @@ export class OrderItemModifierController {
         }
     }
 
+    getOrderItemModifierById = async (req: Request, res: Response<OrderItemModifierResponse>) => {
+        const orderId= req.validatedParams.orderId;
+        const subOrderId = req.validatedParams.subOrderId;
+        const orderItemId = req.validatedParams.itemId;
+        const modifierId = req.validatedParams.modifierId;
+
+        try {
+            const result = await this.service.getOrderItemModifierById(modifierId, orderItemId, orderId, subOrderId);
+
+            res.json(result);
+        } catch (error) {
+            if (error.message === "Order item modifier no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "Order item modifier no pertenece al order item" || error.message === "Order item modifier no pertenece a la suborden" || error.message === "Order item modifier no pertenece a la orden") {
+                return res.status(403).json({ error: error.message });
+            }
+            res.status(400).json({ error: error.message });
+        }
+    }
+
 }

@@ -12,5 +12,6 @@ const controller = new OrderItemModifierController();
 
 router.post("/", validate(parentsParamsSchema, 'params'), validate(createOrderItemModifierSchema, 'body'), controller.createOrderItemModifier);
 router.get("/", validate(parentsParamsSchema, 'params'), controller.getOrderItemModifiers);
+router.get("/:modifierId", validate(combinedParamsSchema, 'params'), controller.getOrderItemModifierById);
 
 export default router;
