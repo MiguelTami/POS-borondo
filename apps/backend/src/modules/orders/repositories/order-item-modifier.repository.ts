@@ -52,4 +52,53 @@ export class OrderItemModifierRepository {
             }
         }
     }
+
+    async getOrderItemModifiers(orderItemId: number): Promise<OrderItemModifierResponse[]> {
+        const orderItemModifiers = await prisma.orderItemModifier.findMany({
+            where: {
+                orderItemId
+            },
+            select: {
+                id: true,
+                quantity: true,
+                type: true,
+                ingredientId: true,
+                ingredient: {
+                    select: {
+                        name: true,
+                        unit: true,
+                        stock: true
+                    }
+                },
+                orderItemId: true,
+                orderItem: {
+                    select: {
+                        subOrderId: true,
+                        product: {
+                            select: {
+                                name: true
+                            }
+                        },
+                        subOrder: {
+                            select: {
+                                label: true,
+                                status: true,
+                                orderId: true
+                            }
+                        }
+                    }
+                }
+
+            }
+
+        });
+        return orderItemModifiers.map((modifier) => ({
+            ...modifier,
+            quantity: modifier.quantity.toNumber(),
+            ingredient: {
+                ...modifier.ingredient,
+                stock: modifier.ingredient.stock.toNumber()
+            }
+        }));
+    }
 }

@@ -28,4 +28,9 @@ export class OrderItemModifierService {
         }
         return this.repository.createOrderItemModifier(orderItemId, data);
     }
+
+    async getOrderItemModifiers(orderItemId: number, orderId: number, subOrderId: number): Promise<OrderItemModifierResponse[]> {
+        await this.orderItemsService.getOrderItemById(orderItemId, orderId, subOrderId)
+        return this.repository.getOrderItemModifiers(orderItemId);
+    }
 }
