@@ -17,7 +17,7 @@ export class OrderController {
             res.status(201).json(order);
         } catch (error: any) {
             console.error(error.message);
-            if (error.message === "Mesa no encontrada" || error.message.includes("rol de mesonero") || error.message === "La mesa no está disponible") {
+            if (error.message === "La mesa no existe" || error.message.includes("rol de mesonero") || error.message === "La mesa no está disponible") {
                 return res.status(400).json({ error: error.message });
             }
 
@@ -31,7 +31,9 @@ export class OrderController {
 
             res.status(200).json(orders);
         } catch (error) {
-            console.error(error.message);
+            if (error.message === "No se encontraron órdenes") {
+                return res.status(404).json({ error: error.message });
+            }
             res.status(500).json({ error: "Failed to fetch orders" });
         }
     }
@@ -64,7 +66,7 @@ export class OrderController {
             if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
-            if (error.message === "Mesa no encontrada" || error.message.includes("rol de mesonero") || error.message === "La mesa no está disponible") {
+            if (error.message === "La mesa no existe" || error.message.includes("rol de mesonero") || error.message === "La mesa no está disponible") {
                 return res.status(400).json({ error: error.message });
             }
 
@@ -77,7 +79,7 @@ export class OrderController {
             const id = req.validatedParams.orderId;
             await this.service.deleteOrder(id);
 
-            res.status(204).send();
+            res.status(200).json({ message: "Orden eliminada exitosamente" });
         } catch (error: any) {
             console.error(error.message);
             if (error.message === "Orden no encontrada") {
@@ -85,6 +87,24 @@ export class OrderController {
             }
 
             res.status(500).json({ error: "Failed to delete order" });
+        }
+    }
+
+    sendOrderToCashier = async (req: Request, res: Response) => {
+        try {
+            const id = req.validatedParams.orderId;
+            const updatedOrder = await this.service.sendOrderToCashier(id);
+
+            res.status(200).json(updatedOrder);
+        } catch (error: any) {
+            if (error.message === "Orden no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "Solo se pueden enviar al cajero órdenes en estado OPEN") {
+                return res.status(400).json({ error: error.message });
+            }
+
+            res.status(500).json({ error: "Failed to send order to cashier" });
         }
     }
 
@@ -99,7 +119,9 @@ export class OrderController {
             if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
-            if (error.message === "No se puede pagar una orden que ya ha sido cancelada") {
+            if (error.message === "No se puede pagar una orden que ya ha sido cancelada, o que no ha sido enviada al cajero" ||
+                error.message === "No se puede pagar una orden que tiene subórdenes que no han sido pagadas o canceladas"
+            ) {
                 return res.status(400).json({ error: error.message });
             }
 
@@ -118,7 +140,9 @@ export class OrderController {
             if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
-            if (error.message === "No se puede cancelar una orden que ya ha sido pagada") {
+            if (error.message === "No se puede cancelar una orden que ya ha sido pagada" ||
+                error.message === "No se puede cancelar una orden que tiene subórdenes pagadas"
+            ) {
                 return res.status(400).json({ error: error.message });
             }
 

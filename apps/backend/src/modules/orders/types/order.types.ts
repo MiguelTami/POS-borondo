@@ -13,14 +13,19 @@ export interface UpdateOrderDTO {
 export interface OrderResponse {
     id: number;
     dailyOrderNumber: number;
-    businessDate: Date;
     status: OrderStatus;
+    tableId: number;
     table: {
         number: number;
         status: TableStatus;
     };
+    waiterId: number;
     waiter: {
-        id: number;
         name: string;
     };
+    subOrders?: {
+        id: number;
+        label: string;
+        status: string;
+    }[];
 }

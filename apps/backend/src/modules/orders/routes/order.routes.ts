@@ -13,6 +13,7 @@ router.get("/", controller.getOrders);
 router.get("/:orderId", validate(orderIdParamSchema, 'params'), controller.getOrderById);
 router.patch("/:orderId", validate(orderIdParamSchema, 'params'), validate(updateOrderSchema, 'body'), controller.updateOrder);
 router.delete("/:orderId", validate(orderIdParamSchema, 'params'), controller.deleteOrder);
+router.patch("/:orderId/send-to-cashier", validate(orderIdParamSchema, 'params'), controller.sendOrderToCashier);
 router.patch("/:orderId/pay", validate(orderIdParamSchema, 'params'), controller.payOrder);
 router.patch("/:orderId/cancel", validate(orderIdParamSchema, 'params'), controller.cancelOrder);
 

@@ -21,17 +21,17 @@ export class OrderRepository {
              select: {
                 id: true,
                 dailyOrderNumber: true,
-                businessDate: true,
                 status: true,
+                tableId: true,
                 table: {
                     select: {
                         number: true,
                         status: true
                     }
                 },
+                waiterId: true,
                 waiter: {
                     select: {
-                        id: true,
                         name: true
                     }
                 }
@@ -42,23 +42,61 @@ export class OrderRepository {
 
     async getOrders() {
         return prisma.order.findMany({
-            include: {
-                table: true,
-                waiter: {
-                    select: { id: true, name: true, role: true },
+            select: {
+                id: true,
+                dailyOrderNumber: true,
+                status: true,
+                tableId: true,
+                table: {
+                    select: {
+                        number: true,
+                        status: true
+                    }
                 },
-            },
+                waiterId: true,
+                waiter: {
+                    select: {
+                        name: true
+                    }
+                },
+                subOrders: {
+                    select: {
+                        id: true,
+                        label: true,
+                        status: true,
+                    }
+                }
+            }
         });
     }
 
     async getOrderById(id: number) {
         return prisma.order.findUnique({
             where: { id },
-            include: {
-                table: true,
-                waiter: {
-                    select: { id: true, name: true, role: true },
+            select: {
+                id: true,
+                dailyOrderNumber: true,
+                status: true,
+                tableId: true,
+                table: {
+                    select: {
+                        number: true,
+                        status: true
+                    }
                 },
+                waiterId: true,
+                waiter: {
+                    select: {
+                        name: true
+                    }
+                },
+                subOrders: {
+                    select: {
+                        id: true,
+                        label: true,
+                        status: true,
+                    }
+                }
             },
         });
     }
@@ -67,12 +105,31 @@ export class OrderRepository {
         return prisma.order.update({
             where: { id },
             data,
-            include: {
-                table: true,
-                waiter: {
-                    select: { id: true, name: true, role: true },
+            select: {
+                id: true,
+                dailyOrderNumber: true,
+                status: true,
+                tableId: true,
+                table: {
+                    select: {
+                        number: true,
+                        status: true
+                    }
                 },
-            },
+                waiterId: true,
+                waiter: {
+                    select: {
+                        name: true
+                    }
+                },
+                subOrders: {
+                    select: {
+                        id: true,
+                        label: true,
+                        status: true,
+                    }
+                }
+            }
         });
     }
 
@@ -82,29 +139,132 @@ export class OrderRepository {
         });
     }
 
-    async payOrder(id: number) {
-        return prisma.order.update({
-            where: { id },
-            data: { status: "PAID" },
-            include: {
-                table: true,
-                waiter: {
-                    select: { id: true, name: true, role: true },
+    async sendOrderToCashier(id: number) {
+        return prisma.$transaction(async (tx) => {
+            await tx.subOrder.updateMany({
+                where: { 
+                    orderId: id,
+                    status: "OPEN"
                 },
+                data: { status: "SENT_TO_CASHIER" }
+            }); 
+            return tx.order.update({
+                where: { id },
+                data: { status: "SENT_TO_CASHIER" },
+                select: {
+                    id: true,
+                    dailyOrderNumber: true,
+                    status: true,
+                    tableId: true,
+                    table: {
+                        select: {
+                            number: true,
+                            status: true
+                        }
+                    },
+                    waiterId: true,
+                    waiter: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    subOrders: {
+                        select: {
+                            id: true,
+                            label: true,
+                            status: true,
+                        }
+                    }
+                }
+            });
+        })
+    }
+
+    async payOrder(id: number) {
+        return prisma.$transaction(async (tx) => {
+            const order = await tx.order.findUnique({
+                where: { id },
+                include: {
+                    subOrders: {select: { status: true }}
+                }
+            })
+
+            const hasUnpaidSubOrders = order.subOrders.some(subOrder => subOrder.status !== "PAID" && subOrder.status !== "CANCELLED");
+
+            if (hasUnpaidSubOrders) {
+                throw new Error("No se puede pagar una orden que tiene subórdenes que no han sido pagadas o canceladas");
             }
-        });
+
+            return tx.order.update({
+                where: { id },
+                data: { status: "PAID" },
+                select: {
+                    id: true,
+                    dailyOrderNumber: true,
+                    status: true,
+                    tableId: true,
+                    table: {
+                        select: {
+                            number: true,
+                            status: true
+                        }
+                    },
+                    waiterId: true,
+                    waiter: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    subOrders: {
+                        select: {
+                            id: true,
+                            label: true,
+                            status: true,
+                        }
+                    }
+                }
+            });
+        })
     }
 
     async cancelOrder(id: number) {
-        return prisma.order.update({
-            where: { id },
-            data: { status: "CANCELLED" },
-            include: {
-                table: true,
-                waiter: {
-                    select: { id: true, name: true, role: true },
+        return prisma.$transaction(async (tx) => {
+            await tx.subOrder.updateMany({
+                where: { 
+                    orderId: id,
+                    status: { not: "PAID" }
                 },
-            }
-        });
+                data: { status: "CANCELLED" }
+            });       
+            return tx.order.update({
+                where: { id },
+                data: { status: "CANCELLED" },
+                select: {
+                    id: true,
+                    dailyOrderNumber: true,
+                    status: true,
+                    tableId: true,
+                    table: {
+                        select: {
+                            number: true,
+                            status: true
+                        }
+                    },
+                    waiterId: true,
+                    waiter: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    subOrders: {
+                        select: {
+                            id: true,
+                            label: true,
+                            status: true,
+                        }
+                    }
+                }
+            });
+        })
     }
 }
