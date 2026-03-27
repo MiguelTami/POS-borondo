@@ -17,6 +17,9 @@ export class TablesController {
             const tables = await this.service.getTables(filters);
             res.json(tables);
         } catch (error) {
+            if (error.message === "No se encontraron mesas con los filtros proporcionados") {
+                return res.status(404).json({ error: error.message });
+            }
             res.status(500).json({ error: "Failed to fetch tables" });
         }
         
@@ -29,8 +32,10 @@ export class TablesController {
             const table = await this.service.createTable(number);
         res.status(201).json(table);
         } catch (error) {
-            console.error(error.message);
-            res.status(500).json({ error: "Failed to create table" });
+            if (error.message === "La mesa con ese número ya existe") {
+                return res.status(400).json({ error: error.message });
+            }
+            res.status(500).json({error: "Failed to create table" });
         }       
     }
 
@@ -43,6 +48,9 @@ export class TablesController {
             }
             res.json(table);
         } catch (error) {
+            if (error.message === "La mesa no existe") {
+                return res.status(404).json({ error: error.message });
+            }
             res.status(500).json({ error: "Failed to fetch table" });
         }
     }
@@ -52,9 +60,15 @@ export class TablesController {
             const id: number = req.validatedParams.tableId;
             const data: UpdateTableDTO = req.validatedBody;
             const table = await this.service.updateTable(id, data);
+
             res.json(table);
         } catch (error) {
-            console.error(error.message);
+            if (error.message === "La mesa no existe") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "La mesa con ese número ya existe") {
+                return res.status(400).json({ error: error.message });
+            }
             res.status(500).json({ error: "Failed to update table" });
         }
     }
@@ -62,9 +76,15 @@ export class TablesController {
     deleteTable = async (req: Request, res: Response) => {
         try {
             const id: number = req.validatedParams.tableId;
-            await this.service.deleteTable(id);
-            res.status(204).send();
+            const result = await this.service.deleteTable(id);
+            res.status(200).json(result);
         } catch (error) {
+            if (error.message === "La mesa no existe") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "No se puede eliminar una mesa con órdenes asociadas") {
+                return res.status(409).json({ error: error.message });
+            }
             res.status(500).json({ error: "Failed to delete table" });
         }
     }

@@ -8,10 +8,10 @@ import { getTablesQuerySchema } from "../../tables/schema/table.query.schema";
 const router = Router();
 const controller = new TablesController();
 
-router.post("/", validate(createTableSchema), controller.createTable);
+router.post("/", validate(createTableSchema, 'body'), controller.createTable);
 router.get("/", validate(getTablesQuerySchema, 'query'), controller.getTables);
 router.get("/:tableId", validate(tableIdParamSchema, 'params'), controller.getTableById);
-router.patch("/:tableId", validate(tableIdParamSchema, 'params'), validate(updateTableSchema), controller.updateTable);
+router.patch("/:tableId", validate(tableIdParamSchema, 'params'), validate(updateTableSchema, 'body'), controller.updateTable);
 router.delete("/:tableId", validate(tableIdParamSchema, 'params'), controller.deleteTable);
 
 export default router

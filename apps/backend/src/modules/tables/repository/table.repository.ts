@@ -29,7 +29,18 @@ export class TablesRepository {
 
     async getTableById (id: number) {
         return prisma.table.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                _count: {
+                    select: { orders: true }
+                }
+            }
+        })
+    }
+
+    async getTableByNumber (number: number) {
+        return prisma.table.findUnique({
+            where: { number }
         })
     }
 
