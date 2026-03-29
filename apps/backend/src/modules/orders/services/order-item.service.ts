@@ -16,7 +16,7 @@ export class OrderItemService {
     }
 
     async createOrderItem(subOrderId: number, data: CreateItemRequest): Promise<ResponseOrderItem> {
-        const product = await this.productRepository.findProductById(data.productId);
+        const product = await this.productRepository.getProductById(data.productId);
         if (!product) {
             throw new Error("Product not found");
         }
@@ -63,7 +63,7 @@ export class OrderItemService {
         let finalQuantity = orderItem.quantity;
 
         if (data.productId) {
-            const product = await this.productRepository.findProductById(data.productId);
+            const product = await this.productRepository.getProductById(data.productId);
 
             finalUnitPrice = Number(product.price);
             data.unitPriceSnapshot = finalUnitPrice;

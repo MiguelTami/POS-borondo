@@ -93,6 +93,9 @@ export class OrderService {
     async payOrder(id: number): Promise<OrderResponse> {
         const order = await this.getOrderById(id);
 
+        if (order.status === "PAID") {
+            throw new Error("No se puede pagar una orden que ya ha sido pagada");
+        }
         if (order.status !== "SENT_TO_CASHIER") {
             throw new Error("No se puede pagar una orden que ya ha sido cancelada, o que no ha sido enviada al cajero");
         }

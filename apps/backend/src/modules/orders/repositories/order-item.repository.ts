@@ -19,9 +19,9 @@ export class OrderItemRepository {
                 notes: true,
                 unitPriceSnapshot: true,
                 totalPriceSnapshot: true,
-                subOrderId: true,
                 productId: true,
                 product: { select: { name: true } },
+                subOrderId: true,
                 subOrder: { select: { label: true, status: true, orderId: true } }
             }
         });
@@ -42,9 +42,9 @@ export class OrderItemRepository {
                 notes: true,
                 unitPriceSnapshot: true,
                 totalPriceSnapshot: true,
-                subOrderId: true,
                 productId: true,
                 product: { select: { name: true } },
+                subOrderId: true,
                 subOrder: { select: { label: true, status: true, orderId: true } }
             }
         });
@@ -66,9 +66,9 @@ export class OrderItemRepository {
                 notes: true,
                 unitPriceSnapshot: true,
                 totalPriceSnapshot: true,
-                subOrderId: true,
                 productId: true,
                 product: { select: { name: true } },
+                subOrderId: true,
                 subOrder: { select: { label: true, status: true, orderId: true } }
             }
         });
@@ -94,9 +94,9 @@ export class OrderItemRepository {
                 notes: true,
                 unitPriceSnapshot: true,
                 totalPriceSnapshot: true,
-                subOrderId: true,
                 productId: true,
                 product: { select: { name: true } },
+                subOrderId: true,
                 subOrder: { select: { label: true, status: true, orderId: true } }
             }
         });

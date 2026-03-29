@@ -120,7 +120,8 @@ export class OrderController {
                 return res.status(404).json({ error: error.message });
             }
             if (error.message === "No se puede pagar una orden que ya ha sido cancelada, o que no ha sido enviada al cajero" ||
-                error.message === "No se puede pagar una orden que tiene subórdenes que no han sido pagadas o canceladas"
+                error.message === "No se puede pagar una orden que tiene subórdenes que no han sido pagadas o canceladas"||
+                error.message === "No se puede pagar una orden que ya ha sido pagada"
             ) {
                 return res.status(400).json({ error: error.message });
             }
