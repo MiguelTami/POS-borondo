@@ -1,5 +1,4 @@
 import { SubOrderRepository } from "../repositories/sub-order.repository";
-import { OrderRepository } from "../repositories/order.repository";
 import { SubOrderResponse } from "../types/sub-order.types";
 import { OrderService } from "./order.service";
 
@@ -14,13 +13,20 @@ export class SubOrderService {
     }
 
     async createSubOrder(orderId: number, label: string): Promise<SubOrderResponse> {
-        await this.orderService.getOrderById(orderId);
+        const order = await this.orderService.getOrderById(orderId);
+        if (order.status === "CANCELLED" || order.status === "PAID") {
+            throw new Error("No se pueden agregar sub-órdenes a una orden que está cancelada o pagada");
+        }
         return this.subOrderRepository.createSubOrder(orderId, label);
     }
 
     async getSubOrders(orderId: number) {
         await this.orderService.getOrderById(orderId);
-        return this.subOrderRepository.getSubOrders(orderId);
+        const subOrders = await this.subOrderRepository.getSubOrders(orderId);
+        if (subOrders.length === 0) {
+            throw new Error("No se encontraron sub-órdenes para esta orden");
+        }
+        return subOrders;
     }
 
     async getSubOrderById(orderId: number, subOrderId: number) {
@@ -29,35 +35,55 @@ export class SubOrderService {
         if (!subOrder) {
             throw new Error("SubOrden no encontrada");
         }
-        console.log(subOrder.orderId, orderId);
-        if (subOrder.orderId !== orderId) {
+        if (subOrder.order.id !== orderId) {
             throw new Error("SubOrden no pertenece a la orden");
         }
         return subOrder;
     }
 
     async updateSubOrder(orderId: number, subOrderId: number, label: string) {
-        await this.getSubOrderById(orderId, subOrderId);
+        const subOrder = await this.getSubOrderById(orderId, subOrderId);
+        if (subOrder.status !== "OPEN") {
+            throw new Error("No se puede actualizar una sub-orden que ya ha sido pagada, enviada al cajero o cancelada");
+        }
         return this.subOrderRepository.updateSubOrder(subOrderId, label);
     }
 
     async deleteSubOrder(orderId: number, subOrderId: number) {
-        await this.getSubOrderById(orderId, subOrderId);
+        const subOrder = await this.getSubOrderById(orderId, subOrderId);
+        if (subOrder.status === "PAID" || subOrder.status === "SENT_TO_CASHIER") {
+            throw new Error("No se puede eliminar una sub-orden que ya ha sido pagada o enviada al cajero");
+        }
         return this.subOrderRepository.deleteSubOrder(subOrderId);
     }
 
     async sendSubOrderToCashier(orderId: number, subOrderId: number) {
-        await this.getSubOrderById(orderId, subOrderId);
+        const subOrder = await this.getSubOrderById(orderId, subOrderId);
+        if (subOrder.orderItems.length === 0) {
+            throw new Error("No se puede enviar al cajero una sub-orden sin productos");
+        }
+        if (subOrder.status === "SENT_TO_CASHIER") {
+            throw new Error("La sub-orden ya ha sido enviada al cajero");
+        }
+        if (subOrder.status !== "OPEN") {
+            throw new Error("No se puede enviar una sub-orden que ya ha sido cancelada o pagada");
+        }
         return this.subOrderRepository.sendSubOrderToCashier(subOrderId);
     }
 
     async paySubOrder(orderId: number, subOrderId: number) {
-        await this.getSubOrderById(orderId, subOrderId);
+        const subOrder = await this.getSubOrderById(orderId, subOrderId);
+        if (subOrder.status !== "SENT_TO_CASHIER") {
+            throw new Error("No se puede pagar una sub-orden que ya ha sido pagada, cancelada o que no ha sido enviada al cajero");
+        }
         return this.subOrderRepository.paySubOrder(subOrderId);
     }
 
     async cancelSubOrder(orderId: number, subOrderId: number) {
-        await this.getSubOrderById(orderId, subOrderId);
+        const subOrder = await this.getSubOrderById(orderId, subOrderId);
+        if (subOrder.status === "PAID") {
+            throw new Error("No se puede cancelar una sub-orden que ya ha sido pagada");
+        }
         return this.subOrderRepository.cancelSubOrder(subOrderId);
     }
 }

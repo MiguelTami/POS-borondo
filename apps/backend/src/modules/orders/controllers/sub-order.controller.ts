@@ -15,7 +15,9 @@ export class SubOrderController {
 
             res.status(201).json(subOrder);
         } catch (error) {
-            console.error(error.message);
+            if (error.message === "No se pueden agregar sub-órdenes a una orden que está cancelada o pagada") {
+                return res.status(400).json({ error: error.message });
+            }
             if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
@@ -29,7 +31,9 @@ export class SubOrderController {
 
             res.status(200).json(subOrders);
         } catch (error) {
-            console.error(error.message);
+            if (error.message === "No se encontraron sub-órdenes para esta orden") {
+                return res.status(404).json({ error: error.message });
+            }
             if (error.message === "Orden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
@@ -61,7 +65,9 @@ export class SubOrderController {
 
             res.status(200).json(subOrder);
         } catch (error) {
-            console.error(error.message);
+            if (error.message === "No se puede actualizar una sub-orden que ya ha sido pagada, enviada al cajero o cancelada") {
+                return res.status(400).json({ error: error.message });
+            }
             if (error.message === "SubOrden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
@@ -76,9 +82,11 @@ export class SubOrderController {
         try {
             await this.subOrderService.deleteSubOrder(req.validatedParams.orderId, req.validatedParams.subOrderId);
 
-            res.status(200).json({ message: "Sub-order deleted successfully" });
+            res.status(200).json({ message: "La sub-orden fue eliminada exitosamente" });
         } catch (error) {
-            console.error(error.message);
+            if (error.message === "No se puede eliminar una sub-orden que ya ha sido pagada o enviada al cajero") {
+                return res.status(400).json({ error: error.message });
+             }
             if (error.message === "SubOrden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
@@ -96,6 +104,12 @@ export class SubOrderController {
             res.status(200).json(subOrder);
         } catch (error) {
             console.error(error.message);
+            if (error.message === "No se puede enviar una sub-orden que ya ha sido cancelada o pagada" || 
+                error.message === "La sub-orden ya ha sido enviada al cajero" ||
+                error.message === "No se puede enviar al cajero una sub-orden sin productos"
+            ) {
+                return res.status(400).json({ error: error.message });
+            }
             if (error.message === "SubOrden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
@@ -112,7 +126,9 @@ export class SubOrderController {
 
             res.status(200).json(subOrder);
         } catch (error) {
-            console.error(error.message);
+            if (error.message === "No se puede pagar una sub-orden que ya ha sido pagada, cancelada o que no ha sido enviada al cajero") {
+                return res.status(400).json({ error: error.message });
+            }
             if (error.message === "SubOrden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }
@@ -130,7 +146,9 @@ export class SubOrderController {
 
             res.status(200).json(subOrder);
         } catch (error) {
-            console.error(error.message);
+            if (error.message === "No se puede cancelar una sub-orden que ya ha sido pagada") {
+                return res.status(400).json({ error: error.message });
+            }
             if (error.message === "SubOrden no encontrada") {
                 return res.status(404).json({ error: error.message });
             }

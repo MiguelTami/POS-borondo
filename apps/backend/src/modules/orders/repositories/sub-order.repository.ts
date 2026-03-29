@@ -14,6 +14,7 @@ export class SubOrderRepository {
                 status: true,
                 order: {
                     select: {
+                        id: true,
                         dailyOrderNumber: true,
                         businessDate: true,
                         table: {
@@ -40,9 +41,38 @@ export class SubOrderRepository {
             where: {
                 orderId
             },
-            include: {
-                order: true,
-                orderItems: true
+            select: {
+                id: true,
+                label: true,
+                status: true,
+                order: {
+                    select: {
+                        id: true,
+                        dailyOrderNumber: true,
+                        businessDate: true,
+                        table: {
+                            select: {
+                                number: true
+                            }
+                        },
+                        waiter: {
+                            select: {
+                                name: true
+                            }
+                        }
+
+                    }
+                },
+                orderItems: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        notes: true,
+                        totalPriceSnapshot: true,
+                        productId: true,
+                        product: { select: { name: true } }
+                    }
+                }
             }
         });
     }
@@ -52,9 +82,38 @@ export class SubOrderRepository {
             where: {
                 id: subOrderId
             },
-            include: {
-                order: true,
-                orderItems: true
+            select: {
+                id: true,
+                label: true,
+                status: true,
+                order: {
+                    select: {
+                        id: true,
+                        dailyOrderNumber: true,
+                        businessDate: true,
+                        table: {
+                            select: {
+                                number: true
+                            }
+                        },
+                        waiter: {
+                            select: {
+                                name: true
+                            }
+                        }
+
+                    }
+                },
+                orderItems: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        notes: true,
+                        totalPriceSnapshot: true,
+                        productId: true,
+                        product: { select: { name: true } }
+                    }
+                }
             }
         });
     }
@@ -66,6 +125,23 @@ export class SubOrderRepository {
             },
             data: {
                 label
+            },
+            select: {
+                id: true,
+                label: true,
+                status: true,
+                order: {
+                    select: {
+                        id: true,
+                        dailyOrderNumber: true,
+                        businessDate: true,
+                        table: {
+                            select: {
+                                number: true
+                            }
+                        },
+                    }
+                }
             }
         });
     }
@@ -85,6 +161,39 @@ export class SubOrderRepository {
             },
             data: {
                 status: 'SENT_TO_CASHIER'
+            },
+            select: {
+                id: true,
+                label: true,
+                status: true,
+                order: {
+                    select: {
+                        id: true,
+                        dailyOrderNumber: true,
+                        businessDate: true,
+                        table: {
+                            select: {
+                                number: true
+                            }
+                        },
+                        waiter: {
+                            select: {
+                                name: true
+                            }
+                        }
+
+                    }
+                },
+                orderItems: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        notes: true,
+                        totalPriceSnapshot: true,
+                        productId: true,
+                        product: { select: { name: true } }
+                    }
+                }
             }
         });
     }
@@ -96,6 +205,39 @@ export class SubOrderRepository {
             },
             data: {
                 status: 'PAID'
+            },
+            select: {
+                id: true,
+                label: true,
+                status: true,
+                order: {
+                    select: {
+                        id: true,
+                        dailyOrderNumber: true,
+                        businessDate: true,
+                        table: {
+                            select: {
+                                number: true
+                            }
+                        },
+                        waiter: {
+                            select: {
+                                name: true
+                            }
+                        }
+
+                    }
+                },
+                orderItems: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        notes: true,
+                        totalPriceSnapshot: true,
+                        productId: true,
+                        product: { select: { name: true } }
+                    }
+                }
             }
         });
     }
@@ -107,6 +249,39 @@ export class SubOrderRepository {
             },
             data: {
                 status: 'CANCELLED'
+            },
+            select: {
+                id: true,
+                label: true,
+                status: true,
+                order: {
+                    select: {
+                        id: true,
+                        dailyOrderNumber: true,
+                        businessDate: true,
+                        table: {
+                            select: {
+                                number: true
+                            }
+                        },
+                        waiter: {
+                            select: {
+                                name: true
+                            }
+                        }
+
+                    }
+                },
+                orderItems: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        notes: true,
+                        totalPriceSnapshot: true,
+                        productId: true,
+                        product: { select: { name: true } }
+                    }
+                }
             }
         });
     }
