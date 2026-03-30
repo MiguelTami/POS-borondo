@@ -7,7 +7,11 @@ export class TablesRepository {
         const where: any = {
             ...(filters.status && { status: filters.status }),
             ...(filters.number && { number: filters.number }),
-            ...(filters.hasOpenOrder !== undefined && { hasOpenOrder: filters.hasOpenOrder })
+            ...(filters.hasOpenOrder !== undefined && { 
+                orders : filters.hasOpenOrder
+                    ? { some: { status: {in: ["OPEN", "SENT_TO_CASHIER"]} } }
+                    : { none: { status: {in: ["OPEN", "SENT_TO_CASHIER"]} } }
+            })
         };
 
         return prisma.table.findMany({
