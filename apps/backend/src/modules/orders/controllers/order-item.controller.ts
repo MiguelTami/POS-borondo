@@ -12,17 +12,21 @@ export class OrderItemController {
 
     createOrderItem = async (req: Request, res: Response<ResponseOrderItem>) => {
         const subOrderId = req.validatedParams.subOrderId;
+        const orderId = req.validatedParams.orderId;
         const data: CreateItemRequest = req.validatedBody;
 
         try {
-            const orderItem = await this.service.createOrderItem(subOrderId, data);
+            const orderItem = await this.service.createOrderItem(orderId, subOrderId, data);
             
             res.status(201).json(orderItem);
         } catch (error) {
             if (error.message.includes("No hay suficiente stock del ingrediente")) {
                 return res.status(400).json({ error: error.message });
             }
-            if (error.message === "Producto no encontrado") {
+            if (error.message === "Producto no encontrado"||
+                error.message === "SubOrden no encontrada" ||
+                error.message === "SubOrden no pertenece a la orden"||
+                error.message === "No se pueden agregar items a una sub-orden que ya ha sido pagada o enviada al cajero") {
                 return res.status(404).json({ error: error.message });
             }
             res.status(400).json({ error: error.message });
@@ -82,7 +86,11 @@ export class OrderItemController {
 
             res.status(200).json(orderItem);
         } catch (error) {
-            if (error.message === "Order item no encontrada") {
+            if (error.message === "Order item no encontrada" ||
+                error.message === "SubOrden no encontrada" ||
+                error.message === "SubOrden no pertenece a la orden" ||
+                error.message === "No se pueden modificar items a una sub-orden que ya ha sido pagada o enviada al cajero"
+            ) {
                 return res.status(404).json({ error: error.message });
             }
             if (error.message === "Order item no pertenece a la suborden") {
