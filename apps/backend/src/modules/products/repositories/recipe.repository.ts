@@ -13,7 +13,8 @@ export class RecipesRepository{
                 ingredient: {
                     select: {
                         name: true,
-                        unit: true
+                        unit: true,
+                        stock: true
                     }
                 },
                 productId: true,
@@ -36,7 +37,8 @@ export class RecipesRepository{
                 ingredient: {
                     select: {
                         name: true,
-                        unit: true
+                        unit: true,
+                        stock: true
                     }
                 },
                 productId: true,

@@ -1,24 +1,32 @@
 import { OrderItemRepository } from "../repositories/order-item.repository";
 import { SubOrderService } from "./sub-order.service";
-import { ProductsRepository } from "../../products/repositories/product.repository";
+import { RecipesService } from "../../products/services/recipe.service";
+import { ProductsService } from "../../products/services/product.service";
 import { CreateOrderItemDTO, CreateItemRequest, ResponseOrderItem, UpdateOrderItemDTO } from "../types/order-item.types";
 
 export class OrderItemService {
     
     private repository: OrderItemRepository;
-    private productRepository: ProductsRepository;
+    private productService: ProductsService;
     private subOrderService: SubOrderService;
+    private recipesService: RecipesService;
 
     constructor() {
         this.repository = new OrderItemRepository();
-        this.productRepository = new ProductsRepository();
+        this.productService = new ProductsService();
         this.subOrderService = new SubOrderService();
+        this.recipesService = new RecipesService();
     }
 
     async createOrderItem(subOrderId: number, data: CreateItemRequest): Promise<ResponseOrderItem> {
-        const product = await this.productRepository.getProductById(data.productId);
-        if (!product) {
-            throw new Error("Product not found");
+        const product = await this.productService.getProductById(data.productId);
+        const recipes = await this.recipesService.getIngredientsRecipe(data.productId);
+
+        for (const recipe of recipes) {
+            const requiredQuantity = Number(recipe.quantityRequired) * data.quantity;
+            if (Number(recipe.ingredient.stock) < requiredQuantity) {
+                throw new Error(`No hay suficiente stock del ingrediente ${recipe.ingredient.name} para preparar el producto ${product.name}`);
+            }
         }
 
         const unitPrice = Number(product.price);
@@ -63,7 +71,7 @@ export class OrderItemService {
         let finalQuantity = orderItem.quantity;
 
         if (data.productId) {
-            const product = await this.productRepository.getProductById(data.productId);
+            const product = await this.productService.getProductById(data.productId);
 
             finalUnitPrice = Number(product.price);
             data.unitPriceSnapshot = finalUnitPrice;

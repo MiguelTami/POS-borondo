@@ -4,11 +4,11 @@ import { OrderService } from "./order.service";
 
 export class SubOrderService {
 
-    private subOrderRepository: SubOrderRepository;
+    private repository: SubOrderRepository;
     private orderService: OrderService;
 
     constructor() {
-        this.subOrderRepository = new SubOrderRepository();
+        this.repository = new SubOrderRepository();
         this.orderService = new OrderService();
     }
 
@@ -17,12 +17,12 @@ export class SubOrderService {
         if (order.status === "CANCELLED" || order.status === "PAID") {
             throw new Error("No se pueden agregar sub-órdenes a una orden que está cancelada o pagada");
         }
-        return this.subOrderRepository.createSubOrder(orderId, label);
+        return this.repository.createSubOrder(orderId, label);
     }
 
     async getSubOrders(orderId: number) {
         await this.orderService.getOrderById(orderId);
-        const subOrders = await this.subOrderRepository.getSubOrders(orderId);
+        const subOrders = await this.repository.getSubOrders(orderId);
         if (subOrders.length === 0) {
             throw new Error("No se encontraron sub-órdenes para esta orden");
         }
@@ -30,7 +30,7 @@ export class SubOrderService {
     }
 
     async getSubOrderById(orderId: number, subOrderId: number) {
-        const subOrder = await this.subOrderRepository.getSubOrderById(subOrderId);
+        const subOrder = await this.repository.getSubOrderById(subOrderId);
 
         if (!subOrder) {
             throw new Error("SubOrden no encontrada");
@@ -46,7 +46,7 @@ export class SubOrderService {
         if (subOrder.status !== "OPEN") {
             throw new Error("No se puede actualizar una sub-orden que ya ha sido pagada, enviada al cajero o cancelada");
         }
-        return this.subOrderRepository.updateSubOrder(subOrderId, label);
+        return this.repository.updateSubOrder(subOrderId, label);
     }
 
     async deleteSubOrder(orderId: number, subOrderId: number) {
@@ -54,7 +54,7 @@ export class SubOrderService {
         if (subOrder.status === "PAID" || subOrder.status === "SENT_TO_CASHIER") {
             throw new Error("No se puede eliminar una sub-orden que ya ha sido pagada o enviada al cajero");
         }
-        return this.subOrderRepository.deleteSubOrder(subOrderId);
+        return this.repository.deleteSubOrder(subOrderId);
     }
 
     async sendSubOrderToCashier(orderId: number, subOrderId: number) {
@@ -68,7 +68,7 @@ export class SubOrderService {
         if (subOrder.status !== "OPEN") {
             throw new Error("No se puede enviar una sub-orden que ya ha sido cancelada o pagada");
         }
-        return this.subOrderRepository.sendSubOrderToCashier(subOrderId);
+        return this.repository.sendSubOrderToCashier(subOrderId);
     }
 
     async paySubOrder(orderId: number, subOrderId: number) {
@@ -76,7 +76,7 @@ export class SubOrderService {
         if (subOrder.status !== "SENT_TO_CASHIER") {
             throw new Error("No se puede pagar una sub-orden que ya ha sido pagada, cancelada o que no ha sido enviada al cajero");
         }
-        return this.subOrderRepository.paySubOrder(subOrderId);
+        return this.repository.paySubOrder(subOrderId);
     }
 
     async cancelSubOrder(orderId: number, subOrderId: number) {
@@ -84,6 +84,6 @@ export class SubOrderService {
         if (subOrder.status === "PAID") {
             throw new Error("No se puede cancelar una sub-orden que ya ha sido pagada");
         }
-        return this.subOrderRepository.cancelSubOrder(subOrderId);
+        return this.repository.cancelSubOrder(subOrderId);
     }
 }

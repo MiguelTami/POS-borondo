@@ -19,7 +19,10 @@ export class OrderItemController {
             
             res.status(201).json(orderItem);
         } catch (error) {
-            if (error.message === "Product not found") {
+            if (error.message.includes("No hay suficiente stock del ingrediente")) {
+                return res.status(400).json({ error: error.message });
+            }
+            if (error.message === "Producto no encontrado") {
                 return res.status(404).json({ error: error.message });
             }
             res.status(400).json({ error: error.message });
