@@ -26,7 +26,7 @@ export class TablesController {
     }
 
 
-    createTable = async (req: Request, res: Response) => {
+    createTable = async (req: Request, res) => {
         try {
             const number: number = req.validatedBody.number;
             const table = await this.service.createTable(number);
@@ -39,7 +39,7 @@ export class TablesController {
         }       
     }
 
-    getTableById = async (req: Request, res: Response) => {
+    getTableById = async (req: Request, res) => {
         try {
             const id: number = req.validatedParams.tableId;
             const table = await this.service.getTableById(id);

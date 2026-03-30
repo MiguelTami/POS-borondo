@@ -9,7 +9,6 @@ export interface TableResponse {
     id: number;
     number: number;
     status: TableStatus;
-    createdAt: Date;
 }
 
 export interface GetTablesQueryDTO {
@@ -18,6 +17,6 @@ export interface GetTablesQueryDTO {
   status?: TableStatus;
   number?: number;
   hasOpenOrder?: boolean;
-  sortBy?: 'number' | 'status' | 'createdAt';
+  sortBy?: 'number' | 'status';
   sortOrder?: 'asc' | 'desc';
 }

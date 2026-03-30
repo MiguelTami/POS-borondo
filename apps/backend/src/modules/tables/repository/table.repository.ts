@@ -12,6 +12,11 @@ export class TablesRepository {
 
         return prisma.table.findMany({
             where,
+            select: {
+                id: true,
+                number: true,
+                status: true
+            },
             skip: (filters.page - 1) * filters.limit,
             take: filters.limit,
             orderBy: {
@@ -21,20 +26,30 @@ export class TablesRepository {
     }
 
 
-    async createTable (number: number) {
-        return prisma.table.create({
-            data: {number}
+    async createTable (number: number){
+        const result = await prisma.table.create({
+            data: {number},
+            select: {
+                id: true,
+                number: true,
+                status: true
+            }
+
         })
+        return result;
     }
 
     async getTableById (id: number) {
         return prisma.table.findUnique({
             where: { id },
-            include: {
+            select: {
+                id: true,
+                number: true,
+                status: true,
                 _count: {
                     select: { orders: true }
                 }
-            }
+            },
         })
     }
 
@@ -50,6 +65,11 @@ export class TablesRepository {
             data: { 
                 status: data.status,
                 number: data.number 
+            },
+            select: {
+                id: true,
+                number: true,
+                status: true
             }
         })
     }

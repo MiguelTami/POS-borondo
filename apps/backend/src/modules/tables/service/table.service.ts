@@ -17,7 +17,7 @@ export class TablesService {
         return tables;
     }
 
-    async createTable (number: number) {
+    async createTable (number: number){
         const existingTable = await this.repository.getTableByNumber(number);
         if (existingTable) {
             throw new Error("La mesa con ese número ya existe");
