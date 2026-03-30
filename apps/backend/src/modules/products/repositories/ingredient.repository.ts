@@ -6,19 +6,22 @@ export class IngredientsRepository {
     async getActiveIngredients () {
         return prisma.ingredient.findMany({
             where: {isActive: true},
-            orderBy: {name: 'asc'}
+            orderBy: {name: 'asc'},
+            select: {id: true, name: true, unit: true, stock: true, minStockAlert: true}
         })
     }
 
     async getAllIngredients () {
         return prisma.ingredient.findMany({
-            orderBy: {name: 'asc'}
+            orderBy: {name: 'asc'},
+            select: {id: true, name: true, unit: true, stock: true, minStockAlert: true, isActive: true}
         })
     }
 
     async getIngredientById (id: number) {
         return prisma.ingredient.findUnique({
-            where: {id}
+            where: {id},
+            select: {id: true, name: true, unit: true, stock: true, minStockAlert: true, isActive: true}
         })
     }
 
@@ -36,14 +39,16 @@ export class IngredientsRepository {
                 stock: data.stock || 0,
                 minStockAlert: data.minStockAlert,
                 isActive: true
-            }
+            },
+            select: {id: true, name: true, unit: true, stock: true, minStockAlert: true, isActive: true}
         })
     }
 
     async updateIngredient (id: number, data: UpdateIngredientDTO) {
         return prisma.ingredient.update({
             where: {id},
-            data: data
+            data,
+            select: {id: true, name: true, unit: true, stock: true, minStockAlert: true, isActive: true}
         })
     }
 
