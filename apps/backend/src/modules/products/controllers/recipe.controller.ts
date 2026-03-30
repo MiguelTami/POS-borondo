@@ -43,7 +43,8 @@ export class RecipesController {
             if (error.message === 'El ingrediente está inactivo' || 
                 error.message === 'Ingrediente no encontrado' || 
                 error.message === 'El producto está inactivo' ||
-                error.message === 'Producto no encontrado') {
+                error.message === 'Producto no encontrado' ||
+                error.message === 'El ingrediente ya forma parte de la receta de este producto') {
                 return res.status(400).json({ message: error.message });
             }
             res.status(500).json({
@@ -63,7 +64,8 @@ export class RecipesController {
         } catch (error) {
             if (error.message === 'El ingrediente está inactivo' ||
                 error.message === 'Ingrediente no encontrado' ||
-                error.message === 'Receta no encontrada') {
+                error.message === 'Receta no encontrada' ||
+                error.message === 'El ingrediente ya forma parte de la receta de este producto') {
                 return res.status(400).json({ message: error.message });
             }
             console.error(error.message)

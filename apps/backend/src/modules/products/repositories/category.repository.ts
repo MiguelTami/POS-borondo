@@ -5,13 +5,15 @@ export class CategoriesRepository {
         return prisma.category.create({
             data: {name, 
                 isActive: true
-            }
+            },
+            select: {id: true, name: true, isActive: true}
         })
     }
 
     async getCategoryById (id: number) {
         return prisma.category.findUnique({
-            where: {id}
+            where: {id},
+            select: {id: true, name: true, isActive: true}
         })
     }
 
@@ -24,20 +26,23 @@ export class CategoriesRepository {
     async getActiveCategories () {
         return prisma.category.findMany({
             where: { isActive: true },
-            orderBy: {name: 'asc'}
+            orderBy: {name: 'asc'},
+            select: {id: true, name: true}
         })
     }
 
     async getAllCategories () {
         return prisma.category.findMany({
-            orderBy: {name: 'asc'}
+            orderBy: {name: 'asc'},
+            select: {id: true, name: true, isActive: true}
         })
     }
 
     async updateCategory (id: number, name: string)  {
         return prisma.category.update({
             where: {id},
-            data: {name}
+            data: {name},
+            select: {id: true, name: true, isActive: true}
         })
     }
 

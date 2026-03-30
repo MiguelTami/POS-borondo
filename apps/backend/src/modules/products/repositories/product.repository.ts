@@ -4,7 +4,7 @@ import { CreateProductDTO, UpdateProductDTO, GetProductQueryDTO } from '../types
 
 export class ProductsRepository {
 
-    async getActiveCategories(filters: GetProductQueryDTO) {
+    async getProducts(filters: GetProductQueryDTO) {
         const where: Prisma.ProductWhereInput = {
             ...(filters.categoryId && {
             categoryId: filters.categoryId
@@ -23,8 +23,17 @@ export class ProductsRepository {
         }
         return prisma.product.findMany({
             where,
-            include: {
-                category: true,
+            select: {
+                id: true,
+                name: true,
+                price: true,
+                isActive: true,
+                categoryId: true,
+                category: {
+                    select: {
+                        name: true
+                    }
+                }
             },
             orderBy: {
                 name: 'asc',
@@ -41,8 +50,17 @@ export class ProductsRepository {
     async getProductById(id: number) {
         return prisma.product.findUnique({
             where: {id},
-            include: {
-                category: true,
+            select: {
+                id: true,
+                name: true,
+                price: true,
+                isActive: true,
+                categoryId: true,
+                category: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
     }
@@ -55,9 +73,19 @@ export class ProductsRepository {
                 categoryId: data.categoryId,
                 isActive: true
             },
-            include: {
-                category: true
+            select: {
+                id: true,
+                name: true,
+                price: true,
+                isActive: true,
+                categoryId: true,
+                category: {
+                    select: {
+                        name: true
+                    }
+                }
             }
+
         })
     }
 
@@ -87,8 +115,17 @@ export class ProductsRepository {
         return prisma.product.update({
             where: {id: productId},
             data,
-            include: {
-                category: true
+            select: {
+                id: true,
+                name: true,
+                price: true,
+                isActive: true,
+                categoryId: true,
+                category: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
     }

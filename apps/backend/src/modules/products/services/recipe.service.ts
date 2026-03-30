@@ -54,47 +54,40 @@ export class RecipesService {
         if (!ingredient.isActive) {
             throw new Error('El ingrediente está inactivo');
         }
+
+        const recipe = await this.repository.getIngredientsRecipe(productId);
+        const ingredientAlreadyInRecipe = recipe.some(r => r.ingredientId === data.ingredientId);
+
+        if (ingredientAlreadyInRecipe) {
+            throw new Error('El ingrediente ya forma parte de la receta de este producto');
+        }
+
         const ingredientRecipe = await this.repository.createIngredientRecipe(productId, data)
 
-        return {
-            product: {
-                id: ingredientRecipe.product.id,
-                name: ingredientRecipe.product.name
-            },
-            ingredient: {
-                id: ingredientRecipe.ingredient.id,
-                name: ingredientRecipe.ingredient.name,
-                unit: ingredientRecipe.ingredient.unit
-            },
-            quantityRequired: ingredientRecipe.quantityRequired
-        }
+        return ingredientRecipe
     };
 
     async updateIngredientRecipe(recipeId: number, data: UpdateRecipeDTO): Promise<RecipeResponse> {
 
-        await this.getRecipeById(recipeId);
+        const currentRecipe = await this.getRecipeById(recipeId);
         
-        if (data.ingredientId !== undefined) {
+        if (data.ingredientId !== undefined && data.ingredientId !== currentRecipe.ingredientId) {
             const ingredient = await this.ingredientService.getIngredientById(data.ingredientId);
             if (!ingredient || !ingredient.isActive) {
                 throw new Error('El ingrediente está inactivo');
+            }
+
+            const productRecipes = await this.repository.getIngredientsRecipe(currentRecipe.productId);
+            const ingredientAlreadyInRecipe = productRecipes.some(r => r.ingredientId === data.ingredientId);
+
+            if (ingredientAlreadyInRecipe) {
+                throw new Error('El ingrediente ya forma parte de la receta de este producto');
             }
         }
 
         const recipeUpdated = await this.repository.updateIngredientRecipe(recipeId, data)
 
-        return {
-            product: {
-                id: recipeUpdated.product.id,
-                name: recipeUpdated.product.name
-            },
-            ingredient: {
-                id: recipeUpdated.ingredient.id,
-                name: recipeUpdated.ingredient.name,
-                unit: recipeUpdated.ingredient.unit
-            },
-            quantityRequired: recipeUpdated.quantityRequired
-        }
+        return recipeUpdated
 
     }
 

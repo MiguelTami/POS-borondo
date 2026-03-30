@@ -19,7 +19,7 @@ export class ProductsService {
     }
 
     async getProducts(filters: GetProductQueryDTO) {
-        const products = await this.repository.getActiveCategories(filters);
+        const products = await this.repository.getProducts(filters);
 
         if (products.length === 0) {
             throw new Error('No se encontraron productos con los filtros proporcionados');
@@ -53,14 +53,8 @@ export class ProductsService {
         const product = await this.repository.createProduct(data);
 
         return {
-            id: product.id,
-            name: product.name,
-            price: Number(product.price),
-            isActive: product.isActive,
-            category: {
-                id: product.category.id,
-                name: product.category.name
-            }
+            ...product,
+            price: Number(product.price)
         }
     }
 
@@ -114,14 +108,8 @@ export class ProductsService {
         const updatedProduct = await this.repository.updateProduct(productId, data);
 
         return {
-            id: updatedProduct.id,
-            name: updatedProduct.name,
-            price: Number(updatedProduct.price),
-            isActive: updatedProduct.isActive,
-            category: {
-                id: updatedProduct.category.id,
-                name: updatedProduct.category.name
-            }
+            ...updatedProduct,
+            price: Number(updatedProduct.price)
         }
     }
 }

@@ -15,8 +15,8 @@ export interface ProductResponse {
   name: string;
   price: number;
   isActive: boolean;
+  categoryId: number;
   category: {
-    id: number;
     name: string;
   };
 }

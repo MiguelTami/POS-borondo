@@ -11,16 +11,17 @@ export interface UpdateRecipeDTO {
 }
 
 export interface RecipeResponse {
-    product: {
-        id: number,
-        name: string
-    },
+    id: number,
+    quantityRequired: number | Decimal,
+    ingredientId: number,
     ingredient: {
-        id: number,
         name: string,
         unit: string
     },
-    quantityRequired: number | Decimal
+    productId: number,
+    product: {
+        name: string
+    }
 }
 
 export interface DeleteRecipe {

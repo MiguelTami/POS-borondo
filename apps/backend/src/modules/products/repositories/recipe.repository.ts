@@ -5,15 +5,46 @@ export class RecipesRepository{
 
     async getRecipeById(id: number) {
         return prisma.recipe.findUnique({
-            where: {id}
+            where: {id},
+            select: {
+                id: true,
+                quantityRequired: true,
+                ingredientId: true,
+                ingredient: {
+                    select: {
+                        name: true,
+                        unit: true
+                    }
+                },
+                productId: true,
+                product: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
         })
     }
 
     async getIngredientsRecipe(productId: number) {
         return prisma.recipe.findMany({
             where: {productId},
-            include: {
-                ingredient: true
+            select: {
+                id: true,
+                quantityRequired: true,
+                ingredientId: true,
+                ingredient: {
+                    select: {
+                        name: true,
+                        unit: true
+                    }
+                },
+                productId: true,
+                product: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
     }
@@ -25,9 +56,22 @@ export class RecipesRepository{
                 ingredientId: data.ingredientId,
                 quantityRequired: data.quantityRequired
             },
-            include: {
-                ingredient: true,
-                product: true
+            select: {
+                id: true,
+                quantityRequired: true,
+                ingredientId: true,
+                ingredient: {
+                    select: {
+                        name: true,
+                        unit: true
+                    }
+                },
+                productId: true,
+                product: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
     }
@@ -36,9 +80,22 @@ export class RecipesRepository{
         return prisma.recipe.update({
             where: {id: recipeId},
             data: data,
-            include: {
-                ingredient: true,
-                product: true
+            select: {
+                id: true,
+                quantityRequired: true,
+                ingredientId: true,
+                ingredient: {
+                    select: {
+                        name: true,
+                        unit: true
+                    }
+                },
+                productId: true,
+                product: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
     }
