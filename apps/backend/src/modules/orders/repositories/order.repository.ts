@@ -5,6 +5,11 @@ export class OrderRepository {
 
     async createOrder(data: CreateOrderDTO, businessDate: Date) {
         return prisma.$transaction(async (tx) => {
+        await tx.table.update({
+            where: { id: data.tableId },
+            data: { status: "OCCUPIED" }
+        });
+
         const counter = await tx.dailyOrderCounter.upsert({
             where: { businessDate },
             update: { lastOrderNumber: { increment: 1 } },
@@ -195,6 +200,11 @@ export class OrderRepository {
                 throw new Error("No se puede pagar una orden que tiene subórdenes que no han sido pagadas o canceladas");
             }
 
+            await tx.table.update({
+                where: { id: order.tableId },
+                data: { status: "AVAILABLE" }
+            });
+
             return tx.order.update({
                 where: { id },
                 data: { status: "PAID" },
@@ -229,6 +239,17 @@ export class OrderRepository {
 
     async cancelOrder(id: number) {
         return prisma.$transaction(async (tx) => {
+            const order = await tx.order.findUnique({
+                where: { id },
+                select: { tableId: true }
+            })
+
+            if (order) {
+                await tx.table.update({
+                    where: { id: order.tableId },
+                    data: { status: "AVAILABLE" }
+                });
+            } 
             await tx.subOrder.updateMany({
                 where: { 
                     orderId: id,
