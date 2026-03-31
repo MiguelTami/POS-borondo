@@ -41,6 +41,15 @@ export class SubOrderService {
         return subOrder;
     }
 
+    async getSubOrderByIdOnly(subOrderId: number) {
+        const subOrder = await this.repository.getSubOrderById(subOrderId);
+
+        if (!subOrder) {
+            throw new Error("SubOrden no encontrada");
+        }
+        return subOrder;
+    }
+
     async updateSubOrder(orderId: number, subOrderId: number, label: string) {
         const subOrder = await this.getSubOrderById(orderId, subOrderId);
         if (subOrder.status !== "OPEN") {

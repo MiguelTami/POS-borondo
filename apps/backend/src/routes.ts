@@ -5,6 +5,7 @@ import recipeRoutes from "./modules/products/routes/recipe.routes";
 import categoryRoutes from "./modules/products/routes/category.routes";
 import tableRoutes from "./modules/tables/routes/table.routes";
 import orderRoutes from "./modules/orders/routes/order.routes";
+import paymentRoutes from "./modules/payments/routes/payment.routes";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use("/tables", tableRoutes);
 router.use("/recipes", recipeRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/orders", orderRoutes)
+router.use("/payments", paymentRoutes)
 
 export default router;
