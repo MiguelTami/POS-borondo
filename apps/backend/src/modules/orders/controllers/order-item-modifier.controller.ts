@@ -22,7 +22,9 @@ export class OrderItemModifierController {
 
             res.status(201).json(result);
         } catch (error) {
-            if (error.message === "Ingrediente no encontrado" || error.message === "Order item no encontrada") {
+            if (error.message === "Ingrediente no encontrado" || 
+                error.message === "Order item no encontrada" || 
+                error.message === "No se pueden agregar modificaciones a una sub-orden que ya ha sido pagada o enviada al cajero") {
                 return res.status(404).json({ error: error.message });
             }
             if (error.message === "No hay suficiente stock del ingrediente para agregar esta modificación") {
@@ -89,7 +91,8 @@ export class OrderItemModifierController {
 
             res.json(result);
         } catch (error) {
-            if (error.message === "Order item modifier no encontrada") {
+            if (error.message === "Order item modifier no encontrada" || 
+                error.message === "No se pueden modificar las modificaciones de una sub-orden que ya ha sido pagada o enviada al cajero") {
                 return res.status(404).json({ error: error.message });
             }
             if (error.message === "Order item modifier no pertenece al order item" || error.message === "Order item modifier no pertenece a la suborden" || error.message === "Order item modifier no pertenece a la orden") {
@@ -113,7 +116,8 @@ export class OrderItemModifierController {
             
             res.status(204).end();
         } catch (error) {
-            if (error.message === "Order item modifier no encontrada") {
+            if (error.message === "Order item modifier no encontrada" || 
+                error.message === "No se pueden eliminar las modificaciones de una sub-orden que ya ha sido pagada o enviada al cajero") {
                 return res.status(404).json({ error: error.message });
             }
             if (error.message === "Order item modifier no pertenece al order item" || error.message === "Order item modifier no pertenece a la suborden" || error.message === "Order item modifier no pertenece a la orden") {

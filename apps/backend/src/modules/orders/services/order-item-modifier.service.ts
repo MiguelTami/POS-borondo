@@ -17,8 +17,11 @@ export class OrderItemModifierService {
 
     async createOrderItemModifier(orderItemId: number, orderId: number, subOrderId: number, data: CreateOrderItemModifier): Promise<OrderItemModifierResponse> {
         const ingredient = await this.ingredientsService.getIngredientById(data.ingredientId)
-        await this.orderItemsService.getOrderItemById(orderItemId, orderId, subOrderId);
+        const orderItem = await this.orderItemsService.getOrderItemById(orderItemId, orderId, subOrderId);
 
+        if (orderItem.subOrder.status === "PAID" || orderItem.subOrder.status === "SENT_TO_CASHIER") {
+            throw new Error("No se pueden agregar modificaciones a una sub-orden que ya ha sido pagada o enviada al cajero");
+        }
         if (!ingredient) {
             throw new Error('Ingrediente no encontrado')
         }
@@ -55,6 +58,11 @@ export class OrderItemModifierService {
     async updateOrderItemModifier(id: number, orderItemId: number, orderId: number, subOrderId: number, data: UpdateOrderItemModifier): Promise<OrderItemModifierResponse> {
         const orderItemModifier = await this.getOrderItemModifierById(id, orderItemId, orderId, subOrderId);
         const ingredient = await this.ingredientsService.getIngredientById(data.ingredientId || orderItemModifier.ingredientId);
+        const orderItem = await this.orderItemsService.getOrderItemById(orderItemId, orderId, subOrderId);
+
+        if (orderItem.subOrder.status === "PAID" || orderItem.subOrder.status === "SENT_TO_CASHIER") {
+            throw new Error("No se pueden modificar las modificaciones de una sub-orden que ya ha sido pagada o enviada al cajero");
+        }
         if (Number(data.quantity) > Number(ingredient.stock)) {
             throw new Error('No hay suficiente stock del ingrediente para agregar esta modificación')
         } 
@@ -62,6 +70,12 @@ export class OrderItemModifierService {
     }
 
     async deleteOrderItemModifier(id: number, orderItemId: number, orderId: number, subOrderId: number) {
+        const orderItem = await this.orderItemsService.getOrderItemById(orderItemId, orderId, subOrderId);
+
+        if (orderItem.subOrder.status === "PAID" || orderItem.subOrder.status === "SENT_TO_CASHIER") {
+            throw new Error("No se pueden eliminar las modificaciones de una sub-orden que ya ha sido pagada o enviada al cajero");
+        }
+
         await this.getOrderItemModifierById(id, orderItemId, orderId, subOrderId);
         return this.repository.deleteOrderItemModifier(id);
     }
