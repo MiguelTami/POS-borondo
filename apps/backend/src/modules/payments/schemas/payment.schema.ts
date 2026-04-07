@@ -5,3 +5,7 @@ export const CreatePaymentSchema = z.object({
     shiftId: z.number().int().positive(),
     method: z.enum(['CASH', 'CARD', 'MOBILE_PAYMENT']),
 }).strict();
+
+export const UpdatePaymentSchema = z.object({
+    method: z.enum(['CASH', 'CARD', 'MOBILE_PAYMENT'])
+}).strict();

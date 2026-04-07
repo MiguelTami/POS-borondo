@@ -4,10 +4,10 @@ import { CreatePaymentDTO } from "../types/payment.types";
 
 export class PaymentController {
 
-    private paymentService: PaymentService;
+    private service: PaymentService;
 
     constructor() {
-        this.paymentService = new PaymentService();
+        this.service = new PaymentService();
     }
 
     createPayment = async (req: Request, res: Response) => {
@@ -16,16 +16,78 @@ export class PaymentController {
         const shiftId = rawData.shiftId;
         const method = rawData.method
         try {
-            const payment = await this.paymentService.createPayment(subOrderId, shiftId, method);
+            const payment = await this.service.createPayment(subOrderId, shiftId, method);
             res.status(201).json(payment);
         } catch (error) {
             console.error("Error al crear el pago:", error.message);
             if (error.message === "No se pueden agregar pagos a una sub-orden que está cancelada o pagada" || 
-                error.message === "No se pueden agregar pagos a una sub-orden que no ha sido enviada al cajero"||
-                error.message === "SubOrden no encontrada") {
+                error.message === "No se pueden agregar pagos a una sub-orden que no ha sido enviada al cajero") {
                 return res.status(400).json({ error: error.message });
             }
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
             res.status(500).json({ error: 'Error al crear el pago' });
+        }
+    }
+
+    getPaymentById = async (req: Request, res: Response) => {
+        const paymentId = req.validatedParams.paymentId;
+        try {
+            const payment = await this.service.getPaymentById(paymentId);
+            res.status(200).json(payment);
+        } catch (error) {
+            console.error("Error al obtener el pago:", error.message);
+            if (error.message === "Pago no encontrado") {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(500).json({ error: 'Error al obtener el pago' });
+        }
+    }
+
+    getPaymentBySubOrder = async (req: Request, res: Response) => {
+        const subOrderId = req.validatedParams.subOrderId;
+        try {
+            const payment = await this.service.getPaymentBySubOrder(subOrderId);
+            res.status(200).json(payment);
+        } catch (error) {
+            console.error("Error al obtener el pago:", error.message);
+            if (error.message === "Pago no encontrado" || error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(500).json({ error: 'Error al obtener el pago' });
+        }
+    }
+
+    updatePayment = async (req: Request, res: Response) => {
+        const paymentId = req.validatedParams.paymentId;
+        const method = req.validatedBody.method;
+        try {
+            const payment = await this.service.updatePayment(paymentId, method);
+            res.status(200).json(payment);
+        } catch (error) {
+            console.error("Error al actualizar el pago:", error.message);
+            if (error.message === "Pago no encontrado") {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(500).json({ error: 'Error al actualizar el pago' });
+        }
+    }
+
+    deletePayment = async (req: Request, res: Response) => {
+        const paymentId = req.validatedParams.paymentId;
+        try {
+            await this.service.deletePayment(paymentId);
+            res.status(200).json({ message: 'Pago eliminado correctamente' });
+        } catch (error) {
+            console.error("Error al eliminar el pago:", error.message);
+            if (error.message === "Pago no encontrado") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "No se pueden eliminar pagos de una orden que ya ha sido pagada o cancelada") {
+                return res.status(400).json({ error: error.message });
+            }
+            res.status(500).json({ error: 'Error al eliminar el pago' });
         }
     }
 }

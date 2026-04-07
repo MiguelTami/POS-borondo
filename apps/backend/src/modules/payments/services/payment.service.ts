@@ -5,11 +5,11 @@ import { SubOrderService } from "../../orders/services/sub-order.service";
 
 export class PaymentService {
 
-    private paymentRepository: PaymentRepository;
+    private repository: PaymentRepository;
     private subOrderService: SubOrderService;
 
     constructor() {
-        this.paymentRepository = new PaymentRepository();
+        this.repository = new PaymentRepository();
         this.subOrderService = new SubOrderService();
     }
 
@@ -33,6 +33,39 @@ export class PaymentService {
             method: method as PaymentMethod
         };
         
-        return await this.paymentRepository.createPayment(subOrderId, shiftId, data);
+        return await this.repository.createPayment(subOrderId, shiftId, data);
     }
+
+    async getPaymentById(paymentId: number) {
+        const payment = await this.repository.getPaymentById(paymentId);
+        if (!payment) {
+            throw new Error("Pago no encontrado");
+        }
+        return payment;
+    }
+
+    async getPaymentBySubOrder(subOrderId: number) {
+        await this.subOrderService.getSubOrderByIdOnly(subOrderId);
+        const payment = await this.repository.getPaymentBySubOrder(subOrderId);
+        if (!payment) {
+            throw new Error("Pago no encontrado");
+        }
+        return payment;
+    }
+
+    async updatePayment(paymentId: number, method: PaymentMethod) {
+        await this.getPaymentById(paymentId);
+        
+        return await this.repository.updatePayment(paymentId, method);
+
+    }
+
+    async deletePayment(paymentId: number) {
+        const payment = await this.getPaymentById(paymentId);
+        if (payment.subOrder.order.status === "PAID" || payment.subOrder.order.status === "CANCELLED") {
+            throw new Error("No se pueden eliminar pagos de una orden que ya ha sido pagada o cancelada");
+        }
+
+        return await this.repository.deletePayment(paymentId, payment.subOrderId);
+    }     
 }
