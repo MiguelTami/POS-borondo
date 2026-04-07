@@ -39,3 +39,7 @@ export const modifierIdParamSchema = z.object({
 export const paymentIdParamSchema = z.object({
   paymentId: z.coerce.number().int().positive()
 })
+
+export const userIdParamSchema = z.object({
+  userId: z.coerce.number().int().positive()
+})
