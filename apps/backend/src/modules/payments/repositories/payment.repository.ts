@@ -1,8 +1,52 @@
 import { prisma } from "../../../config/prisma";
-import { PaymentMethod } from "@prisma/client";
-import { CreatePaymentDTO } from "../types/payment.types";
+import { Prisma, PaymentMethod } from "@prisma/client";
+import { CreatePaymentDTO, GetPaymentsFilters } from "../types/payment.types";
 
 export class PaymentRepository {
+
+    async getPayments(filters: GetPaymentsFilters) {
+        const where: Prisma.PaymentWhereInput = {};
+
+        if (filters.shiftId) where.shiftId = filters.shiftId;
+        if (filters.method) where.method = filters.method;
+        if (filters.cashierId) where.cashierId = filters.cashierId;
+
+        // Filtros de fecha
+        if (filters.startDate || filters.endDate) {
+            where.createdAt = {};
+            if (filters.startDate) where.createdAt.gte = filters.startDate;
+            if (filters.endDate) where.createdAt.lte = filters.endDate;
+        }
+
+        // Filtro por orden general
+        if (filters.orderId) {
+            where.subOrder = {
+                orderId: filters.orderId
+            };
+        }
+
+        return prisma.payment.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                cashier: { select: { id: true, name: true } },
+                subOrder: {
+                    select: {
+                        id: true,
+                        label: true,
+                        order: {
+                            select: {
+                                id: true,
+                                dailyOrderNumber: true,
+                                businessDate: true,
+                                table: { select: { number: true } }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     async createPayment(subOrderId: number, shiftId: number, data: CreatePaymentDTO) {
         return prisma.$transaction(async (tx) => {

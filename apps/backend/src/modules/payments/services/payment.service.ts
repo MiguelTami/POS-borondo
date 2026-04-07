@@ -1,5 +1,5 @@
 import { PaymentRepository } from "../repositories/payment.repository";
-import { CreatePaymentDTO } from "../types/payment.types";
+import { CreatePaymentDTO, GetPaymentsFilters } from "../types/payment.types";
 import { PaymentMethod } from "@prisma/client";
 import { SubOrderService } from "../../orders/services/sub-order.service";
 
@@ -11,6 +11,13 @@ export class PaymentService {
     constructor() {
         this.repository = new PaymentRepository();
         this.subOrderService = new SubOrderService();
+    }
+
+    async getPayments(filters: GetPaymentsFilters) {
+        if (filters.startDate && filters.endDate && filters.startDate > filters.endDate) {
+            throw new Error("La fecha de inicio no puede ser mayor que la fecha de fin");
+        }
+        return await this.repository.getPayments(filters);
     }
 
     async createPayment(subOrderId: number, shiftId: number, method: string) {

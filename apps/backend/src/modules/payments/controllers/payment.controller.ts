@@ -10,6 +10,20 @@ export class PaymentController {
         this.service = new PaymentService();
     }
 
+    getPayments = async (req: Request, res: Response) => {
+        try {
+            const filters = req.validatedQuery;
+            const payments = await this.service.getPayments(filters);
+            res.status(200).json(payments);
+        } catch (error) {
+            console.error("Error al obtener los pagos:", error.message);
+            if (error.message === "La fecha de inicio no puede ser mayor que la fecha de fin") {
+                return res.status(400).json({ error: error.message });
+            }
+            res.status(500).json({ error: 'Error al obtener los pagos' });
+        }
+    }
+
     createPayment = async (req: Request, res: Response) => {
         const rawData = req.validatedBody;
         const subOrderId = rawData.subOrderId;
