@@ -5,3 +5,14 @@ export interface CreateUserDTO {
     password: string;
     role: Role;
 }
+
+export interface UpdateUserDTO {
+    name?: string;
+    password?: string;
+    role?: Role;
+}
+
+export interface GetUsersQueryDTO {
+    role?: Role;
+    isActive?: boolean;
+}

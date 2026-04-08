@@ -1,5 +1,5 @@
 import { UserRepository } from "../repositories/user.repository";
-import { CreateUserDTO } from "../types/user.types";
+import { CreateUserDTO, UpdateUserDTO, GetUsersQueryDTO } from "../types/user.types";
 import bcrypt from "bcrypt";
 
 export class UserService {
@@ -25,5 +25,43 @@ export class UserService {
         };
 
         return await this.repository.createUser(userData);
+    }
+
+    async getUsers(filters: GetUsersQueryDTO) {
+        return await this.repository.getUsers(filters);
+    }
+
+    async getUserById(id: number) {
+        const user = await this.repository.getUserById(id);
+
+        if (!user) {
+            throw new Error("Usuario no encontrado");
+        }
+
+        return user;
+    }
+
+    async updateUser(id: number, data: UpdateUserDTO) {
+        await this.getUserById(id);
+
+        const updateData: UpdateUserDTO = { ...data };
+
+        if (updateData.password) {
+            updateData.password = await bcrypt.hash(updateData.password, 10);
+        }
+
+        return await this.repository.updateUser(id, updateData);
+    }
+
+    async deactivateUser(id: number) {
+        await this.getUserById(id);
+        
+        return await this.repository.updateUserStatus(id, false);
+    }
+
+    async activateUser(id: number) {
+        await this.getUserById(id);
+        
+        return await this.repository.updateUserStatus(id, true);
     }
 }
