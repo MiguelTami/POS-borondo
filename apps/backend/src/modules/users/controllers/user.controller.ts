@@ -60,6 +60,9 @@ export class UserController {
             res.status(200).json(user);
         } catch (error) {
             console.error("Error al actualizar el usuario:", error.message);
+            if (error.message === "El nombre de usuario ya está en uso") {
+                return res.status(409).json({ error: error.message });
+            }
             if (error.message === "Usuario no encontrado") {
                 return res.status(404).json({ error: error.message });
             }

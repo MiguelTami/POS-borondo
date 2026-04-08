@@ -44,6 +44,13 @@ export class UserService {
     async updateUser(id: number, data: UpdateUserDTO) {
         await this.getUserById(id);
 
+        if (data.name) {
+            const existingUser = await this.repository.getUserByName(data.name);
+            if (existingUser && existingUser.id !== id) {
+                throw new Error("El nombre de usuario ya está en uso");
+            }
+        }
+
         const updateData: UpdateUserDTO = { ...data };
 
         if (updateData.password) {
