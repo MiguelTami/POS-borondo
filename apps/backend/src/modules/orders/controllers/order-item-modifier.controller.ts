@@ -10,7 +10,7 @@ export class OrderItemModifierController {
         this.service = new OrderItemModifierService();
     }
 
-    createOrderItemModifier = async (req: Request, res: Response<OrderItemModifierResponse>) => {
+    createOrderItemModifier = async (req: Request, res: Response) => {
         const orderId= req.validatedParams.orderId;
         const subOrderId = req.validatedParams.subOrderId;
         const orderItemId = req.validatedParams.itemId;
@@ -37,7 +37,7 @@ export class OrderItemModifierController {
         }
     }
 
-    getOrderItemModifiers = async (req: Request, res: Response<OrderItemModifierResponse[]>) => {
+    getOrderItemModifiers = async (req: Request, res: Response) => {
         const orderId= req.validatedParams.orderId;
         const subOrderId = req.validatedParams.subOrderId;
         const orderItemId = req.validatedParams.itemId;
@@ -57,7 +57,7 @@ export class OrderItemModifierController {
         }
     }
 
-    getOrderItemModifierById = async (req: Request, res: Response<OrderItemModifierResponse>) => {
+    getOrderItemModifierById = async (req: Request, res: Response) => {
         const orderId= req.validatedParams.orderId;
         const subOrderId = req.validatedParams.subOrderId;
         const orderItemId = req.validatedParams.itemId;
@@ -78,7 +78,7 @@ export class OrderItemModifierController {
         }
     }
 
-    updateOrderItemModifier = async (req: Request, res: Response<OrderItemModifierResponse>) => {
+    updateOrderItemModifier = async (req: Request, res: Response) => {
         const orderId= req.validatedParams.orderId;
         const subOrderId = req.validatedParams.subOrderId;
         const orderItemId = req.validatedParams.itemId;

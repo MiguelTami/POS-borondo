@@ -102,7 +102,7 @@ export class OrderItemModifierRepository {
         }));
     }
 
-    async getOrderItemModifierById(id: number): Promise<OrderItemModifierResponse> {
+    async getOrderItemModifierById(id: number): Promise<OrderItemModifierResponse | null> {
         const orderItemModifier = await prisma.orderItemModifier.findUnique({
             where: {
                 id

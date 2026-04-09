@@ -194,6 +194,10 @@ export class OrderRepository {
                 }
             })
 
+            if (!order) {
+                throw new Error(`Order with ID ${id} not found.`);
+            }
+
             const hasUnpaidSubOrders = order.subOrders.some(subOrder => subOrder.status !== "PAID" && subOrder.status !== "CANCELLED");
 
             if (hasUnpaidSubOrders) {

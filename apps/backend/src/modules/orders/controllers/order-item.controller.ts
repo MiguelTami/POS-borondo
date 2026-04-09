@@ -10,7 +10,7 @@ export class OrderItemController {
         this.service = new OrderItemService();
     }
 
-    createOrderItem = async (req: Request, res: Response<ResponseOrderItem>) => {
+    createOrderItem = async (req: Request, res: Response) => {
         const subOrderId = req.validatedParams.subOrderId;
         const orderId = req.validatedParams.orderId;
         const data: CreateItemRequest = req.validatedBody;
@@ -33,7 +33,7 @@ export class OrderItemController {
         }
     }
 
-    getOrderItems = async (req: Request, res: Response<ResponseOrderItem[]>) => {
+    getOrderItems = async (req: Request, res: Response) => {
         const subOrderId = req.validatedParams.subOrderId;
         const orderId = req.validatedParams.orderId;
 
@@ -52,7 +52,7 @@ export class OrderItemController {
         }    
     }
 
-    getOrderItemById = async (req: Request, res: Response<ResponseOrderItem>) => {
+    getOrderItemById = async (req: Request, res: Response) => {
         const id = req.validatedParams.itemId;
         const subOrderId = req.validatedParams.subOrderId;
         const orderId = req.validatedParams.orderId;
@@ -75,7 +75,7 @@ export class OrderItemController {
         }
     }
 
-    updateOrderItem = async (req: Request, res: Response<ResponseOrderItem>) => {
+    updateOrderItem = async (req: Request, res: Response) => {
         const id = req.validatedParams.itemId;
         const subOrderId = req.validatedParams.subOrderId;
         const orderId = req.validatedParams.orderId;

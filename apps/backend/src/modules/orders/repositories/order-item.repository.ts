@@ -57,7 +57,7 @@ export class OrderItemRepository {
         }));
     }
 
-    async getOrderItemById(id: number): Promise<ResponseOrderItem> {
+    async getOrderItemById(id: number): Promise<ResponseOrderItem | null> {
         const orderItem = await prisma.orderItem.findUnique({
             where: { id },
             select: {

@@ -29,7 +29,7 @@ export interface UpdateItemRequest {
 export interface ResponseOrderItem {
     id: number;
     quantity: number;
-    notes?: string;
+    notes?: string | null;
     unitPriceSnapshot: number;
     totalPriceSnapshot: number;
     subOrderId: number;
