@@ -80,14 +80,6 @@ export class SubOrderService {
         return this.repository.sendSubOrderToCashier(subOrderId);
     }
 
-    async paySubOrder(orderId: number, subOrderId: number) {
-        const subOrder = await this.getSubOrderById(orderId, subOrderId);
-        if (subOrder.status !== "SENT_TO_CASHIER") {
-            throw new Error("No se puede pagar una sub-orden que ya ha sido pagada, cancelada o que no ha sido enviada al cajero");
-        }
-        return this.repository.paySubOrder(subOrderId);
-    }
-
     async cancelSubOrder(orderId: number, subOrderId: number) {
         const subOrder = await this.getSubOrderById(orderId, subOrderId);
         if (subOrder.status === "PAID") {

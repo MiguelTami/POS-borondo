@@ -120,26 +120,6 @@ export class SubOrderController {
         }
     }
 
-    paySubOrder = async (req: Request, res: Response) => {
-        try {
-            const subOrder = await this.subOrderService.paySubOrder(req.validatedParams.orderId, req.validatedParams.subOrderId);
-
-            res.status(200).json(subOrder);
-        } catch (error) {
-            if (error.message === "No se puede pagar una sub-orden que ya ha sido pagada, cancelada o que no ha sido enviada al cajero") {
-                return res.status(400).json({ error: error.message });
-            }
-            if (error.message === "SubOrden no encontrada") {
-                return res.status(404).json({ error: error.message });
-            }
-            if (error.message === "SubOrden no pertenece a la orden") {
-                return res.status(403).json({ error: error.message });
-            }
-
-            res.status(500).json({ error: "Failed to pay sub-order" });
-        }
-    }
-
     cancelSubOrder = async (req: Request, res: Response) => {
         try {
             const subOrder = await this.subOrderService.cancelSubOrder(req.validatedParams.orderId, req.validatedParams.subOrderId);

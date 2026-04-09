@@ -198,50 +198,6 @@ export class SubOrderRepository {
         });
     }
 
-    async paySubOrder(subOrderId: number) {
-        return prisma.subOrder.update({
-            where: {
-                id: subOrderId,
-            },
-            data: {
-                status: 'PAID'
-            },
-            select: {
-                id: true,
-                label: true,
-                status: true,
-                order: {
-                    select: {
-                        id: true,
-                        dailyOrderNumber: true,
-                        businessDate: true,
-                        table: {
-                            select: {
-                                number: true
-                            }
-                        },
-                        waiter: {
-                            select: {
-                                name: true
-                            }
-                        }
-
-                    }
-                },
-                orderItems: {
-                    select: {
-                        id: true,
-                        quantity: true,
-                        notes: true,
-                        totalPriceSnapshot: true,
-                        productId: true,
-                        product: { select: { name: true } }
-                    }
-                }
-            }
-        });
-    }
-
     async cancelSubOrder(subOrderId: number) {
         return prisma.subOrder.update({
             where: {
