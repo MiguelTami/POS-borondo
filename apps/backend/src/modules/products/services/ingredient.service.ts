@@ -46,9 +46,11 @@ export class IngredientsService {
     async updateIngredient(id: number, data: UpdateIngredientDTO): Promise<IngredientResponse> {
         await this.getIngredientById(id);
 
-        const existingIngredient = await this.repository.getIngredientByName(data.name);
-        if (existingIngredient && existingIngredient.id !== id) {
-            throw new Error(`Ya existe un ingrediente con el nombre: ${data.name}`);
+        if (data.name) {
+            const existingIngredient = await this.repository.getIngredientByName(data.name);
+            if (existingIngredient && existingIngredient.id !== id) {
+                throw new Error(`Ya existe un ingrediente con el nombre: ${data.name}`);
+            }
         }
 
         const ingredientUpdated = await this.repository.updateIngredient(id, data);

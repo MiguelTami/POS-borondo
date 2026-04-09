@@ -36,7 +36,6 @@ export class IngredientsRepository {
             data: {
                 name: data.name,
                 unit: data.unit,
-                stock: data.stock || 0,
                 minStockAlert: data.minStockAlert,
                 isActive: true
             },

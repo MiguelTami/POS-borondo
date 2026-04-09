@@ -8,21 +8,23 @@ import orderRoutes from "./modules/orders/routes/order.routes";
 import paymentRoutes from "./modules/payments/routes/payment.routes";
 import userRoutes from "./modules/users/routes/user.routes";
 import shiftRoutes from "./modules/shifts/routes/shift.routes";
+import inventoryRoutes from "./modules/inventory/routes/inventory.routes";
 import { authenticate } from "./middlewares/auth.middleware";
 
 const router = Router();
 
 router.use("/users", userRoutes);
 
-router.use(authenticate)
+router.use(authenticate);
 
 router.use("/products", productsRoutes);
 router.use("/ingredients", ingredientRoutes);
 router.use("/tables", tableRoutes);
 router.use("/recipes", recipeRoutes);
 router.use("/categories", categoryRoutes);
-router.use("/orders", orderRoutes)
-router.use("/payments", paymentRoutes)
+router.use("/orders", orderRoutes);
+router.use("/payments", paymentRoutes);
 router.use("/shifts", shiftRoutes);
+router.use("/inventory", inventoryRoutes);
 
 export default router;

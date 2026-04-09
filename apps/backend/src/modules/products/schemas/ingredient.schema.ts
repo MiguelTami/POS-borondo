@@ -11,8 +11,6 @@ export const createIngredientSchema = z.object({
     "LITER"
   ]),
 
-  stock: z.number().min(0, "Stock cannot be negative"),
-
   minStockAlert: z.number().int().min(0),
 }).strict()
 
