@@ -12,7 +12,7 @@ const router = Router({ mergeParams: true });
 const controller = new SubOrderController();
 
 router.post("/", authenticate, authorizeRole(['WAITER']), validate(createSubOrderSchema, 'body'), controller.createSubOrder);
-router.get("/", controller.getSubOrders);
+router.get("/", authenticate,controller.getSubOrders);
 router.get("/:subOrderId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.getSubOrderById);
 router.patch("/:subOrderId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), validate(updateSubOrderSchema, 'body'), controller.updateSubOrder);
 router.delete("/:subOrderId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.deleteSubOrder);
