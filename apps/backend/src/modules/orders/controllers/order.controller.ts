@@ -11,8 +11,9 @@ export class OrderController {
 
     createOrder = async (req: Request, res: Response) => {
         try {
-            const data: CreateOrderDTO = req.validatedBody;
-            const order: OrderResponse = await this.service.createOrder(data);
+            const tableId: number = req.validatedBody.tableId;
+            const waiterId: number = req.user!.id;
+            const order: OrderResponse = await this.service.createOrder({ tableId, waiterId });
 
             res.status(201).json(order);
         } catch (error: any) {
@@ -57,8 +58,9 @@ export class OrderController {
     updateOrder = async (req: Request, res: Response) => {
         try {
             const id = req.validatedParams.orderId;
-            const data = req.validatedBody;
-            const updatedOrder: OrderResponse = await this.service.updateOrder(id, data);
+            const tableId: number = req.validatedBody.tableId;
+            const waiterId: number = req.user!.id;
+            const updatedOrder: OrderResponse = await this.service.updateOrder(id, { tableId, waiterId });
 
             res.status(200).json(updatedOrder);
         } catch (error: any) {

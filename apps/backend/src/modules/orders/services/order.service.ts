@@ -13,19 +13,10 @@ export class OrderService {
     }
 
     async createOrder(data: CreateOrderDTO): Promise<OrderResponse> {
-        const [waiter, table] = await Promise.all([
-        prisma.user.findUnique({ where: { id: data.waiterId } }),
-        this.tablesService.getTableById(data.tableId)
-        ]);
-
-        
+        const table = await this.tablesService.getTableById(data.tableId);
 
         if (table.status !== "AVAILABLE") {
         throw new Error("La mesa no está disponible");
-        }
-
-        if (!waiter || waiter.role !== "WAITER") {
-        throw new Error("El usuario no existe o no tiene rol de mesonero");
         }
 
         const now = new Date();
@@ -55,21 +46,13 @@ export class OrderService {
     async updateOrder(id: number, data: UpdateOrderDTO): Promise<OrderResponse> {
         await this.getOrderById(id);
 
-        const [table, waiter] = await Promise.all([
-        data.tableId !== undefined ? this.tablesService.getTableById(data.tableId) : null,
-        data.waiterId !== undefined ? prisma.user.findUnique({ where: { id: data.waiterId } }) : null,
-        ]);
+        const table = data.tableId !== undefined 
+            ? await this.tablesService.getTableById(data.tableId) 
+            : null;
         
         if(data.tableId !== undefined && table) {
-
             if (table.status !== "AVAILABLE") {
                 throw new Error("La mesa no está disponible");
-            }
-        }
-        
-        if(data.waiterId !== undefined) {
-            if (!waiter || waiter.role !== "WAITER") {
-                throw new Error("El usuario no existe o no tiene rol de mesonero");
             }
         }
 
