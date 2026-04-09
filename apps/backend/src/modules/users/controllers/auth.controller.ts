@@ -25,7 +25,6 @@ export class AuthController {
 
     getMe = async (req: Request, res: Response) => {
         try {
-            // req.user viene del middleware de autenticación (auth.middleware.ts)
             const userId = req.user!.id;
             const user = await this.service.getMe(userId);
 

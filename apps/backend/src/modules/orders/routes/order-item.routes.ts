@@ -4,7 +4,7 @@ import { validate } from "../../../middlewares/validate.middleware";
 import { itemIdParamSchema, orderIdParamSchema, subOrderIdParamSchema} from "../../../shared/validations/schemas/params.schema";
 import { createOrderItemSchema, updateOrderItemSchema } from "../schemas/order-item.schema";
 import orderItemModifierRoutes from "./order-item-modifier.routes";
-import { authenticate, authorizeRole } from "../../../middlewares/auth.middleware";
+import { authorizeRole } from "../../../middlewares/auth.middleware";
 
 const combinedParamsSchema = orderIdParamSchema.merge(subOrderIdParamSchema).merge(itemIdParamSchema);
 const parentParamsSchema = orderIdParamSchema.merge(subOrderIdParamSchema);
@@ -18,6 +18,6 @@ router.get("/:itemId", authorizeRole(['WAITER']), validate(combinedParamsSchema,
 router.patch("/:itemId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), validate(updateOrderItemSchema, 'body'), controller.updateOrderItem);
 router.delete("/:itemId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.deleteOrderItem);
 
-router.use("/:itemId/modifiers", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), orderItemModifierRoutes);
+router.use("/:itemId/modifiers", validate(combinedParamsSchema, 'params'), orderItemModifierRoutes);
 
 export default router;

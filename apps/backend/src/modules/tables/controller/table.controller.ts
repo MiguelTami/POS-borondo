@@ -26,7 +26,7 @@ export class TablesController {
     }
 
 
-    createTable = async (req: Request, res) => {
+    createTable = async (req: Request, res: Response) => {
         try {
             const number: number = req.validatedBody.number;
             const table = await this.service.createTable(number);
@@ -35,11 +35,11 @@ export class TablesController {
             if (error.message === "La mesa con ese número ya existe") {
                 return res.status(400).json({ error: error.message });
             }
-            res.status(500).json({error: "Failed to create table" });
+            res.status(500).json({ error: "Failed to create table" });
         }       
     }
 
-    getTableById = async (req: Request, res) => {
+    getTableById = async (req: Request, res: Response) => {
         try {
             const id: number = req.validatedParams.tableId;
             const table = await this.service.getTableById(id);

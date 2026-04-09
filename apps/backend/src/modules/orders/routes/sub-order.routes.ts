@@ -4,7 +4,7 @@ import { validate } from "../../../middlewares/validate.middleware";
 import { createSubOrderSchema, updateSubOrderSchema } from "../schemas/sub-order.schema";
 import { subOrderIdParamSchema, orderIdParamSchema } from "../../../shared/validations/schemas/params.schema";
 import orderItemRoutes from "./order-item.routes";
-import { authenticate, authorizeRole } from "../../../middlewares/auth.middleware";
+import { authorizeRole } from "../../../middlewares/auth.middleware";
 
 const combinedParamsSchema = orderIdParamSchema.merge(subOrderIdParamSchema);
 

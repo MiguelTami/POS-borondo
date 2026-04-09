@@ -10,12 +10,12 @@ const router = Router();
 const controller = new OrderController();
 
 router.post("/", authenticate, authorizeRole(['WAITER']), validate(createOrderSchema, 'body'), controller.createOrder);
-router.get("/", controller.getOrders);
+router.get("/", authenticate, controller.getOrders);
 router.get("/:orderId", validate(orderIdParamSchema, 'params'), controller.getOrderById);
 router.patch("/:orderId", authenticate, authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), validate(updateOrderSchema, 'body'), controller.updateOrder);
 router.delete("/:orderId", authenticate, authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.deleteOrder);
 router.patch("/:orderId/send-to-cashier", authenticate, authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.sendOrderToCashier);
-router.patch("/:orderId/pay", authenticate, authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.payOrder);
+router.patch("/:orderId/pay", authenticate, authorizeRole(['CASHIER', 'ADMIN']), validate(orderIdParamSchema, 'params'), controller.payOrder);
 router.patch("/:orderId/cancel", authenticate, authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.cancelOrder);
 
 router.use("/:orderId/sub-orders", authenticate, validate(orderIdParamSchema, 'params'), subOrderRoutes);
