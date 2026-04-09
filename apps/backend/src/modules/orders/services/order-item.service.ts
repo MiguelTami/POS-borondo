@@ -18,7 +18,7 @@ export class OrderItemService {
         this.recipesService = new RecipesService();
     }
 
-    async createOrderItem(orderId: number, subOrderId: number, data: CreateItemRequest): Promise<ResponseOrderItem> {
+    async createOrderItem(orderId: number, subOrderId: number, data: CreateItemRequest, userId: number): Promise<ResponseOrderItem> {
         const product = await this.productService.getProductById(data.productId);
         const recipes = await this.recipesService.getIngredientsRecipe(data.productId);
         const subOrder = await this.subOrderService.getSubOrderById(orderId, subOrderId);
@@ -27,11 +27,16 @@ export class OrderItemService {
             throw new Error("No se pueden agregar items a una sub-orden que ya ha sido pagada o enviada al cajero");
         }
 
+        const ingredientsToDeduct = [];
         for (const recipe of recipes) {
             const requiredQuantity = Number(recipe.quantityRequired) * data.quantity;
             if (Number(recipe.ingredient.stock) < requiredQuantity) {
                 throw new Error(`No hay suficiente stock del ingrediente ${recipe.ingredient.name} para preparar el producto ${product.name}`);
             }
+            ingredientsToDeduct.push({
+                ingredientId: recipe.ingredientId,
+                quantityToDeduct: requiredQuantity
+            });
         }
 
         const unitPrice = Number(product.price);
@@ -43,7 +48,7 @@ export class OrderItemService {
             totalPrice
         };
 
-        return this.repository.createOrderItem(subOrderId, createData);  
+        return this.repository.createOrderItemWithDeduction(subOrderId, createData, userId, ingredientsToDeduct);  
     }
 
     async getOrderItems(orderId: number, subOrderId: number): Promise<ResponseOrderItem[]> {

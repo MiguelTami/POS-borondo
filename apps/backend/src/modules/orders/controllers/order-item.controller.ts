@@ -14,9 +14,10 @@ export class OrderItemController {
         const subOrderId = req.validatedParams.subOrderId;
         const orderId = req.validatedParams.orderId;
         const data: CreateItemRequest = req.validatedBody;
+        const userId = req.user!.id;
 
         try {
-            const orderItem = await this.service.createOrderItem(orderId, subOrderId, data);
+            const orderItem = await this.service.createOrderItem(orderId, subOrderId, data, userId);
             
             res.status(201).json(orderItem);
         } catch (error) {
