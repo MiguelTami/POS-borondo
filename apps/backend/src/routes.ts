@@ -7,6 +7,7 @@ import tableRoutes from "./modules/tables/routes/table.routes";
 import orderRoutes from "./modules/orders/routes/order.routes";
 import paymentRoutes from "./modules/payments/routes/payment.routes";
 import userRoutes from "./modules/users/routes/user.routes";
+import shiftRoutes from "./modules/shifts/routes/shift.routes";
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use("/categories", categoryRoutes);
 router.use("/orders", orderRoutes)
 router.use("/payments", paymentRoutes)
 router.use("/users", userRoutes);
+router.use("/shifts", shiftRoutes);
 
 export default router;
