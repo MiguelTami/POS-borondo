@@ -8,11 +8,11 @@ import { authenticate, authorizeRole } from "../../../middlewares/auth.middlewar
 const router = Router();
 const controller = new PaymentController();
 
-router.get("/", validate(GetPaymentsQuerySchema, 'query'), controller.getPayments);
+router.get("/", authenticate, authorizeRole(['CASHIER', 'ADMIN']), validate(GetPaymentsQuerySchema, 'query'), controller.getPayments);
 router.post("/", authenticate, authorizeRole(['CASHIER']), validate(CreatePaymentSchema, 'body'), controller.createPayment);
-router.get("/:paymentId", validate(paymentIdParamSchema, 'params'), controller.getPaymentById);
-router.get("/sub-order/:subOrderId", validate(subOrderIdParamSchema, 'params'), controller.getPaymentBySubOrder);
-router.patch("/:paymentId", validate(paymentIdParamSchema, 'params'), validate(UpdatePaymentSchema, 'body'), controller.updatePayment);
-router.delete("/:paymentId", validate(paymentIdParamSchema, 'params'), controller.deletePayment);
+router.get("/:paymentId", authenticate, authorizeRole(['CASHIER', 'ADMIN']), validate(paymentIdParamSchema, 'params'), controller.getPaymentById);
+router.get("/sub-order/:subOrderId", authenticate, authorizeRole(['CASHIER', 'ADMIN']), validate(subOrderIdParamSchema, 'params'), controller.getPaymentBySubOrder);
+router.patch("/:paymentId", authenticate, authorizeRole(['ADMIN']), validate(paymentIdParamSchema, 'params'), validate(UpdatePaymentSchema, 'body'), controller.updatePayment);
+router.delete("/:paymentId", authenticate, authorizeRole(['ADMIN']), validate(paymentIdParamSchema, 'params'), controller.deletePayment);
 
 export default router;
