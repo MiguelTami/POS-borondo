@@ -12,12 +12,12 @@ const parentParamsSchema = orderIdParamSchema.merge(subOrderIdParamSchema);
 const router = Router({ mergeParams: true });
 const controller = new OrderItemController();
 
-router.post("/", authenticate, authorizeRole(['WAITER']), validate(parentParamsSchema, 'params') ,validate(createOrderItemSchema, 'body'), controller.createOrderItem);
-router.get("/", authenticate, validate(parentParamsSchema, 'params'), controller.getOrderItems);
-router.get("/:itemId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.getOrderItemById);
-router.patch("/:itemId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), validate(updateOrderItemSchema, 'body'), controller.updateOrderItem);
-router.delete("/:itemId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.deleteOrderItem);
+router.post("/", authorizeRole(['WAITER']), validate(parentParamsSchema, 'params') ,validate(createOrderItemSchema, 'body'), controller.createOrderItem);
+router.get("/", validate(parentParamsSchema, 'params'), controller.getOrderItems);
+router.get("/:itemId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.getOrderItemById);
+router.patch("/:itemId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), validate(updateOrderItemSchema, 'body'), controller.updateOrderItem);
+router.delete("/:itemId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.deleteOrderItem);
 
-router.use("/:itemId/modifiers", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), orderItemModifierRoutes);
+router.use("/:itemId/modifiers", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), orderItemModifierRoutes);
 
 export default router;

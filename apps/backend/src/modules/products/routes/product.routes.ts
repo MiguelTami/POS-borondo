@@ -6,20 +6,21 @@ import { createProductSchema, updateProductSchema } from "../schemas/product.sch
 import { productIdParamSchema } from "../../../shared/validations/schemas/params.schema";
 import { getProductsQuerySchema } from "../schemas/product.query.schema";
 import { createRecipeSchema } from "../schemas/recipes.schema";
+import { authenticate, authorizeRole } from "../../../middlewares/auth.middleware";
 
 
 const router = Router();
 const controller = new ProductsController();
 const recipeController = new RecipesController();
 
-router.get('/', validate(getProductsQuerySchema, 'query'), controller.getProducts);
-router.get('/:productId', validate(productIdParamSchema, 'params'), controller.getProductById);
-router.post('/', validate(createProductSchema), controller.createProduct);
-router.delete('/:productId', validate(productIdParamSchema, 'params'), controller.desactivateProduct);
-router.patch('/:productId/reactivate', validate(productIdParamSchema, 'params'), controller.reactivateProduct);
-router.patch('/:productId', validate(productIdParamSchema, 'params'), validate(updateProductSchema), controller.updateProduct);
+router.get('/', authenticate, validate(getProductsQuerySchema, 'query'), controller.getProducts);
+router.get('/:productId', authenticate, validate(productIdParamSchema, 'params'), controller.getProductById);
+router.post('/', authenticate, authorizeRole(['ADMIN']), validate(createProductSchema), controller.createProduct);
+router.delete('/:productId', authenticate, authorizeRole(['ADMIN']), validate(productIdParamSchema, 'params'), controller.desactivateProduct);
+router.patch('/:productId/reactivate', authenticate, authorizeRole(['ADMIN']), validate(productIdParamSchema, 'params'), controller.reactivateProduct);
+router.patch('/:productId', authenticate, authorizeRole(['ADMIN']), validate(productIdParamSchema, 'params'), validate(updateProductSchema), controller.updateProduct);
 
-router.get('/:productId/recipes', validate(productIdParamSchema, 'params'), recipeController.getIngredientsRecipe) //products/:productId/recipes
-router.post('/:productId/recipes', validate(productIdParamSchema, 'params'), validate(createRecipeSchema), recipeController.createIngredientRecipe) //products/:productId/recipes
+router.get('/:productId/recipes', authenticate, validate(productIdParamSchema, 'params'), recipeController.getIngredientsRecipe) //products/:productId/recipes
+router.post('/:productId/recipes', authenticate, authorizeRole(['ADMIN']), validate(productIdParamSchema, 'params'), validate(createRecipeSchema), recipeController.createIngredientRecipe) //products/:productId/recipes
 
 export default router;

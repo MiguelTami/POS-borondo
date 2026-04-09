@@ -18,6 +18,6 @@ router.patch("/:orderId/send-to-cashier", authenticate, authorizeRole(['WAITER']
 router.patch("/:orderId/pay", authenticate, authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.payOrder);
 router.patch("/:orderId/cancel", authenticate, authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.cancelOrder);
 
-router.use("/:orderId/sub-orders", validate(orderIdParamSchema, 'params'), subOrderRoutes);
+router.use("/:orderId/sub-orders", authenticate, validate(orderIdParamSchema, 'params'), subOrderRoutes);
 
 export default router;

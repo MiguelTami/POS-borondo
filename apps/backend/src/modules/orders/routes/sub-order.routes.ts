@@ -11,13 +11,13 @@ const combinedParamsSchema = orderIdParamSchema.merge(subOrderIdParamSchema);
 const router = Router({ mergeParams: true });
 const controller = new SubOrderController();
 
-router.post("/", authenticate, authorizeRole(['WAITER']), validate(createSubOrderSchema, 'body'), controller.createSubOrder);
-router.get("/", authenticate,controller.getSubOrders);
-router.get("/:subOrderId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.getSubOrderById);
-router.patch("/:subOrderId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), validate(updateSubOrderSchema, 'body'), controller.updateSubOrder);
-router.delete("/:subOrderId", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.deleteSubOrder);
-router.patch("/:subOrderId/send-to-cashier", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.sendSubOrderToCashier);
-router.patch("/:subOrderId/cancel", authenticate, authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.cancelSubOrder);
+router.post("/", authorizeRole(['WAITER']), validate(createSubOrderSchema, 'body'), controller.createSubOrder);
+router.get("/", controller.getSubOrders);
+router.get("/:subOrderId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.getSubOrderById);
+router.patch("/:subOrderId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), validate(updateSubOrderSchema, 'body'), controller.updateSubOrder);
+router.delete("/:subOrderId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.deleteSubOrder);
+router.patch("/:subOrderId/send-to-cashier", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.sendSubOrderToCashier);
+router.patch("/:subOrderId/cancel", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.cancelSubOrder);
 
 
 router.use("/:subOrderId/items", validate(combinedParamsSchema, 'params'), orderItemRoutes);
