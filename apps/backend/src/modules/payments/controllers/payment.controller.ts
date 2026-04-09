@@ -28,14 +28,16 @@ export class PaymentController {
         const rawData = req.validatedBody;
         const subOrderId = rawData.subOrderId;
         const shiftId = rawData.shiftId;
-        const method = rawData.method
+        const method = rawData.method;
+        const cashierId = req.user!.id;
         try {
-            const payment = await this.service.createPayment(subOrderId, shiftId, method);
+            const payment = await this.service.createPayment(subOrderId, shiftId, method, cashierId);
             res.status(201).json(payment);
         } catch (error) {
             console.error("Error al crear el pago:", error.message);
             if (error.message === "No se pueden agregar pagos a una sub-orden que está cancelada o pagada" || 
-                error.message === "No se pueden agregar pagos a una sub-orden que no ha sido enviada al cajero") {
+                error.message === "No se pueden agregar pagos a una sub-orden que no ha sido enviada al cajero" ||
+                error.message === "Solo se pueden agregar pagos al turno activo") {
                 return res.status(400).json({ error: error.message });
             }
             if (error.message === "SubOrden no encontrada") {

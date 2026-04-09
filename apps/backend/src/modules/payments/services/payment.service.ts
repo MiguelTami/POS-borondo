@@ -2,15 +2,18 @@ import { PaymentRepository } from "../repositories/payment.repository";
 import { CreatePaymentDTO, GetPaymentsFilters } from "../types/payment.types";
 import { PaymentMethod } from "@prisma/client";
 import { SubOrderService } from "../../orders/services/sub-order.service";
+import { ShiftService } from "../../shifts/services/shift.service";
 
 export class PaymentService {
 
     private repository: PaymentRepository;
     private subOrderService: SubOrderService;
+    private shiftService: ShiftService;
 
     constructor() {
         this.repository = new PaymentRepository();
         this.subOrderService = new SubOrderService();
+        this.shiftService = new ShiftService();
     }
 
     async getPayments(filters: GetPaymentsFilters) {
@@ -20,7 +23,13 @@ export class PaymentService {
         return await this.repository.getPayments(filters);
     }
 
-    async createPayment(subOrderId: number, shiftId: number, method: string) {
+    async createPayment(subOrderId: number, shiftId: number, method: string, cashierId: number) {
+        const activeShift = await this.shiftService.getActiveShift();
+        const activeShiftId = activeShift.id;
+        
+        if (shiftId !== activeShiftId) {
+            throw new Error("Solo se pueden agregar pagos al turno activo");
+        }
         const subOrder = await this.subOrderService.getSubOrderByIdOnly(subOrderId);
         const orderItems = subOrder.orderItems;
 
@@ -37,7 +46,8 @@ export class PaymentService {
 
         const data: CreatePaymentDTO = {
             amount: calculatedTotal,
-            method: method as PaymentMethod
+            method: method as PaymentMethod,
+            cashierId: cashierId
         };
         
         return await this.repository.createPayment(subOrderId, shiftId, data);

@@ -58,7 +58,6 @@ export class PaymentRepository {
                 data: {
                     subOrderId,
                     shiftId,
-                    cashierId: 3,
                     ...data
                 },
                 include: {
