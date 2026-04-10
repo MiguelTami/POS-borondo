@@ -2,17 +2,20 @@ import { OrderItemModifierRepository } from "../repositories/order-item-modifier
 import { CreateOrderItemModifier, OrderItemModifierResponse, UpdateOrderItemModifier } from "../types/order-item-modifier.types";
 import { IngredientsService } from "../../products/services/ingredient.service";
 import { OrderItemService } from "./order-item.service";
+import { RecipesService } from "../../products/services/recipe.service";
 
 export class OrderItemModifierService {
 
     private repository: OrderItemModifierRepository;
     private ingredientsService: IngredientsService;
     private orderItemsService: OrderItemService;
+    private recipesService: RecipesService;
 
     constructor() {
         this.repository = new OrderItemModifierRepository();
         this.ingredientsService = new IngredientsService();
         this.orderItemsService = new OrderItemService();
+        this.recipesService = new RecipesService();
     }
 
     async createOrderItemModifier(orderItemId: number, orderId: number, subOrderId: number, data: CreateOrderItemModifier): Promise<OrderItemModifierResponse> {
@@ -26,7 +29,17 @@ export class OrderItemModifierService {
             throw new Error('Ingrediente no encontrado')
         }
 
-        if (Number(data.quantity) > Number(ingredient.stock)) {
+        if (data.type === 'REMOVE') {
+            const recipeItems = await this.recipesService.getRecipes({
+                productId: orderItem.productId,
+                ingredientId: data.ingredientId
+            });
+            if (recipeItems.length === 0) {
+                throw new Error('No se puede quitar un ingrediente que no forma parte de la receta del producto');
+            }
+        }
+
+        if (data.type === 'EXTRA' && Number(data.quantity) > Number(ingredient.stock)) {
             throw new Error('No hay suficiente stock del ingrediente para agregar esta modificación')
         }
         return this.repository.createOrderItemModifier(orderItemId, data);
@@ -63,7 +76,21 @@ export class OrderItemModifierService {
         if (orderItem.subOrder.status === "PAID" || orderItem.subOrder.status === "SENT_TO_CASHIER") {
             throw new Error("No se pueden modificar las modificaciones de una sub-orden que ya ha sido pagada o enviada al cajero");
         }
-        if (Number(data.quantity) > Number(ingredient.stock)) {
+
+        const modifierType = data.type || orderItemModifier.type;
+        const ingredientId = data.ingredientId || orderItemModifier.ingredientId;
+
+        if (modifierType === 'REMOVE') {
+            const recipeItems = await this.recipesService.getRecipes({
+                productId: orderItem.productId,
+                ingredientId: ingredientId
+            });
+            if (recipeItems.length === 0) {
+                throw new Error('No se puede quitar un ingrediente que no forma parte de la receta del producto');
+            }
+        }
+
+        if (modifierType === 'EXTRA' && Number(data.quantity || orderItemModifier.quantity) > Number(ingredient.stock)) {
             throw new Error('No hay suficiente stock del ingrediente para agregar esta modificación')
         } 
         return this.repository.updateOrderItemModifier(id, data);
