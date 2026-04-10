@@ -99,7 +99,8 @@ export class SubOrderController {
 
     sendSubOrderToCashier = async (req: Request, res: Response) => {
         try {
-            const subOrder = await this.subOrderService.sendSubOrderToCashier(req.validatedParams.orderId, req.validatedParams.subOrderId);
+            const userId = req.user!.id;
+            const subOrder = await this.subOrderService.sendSubOrderToCashier(req.validatedParams.orderId, req.validatedParams.subOrderId, userId);
 
             res.status(200).json(subOrder);
         } catch (error) {

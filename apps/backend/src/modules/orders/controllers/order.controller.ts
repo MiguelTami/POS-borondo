@@ -95,7 +95,8 @@ export class OrderController {
     sendOrderToCashier = async (req: Request, res: Response) => {
         try {
             const id = req.validatedParams.orderId;
-            const updatedOrder = await this.service.sendOrderToCashier(id);
+            const userId = req.user!.id;
+            const updatedOrder = await this.service.sendOrderToCashier(id, userId);
 
             res.status(200).json(updatedOrder);
         } catch (error: any) {

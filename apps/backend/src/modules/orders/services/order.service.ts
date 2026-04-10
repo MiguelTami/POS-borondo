@@ -64,13 +64,50 @@ export class OrderService {
         return this.repository.deleteOrder(id);
     }
 
-    async sendOrderToCashier(id: number): Promise<OrderResponse> {
+    async sendOrderToCashier(id: number, userId: number): Promise<OrderResponse> {
         const order = await this.getOrderById(id);
 
         if (order.status !== "OPEN") {
             throw new Error("Solo se pueden enviar al cajero órdenes en estado OPEN");
         }
-        return this.repository.sendOrderToCashier(id);
+
+        const orderDetails = await this.repository.getOrderWithModifiersAndRecipes(id);
+        const deductions: { ingredientId: number, quantityToDeduct: number, subOrderId: number }[] = [];
+
+        if (orderDetails && orderDetails.subOrders) {
+            for (const subOrder of orderDetails.subOrders) {
+                if (subOrder.orderItems) {
+                    for (const item of subOrder.orderItems) {
+                        const recipeIngredients = item.product.recipes || [];
+
+                        for (const recipeNode of recipeIngredients) {
+                            const isRemoved = item.modifiers.some(
+                                m => m.ingredientId === recipeNode.ingredientId && m.type === 'REMOVE'
+                            );
+
+                            if (!isRemoved) {
+                                deductions.push({
+                                    ingredientId: recipeNode.ingredientId,
+                                    quantityToDeduct: Number(recipeNode.quantityRequired) * item.quantity,
+                                    subOrderId: subOrder.id
+                                });
+                            }
+                        }
+
+                        const addedModifiers = item.modifiers.filter(m => m.type === 'EXTRA');
+                        for (const added of addedModifiers) {
+                            deductions.push({
+                                ingredientId: added.ingredientId,
+                                quantityToDeduct: Number(added.quantity) * item.quantity,
+                                subOrderId: subOrder.id
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        return this.repository.sendOrderToCashier(id, userId, deductions);
     }
 
     async payOrder(id: number): Promise<OrderResponse> {

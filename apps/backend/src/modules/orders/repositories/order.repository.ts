@@ -144,8 +144,79 @@ export class OrderRepository {
         });
     }
 
-    async sendOrderToCashier(id: number) {
+    async getOrderWithModifiersAndRecipes(orderId: number) {
+        return prisma.order.findUnique({
+            where: { id: orderId },
+            select: {
+                id: true,
+                subOrders: {
+                    where: { status: 'OPEN' },
+                    select: {
+                        id: true,
+                        orderItems: {
+                            select: {
+                                id: true,
+                                quantity: true,
+                                product: {
+                                    select: {
+                                        recipes: {
+                                            select: {
+                                                ingredientId: true,
+                                                quantityRequired: true
+                                            }
+                                        }
+                                    }
+                                },
+                                modifiers: {
+                                    select: {
+                                        ingredientId: true,
+                                        type: true,
+                                        quantity: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async sendOrderToCashier(id: number, userId: number, deductions: { ingredientId: number, quantityToDeduct: number, subOrderId: number }[]) {
         return prisma.$transaction(async (tx) => {
+            const groupedMap = deductions.reduce((acc, curr) => {
+                const key = `${curr.ingredientId}-${curr.subOrderId}`;
+                if (acc[key]) {
+                    acc[key].quantityToDeduct += curr.quantityToDeduct;
+                } else {
+                    acc[key] = {
+                        ingredientId: curr.ingredientId,
+                        subOrderId: curr.subOrderId,
+                        quantityToDeduct: curr.quantityToDeduct
+                    };
+                }
+                return acc;
+            }, {} as Record<string, { ingredientId: number, subOrderId: number, quantityToDeduct: number }>);
+
+            for (const key of Object.keys(groupedMap)) {
+                const deduction = groupedMap[key];
+                
+                await tx.ingredient.update({
+                    where: { id: deduction.ingredientId },
+                    data: { stock: { decrement: deduction.quantityToDeduct } }
+                });
+
+                await tx.inventoryMovement.create({
+                    data: {
+                        type: 'SALE_DEDUCTION',
+                        quantity: deduction.quantityToDeduct,
+                        ingredientId: deduction.ingredientId,
+                        subOrderId: deduction.subOrderId,
+                        userId: userId
+                    }
+                });
+            }
+
             await tx.subOrder.updateMany({
                 where: { 
                     orderId: id,

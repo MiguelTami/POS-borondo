@@ -66,7 +66,7 @@ export class SubOrderService {
         return this.repository.deleteSubOrder(subOrderId);
     }
 
-    async sendSubOrderToCashier(orderId: number, subOrderId: number) {
+    async sendSubOrderToCashier(orderId: number, subOrderId: number, userId: number) {
         const subOrder = await this.getSubOrderById(orderId, subOrderId);
         if (subOrder.orderItems.length === 0) {
             throw new Error("No se puede enviar al cajero una sub-orden sin productos");
@@ -77,7 +77,41 @@ export class SubOrderService {
         if (subOrder.status !== "OPEN") {
             throw new Error("No se puede enviar una sub-orden que ya ha sido cancelada o pagada");
         }
-        return this.repository.sendSubOrderToCashier(subOrderId);
+
+        const subOrderDetails = await this.repository.getSubOrderWithModifiersAndRecipes(subOrderId);
+        
+        const deductions: { ingredientId: number, quantityToDeduct: number }[] = [];
+        
+        if (subOrderDetails && subOrderDetails.orderItems) {
+            for (const item of subOrderDetails.orderItems) {
+                const recipeIngredients = item.product.recipes || [];
+
+                // Deduct base recipes
+                for (const recipeNode of recipeIngredients) {
+                    const isRemoved = item.modifiers.some(
+                        m => m.ingredientId === recipeNode.ingredientId && m.type === 'REMOVE'
+                    );
+
+                    if (!isRemoved) {
+                        deductions.push({
+                            ingredientId: recipeNode.ingredientId,
+                            quantityToDeduct: Number(recipeNode.quantityRequired) * item.quantity
+                        });
+                    }
+                }
+
+                // Deduct extra modifiers
+                const addedModifiers = item.modifiers.filter(m => m.type === 'EXTRA');
+                for (const added of addedModifiers) {
+                    deductions.push({
+                        ingredientId: added.ingredientId,
+                        quantityToDeduct: Number(added.quantity) * item.quantity
+                    });
+                }
+            }
+        }
+
+        return this.repository.sendSubOrderToCashier(subOrderId, userId, deductions);
     }
 
     async cancelSubOrder(orderId: number, subOrderId: number) {
