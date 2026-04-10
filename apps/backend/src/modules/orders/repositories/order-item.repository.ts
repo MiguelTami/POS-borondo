@@ -3,48 +3,27 @@ import { CreateOrderItemDTO, UpdateOrderItemDTO, ResponseOrderItem } from "../ty
 
 export class OrderItemRepository {
 
-    async createOrderItemWithDeduction(subOrderId: number, data: CreateOrderItemDTO, userId: number, ingredientsToDeduct: { ingredientId: number, quantityToDeduct: number }[]): Promise<ResponseOrderItem> {
-        const orderItem = await prisma.$transaction(async (tx) => {
-            const item = await tx.orderItem.create({
-                data: {
-                    subOrderId,
-                    productId: data.productId,
-                    quantity: data.quantity,
-                    notes: data.notes,
-                    unitPriceSnapshot: data.unitPrice,
-                    totalPriceSnapshot: data.totalPrice
-                },
-                select: {
-                    id: true,
-                    quantity: true,
-                    notes: true,
-                    unitPriceSnapshot: true,
-                    totalPriceSnapshot: true,
-                    productId: true,
-                    product: { select: { name: true } },
-                    subOrderId: true,
-                    subOrder: { select: { label: true, status: true, orderId: true } }
-                }
-            });
-
-            for (const { ingredientId, quantityToDeduct } of ingredientsToDeduct) {
-                await tx.ingredient.update({
-                    where: { id: ingredientId },
-                    data: { stock: { decrement: quantityToDeduct } }
-                });
-
-                await tx.inventoryMovement.create({
-                    data: {
-                        type: 'SALE_DEDUCTION',
-                        quantity: quantityToDeduct,
-                        ingredientId: ingredientId,
-                        userId: userId,
-                        subOrderId: subOrderId,
-                    }
-                });
+    async createOrderItem(subOrderId: number, data: CreateOrderItemDTO): Promise<ResponseOrderItem> {
+        const orderItem = await prisma.orderItem.create({
+            data: {
+                subOrderId,
+                productId: data.productId,
+                quantity: data.quantity,
+                notes: data.notes,
+                unitPriceSnapshot: data.unitPrice,
+                totalPriceSnapshot: data.totalPrice
+            },
+            select: {
+                id: true,
+                quantity: true,
+                notes: true,
+                unitPriceSnapshot: true,
+                totalPriceSnapshot: true,
+                productId: true,
+                product: { select: { name: true } },
+                subOrderId: true,
+                subOrder: { select: { label: true, status: true, orderId: true } }
             }
-
-            return item;
         });
 
         return {
