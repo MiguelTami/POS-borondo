@@ -42,6 +42,10 @@ export class RecipesService {
         return await this.repository.getIngredientsRecipe(productId)
     }
 
+    async getIngredientsProduct(productId: number, ingredientId: number) {
+        return await this.repository.getIngredientsProduct(productId, ingredientId)
+    }
+
     async createIngredientRecipe(productId: number, data: CreateRecipeDTO): Promise<RecipeResponse> {
 
         const product = await this.productService.getProductById(productId);

@@ -30,17 +30,27 @@ export class OrderItemModifierService {
         }
 
         if (data.type === 'REMOVE') {
-            const recipeItems = await this.recipesService.getRecipes({
-                productId: orderItem.productId,
-                ingredientId: data.ingredientId
-            });
+            const productId = orderItem.productId;
+            const ingredientId = data.ingredientId;
+            const recipeItems = await this.recipesService.getIngredientsProduct(productId, ingredientId);
             if (recipeItems.length === 0) {
                 throw new Error('No se puede quitar un ingrediente que no forma parte de la receta del producto');
             }
+            if (Number(data.quantity) > Number(recipeItems[0].quantityRequired) * orderItem.quantity) {
+                throw new Error('No puedes remover una cantidad mayor a la que dicta la receta');
+            }
         }
 
-        if (data.type === 'EXTRA' && Number(data.quantity) > Number(ingredient.stock)) {
-            throw new Error('No hay suficiente stock del ingrediente para agregar esta modificación')
+        if (data.type === 'EXTRA') {
+            let baseQuantity = 0;
+            const recipeItems = await this.recipesService.getIngredientsProduct(orderItem.productId, data.ingredientId);
+            if (recipeItems.length > 0) {
+                baseQuantity = Number(recipeItems[0].quantityRequired) * orderItem.quantity;
+            }
+
+            if (Number(data.quantity) + baseQuantity > Number(ingredient.stock)) {
+                throw new Error('No hay suficiente stock del ingrediente para agregar esta modificación')
+            }
         }
         return this.repository.createOrderItemModifier(orderItemId, data);
     }
@@ -81,17 +91,25 @@ export class OrderItemModifierService {
         const ingredientId = data.ingredientId || orderItemModifier.ingredientId;
 
         if (modifierType === 'REMOVE') {
-            const recipeItems = await this.recipesService.getRecipes({
-                productId: orderItem.productId,
-                ingredientId: ingredientId
-            });
+            const recipeItems = await this.recipesService.getIngredientsProduct(orderItem.productId, ingredientId);
             if (recipeItems.length === 0) {
                 throw new Error('No se puede quitar un ingrediente que no forma parte de la receta del producto');
             }
+            if (Number(data.quantity || orderItemModifier.quantity) > Number(recipeItems[0].quantityRequired) * orderItem.quantity) {
+                throw new Error('No puedes remover una cantidad mayor a la que dicta la receta');
+            }
         }
 
-        if (modifierType === 'EXTRA' && Number(data.quantity || orderItemModifier.quantity) > Number(ingredient.stock)) {
-            throw new Error('No hay suficiente stock del ingrediente para agregar esta modificación')
+        if (modifierType === 'EXTRA') {
+            let baseQuantity = 0;
+            const recipeItems = await this.recipesService.getIngredientsProduct(orderItem.productId, ingredientId);
+            if (recipeItems.length > 0) {
+                baseQuantity = Number(recipeItems[0].quantityRequired) * orderItem.quantity;
+            }
+
+            if (Number(data.quantity || orderItemModifier.quantity) + baseQuantity > Number(ingredient.stock)) {
+                throw new Error('No hay suficiente stock del ingrediente para agregar esta modificación')
+            }
         } 
         return this.repository.updateOrderItemModifier(id, data);
     }

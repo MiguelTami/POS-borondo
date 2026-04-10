@@ -26,6 +26,22 @@ export class OrderItemService {
             throw new Error("No se pueden agregar items a una sub-orden que ya ha sido pagada o enviada al cajero");
         }
 
+        let recipeItems: any[] = [];
+        try {
+            recipeItems = await this.recipesService.getIngredientsRecipe(data.productId);
+        } catch (error: any) {
+            if (error.message !== 'EL producto no tiene ingredientes asociados') {
+                throw error;
+            }
+        }
+
+        for (const recipe of recipeItems) {
+            const required = Number(recipe.quantityRequired) * data.quantity;
+            if (required > Number(recipe.ingredient.stock)) {
+                throw new Error(`No hay suficiente stock del ingrediente ${recipe.ingredient.name} para agregar este producto. Cantidad requerida: ${required}, disponible: ${recipe.ingredient.stock}`);
+            }
+        }
+
         const unitPrice = Number(product.price);
         const totalPrice = unitPrice * data.quantity;
 

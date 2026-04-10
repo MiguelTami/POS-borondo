@@ -27,6 +27,15 @@ export class RecipesRepository{
         })
     }
 
+    async getIngredientsProduct(productId: number, ingredientId: number) {
+        return prisma.recipe.findMany({
+            where: {
+                productId,
+                ingredientId
+            },
+        })
+    }
+
     async getIngredientsRecipe(productId: number) {
         return prisma.recipe.findMany({
             where: {productId},

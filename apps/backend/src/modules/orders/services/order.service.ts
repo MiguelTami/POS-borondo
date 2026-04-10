@@ -81,14 +81,20 @@ export class OrderService {
                         const recipeIngredients = item.product.recipes || [];
 
                         for (const recipeNode of recipeIngredients) {
-                            const isRemoved = item.modifiers.some(
+                            let totalBaseQuantity = Number(recipeNode.quantityRequired) * item.quantity;
+                            
+                            const removeModifier = item.modifiers.find(
                                 m => m.ingredientId === recipeNode.ingredientId && m.type === 'REMOVE'
                             );
 
-                            if (!isRemoved) {
+                            if (removeModifier) {
+                                totalBaseQuantity -= Number(removeModifier.quantity);
+                            }
+
+                            if (totalBaseQuantity > 0) {
                                 deductions.push({
                                     ingredientId: recipeNode.ingredientId,
-                                    quantityToDeduct: Number(recipeNode.quantityRequired) * item.quantity,
+                                    quantityToDeduct: totalBaseQuantity,
                                     subOrderId: subOrder.id
                                 });
                             }
@@ -98,7 +104,7 @@ export class OrderService {
                         for (const added of addedModifiers) {
                             deductions.push({
                                 ingredientId: added.ingredientId,
-                                quantityToDeduct: Number(added.quantity) * item.quantity,
+                                quantityToDeduct: Number(added.quantity),
                                 subOrderId: subOrder.id
                             });
                         }

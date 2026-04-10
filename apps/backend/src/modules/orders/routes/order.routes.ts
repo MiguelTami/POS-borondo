@@ -16,7 +16,7 @@ router.patch("/:orderId", authorizeRole(['WAITER']), validate(orderIdParamSchema
 router.delete("/:orderId", authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.deleteOrder);
 router.patch("/:orderId/send-to-cashier", authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.sendOrderToCashier);
 router.patch("/:orderId/pay", authorizeRole(['CASHIER', 'ADMIN']), validate(orderIdParamSchema, 'params'), controller.payOrder);
-router.patch("/:orderId/cancel", authorizeRole(['WAITER']), validate(orderIdParamSchema, 'params'), controller.cancelOrder);
+router.patch("/:orderId/cancel", authorizeRole(['WAITER', 'CASHIER']), validate(orderIdParamSchema, 'params'), controller.cancelOrder);
 
 router.use("/:orderId/sub-orders", validate(orderIdParamSchema, 'params'), subOrderRoutes);
 

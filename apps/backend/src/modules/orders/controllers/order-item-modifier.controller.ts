@@ -25,7 +25,8 @@ export class OrderItemModifierController {
             if (error.message === "Ingrediente no encontrado" || 
                 error.message === "Order item no encontrada" || 
                 error.message === "No se pueden agregar modificaciones a una sub-orden que ya ha sido pagada o enviada al cajero"||
-                error.message === "No se puede quitar un ingrediente que no forma parte de la receta del producto") {
+                error.message === "No se puede quitar un ingrediente que no forma parte de la receta del producto"||
+                error.message === "No puedes remover una cantidad mayor a la que dicta la receta") {
                 return res.status(404).json({ error: error.message });
             }
             if (error.message === "No hay suficiente stock del ingrediente para agregar esta modificación") {
@@ -94,7 +95,8 @@ export class OrderItemModifierController {
         } catch (error) {
             if (error.message === "Order item modifier no encontrada" || 
                 error.message === "No se pueden modificar las modificaciones de una sub-orden que ya ha sido pagada o enviada al cajero"||
-                error.message === "No se puede quitar un ingrediente que no forma parte de la receta del producto") {
+                error.message === "No se puede quitar un ingrediente que no forma parte de la receta del producto"||
+                error.message === "No puedes remover una cantidad mayor a la que dicta la receta") {
                 return res.status(404).json({ error: error.message });
             }
             if (error.message === "Order item modifier no pertenece al order item" || error.message === "Order item modifier no pertenece a la suborden" || error.message === "Order item modifier no pertenece a la orden") {
