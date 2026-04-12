@@ -50,6 +50,11 @@ export class ShiftService {
             throw new Error("Este turno ya se encuentra cerrado");
         }
 
+        const hasOpenOrders = await this.repository.hasOpenOrders(id);
+        if (hasOpenOrders) {
+            throw new Error("No se puede cerrar el turno porque aún hay órdenes abiertas o sin pagar");
+        }
+
         const expectedRevenue = await this.repository.calculateExpectedRevenue(id);
         const declaredCash = Number(data.declaredCash);
         const difference = declaredCash - expectedRevenue;

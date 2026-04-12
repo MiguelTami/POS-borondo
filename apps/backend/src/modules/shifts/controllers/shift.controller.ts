@@ -78,6 +78,9 @@ export class ShiftController {
             if (error.message === "Turno no encontrado") {
                 return res.status(404).json({ error: error.message });
             }
+            if (error.message === "Este turno ya se encuentra cerrado" || error.message === "No se puede cerrar el turno porque aún hay órdenes abiertas o sin pagar") {
+                return res.status(400).json({ error: error.message });
+            }
             if (error.message === "Este turno ya se encuentra cerrado") {
                 return res.status(400).json({ error: error.message });
             }

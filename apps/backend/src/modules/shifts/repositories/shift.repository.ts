@@ -65,6 +65,18 @@ export class ShiftRepository {
         return result._sum.amount ? Number(result._sum.amount) : 0;
     }
 
+    async hasOpenOrders(shiftId: number) {
+        const openOrder = await prisma.order.findFirst({
+            where: {
+                shiftId,
+                status: {
+                    in: ['OPEN', 'SENT_TO_CASHIER']
+                }
+            }
+        });
+        return !!openOrder;
+    }
+
     async closeShift(id: number, closedById: number, expectedRevenue: number, declaredCash: number, difference: number) {
         return prisma.shift.update({
             where: { id },
