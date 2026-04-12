@@ -3,6 +3,7 @@ import { OrderStatus, TableStatus } from "@prisma/client";
 export interface CreateOrderDTO {
     tableId: number;
     waiterId: number;
+    shiftId?: number;
 }
 
 export interface UpdateOrderDTO {

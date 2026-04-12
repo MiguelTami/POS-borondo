@@ -18,7 +18,12 @@ export class OrderController {
             res.status(201).json(order);
         } catch (error: any) {
             console.error(error.message);
-            if (error.message === "La mesa no existe" || error.message.includes("rol de mesonero") || error.message === "La mesa no está disponible") {
+            if (
+                error.message === "La mesa no existe" || 
+                error.message.includes("rol de mesonero") || 
+                error.message === "La mesa no está disponible" ||
+                error.message === "No hay un turno activo. Debes abrir un turno antes de crear órdenes."
+            ) {
                 return res.status(400).json({ error: error.message });
             }
 

@@ -2,17 +2,25 @@ import { OrderRepository } from "../repositories/order.repository";
 import { prisma } from "../../../config/prisma";
 import { CreateOrderDTO, OrderResponse, UpdateOrderDTO } from "../types/order.types";
 import { TablesService } from "../../tables/service/table.service";
+import { ShiftService } from "../../shifts/services/shift.service";
 
 export class OrderService {
     private repository: OrderRepository;
     private tablesService: TablesService;
+    private shiftService: ShiftService;
 
     constructor() {
         this.repository = new OrderRepository();
         this.tablesService = new TablesService();
+        this.shiftService = new ShiftService();
     }
 
     async createOrder(data: CreateOrderDTO): Promise<OrderResponse> {
+        const activeShift = await this.shiftService.getActiveShift();
+        if (!activeShift) {
+            throw new Error("No hay un turno activo. Debes abrir un turno antes de crear órdenes.");
+        }
+
         const table = await this.tablesService.getTableById(data.tableId);
 
         if (table.status !== "AVAILABLE") {
@@ -21,6 +29,8 @@ export class OrderService {
 
         const now = new Date();
         const businessDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+        data.shiftId = activeShift.id;
 
         return this.repository.createOrder(data, businessDate);
     }

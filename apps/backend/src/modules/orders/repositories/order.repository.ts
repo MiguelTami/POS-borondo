@@ -20,6 +20,7 @@ export class OrderRepository {
             data: {
             tableId: data.tableId,
             waiterId: data.waiterId,
+            shiftId: data.shiftId!,
             businessDate,
             dailyOrderNumber: counter.lastOrderNumber
             },
