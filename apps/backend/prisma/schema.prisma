@@ -55,6 +55,9 @@ model Order {
   waiter User @relation("WaiterOrders",fields: [waiterId], references: [id])
   waiterId Int
 
+  shift Shift @relation(fields: [shiftId], references: [id])
+  shiftId Int
+
   subOrders SubOrder[]
 
   @@unique([dailyOrderNumber, businessDate]) 
@@ -196,6 +199,7 @@ model Shift {
   closedById Int?
 
   payments Payment[]
+  orders Order[]
 }
 
 model Payment {
