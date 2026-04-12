@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export interface User {
   id: number;
@@ -16,15 +16,16 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()(
-    persist(
-        (set) => ({
-            token: null,
-            user: null,
-            setAuth: (user, token) => set({ user, token }),
-            logout: () => set({ user: null, token: null }),
-        }),
-        {
-            name: "borondo-auth", // Guardar el token en localStorage
-        }
-    )
+  persist(
+    (set) => ({
+      token: null,
+      user: null,
+      setAuth: (user, token) => set({ user, token }),
+      logout: () => set({ user: null, token: null }),
+    }),
+    {
+      name: "borondo-auth", // Guardar el token en sessionStorage
+      storage: createJSONStorage(() => sessionStorage),
+    },
+  ),
 );

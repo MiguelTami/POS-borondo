@@ -4,12 +4,15 @@ import { ProtectedRoute } from "../layouts/ProtectedRoute";
 import { PosLayout } from "../layouts/PosLayout";
 import { AdminLayout } from "../layouts/AdminLayout";
 import { useAuthStore } from "../features/auth/slices/authStore";
+import { ShiftGuard } from "../features/shifts/layouts/ShiftGuard";
+import { OpenShiftView } from "../features/shifts/views/OpenShiftView";
+import { ActiveOrdersView } from "../features/orders/views/ActiveOrdersView";
 
-// Un AuthRedirect base para que la raÃ­z (/) mande a donde deba
 const RootRedirect = () => {
   const { user, token } = useAuthStore();
   if (!token || !user) return <Navigate to="/login" replace />;
-  if (user.role === "ADMIN") return <Navigate to="/admin/dashboard" replace />;
+  if (user.role === "ADMIN" || user.role === "CASHIER")
+    return <Navigate to="/pos/orders" replace />;
   return <Navigate to="/pos/tables" replace />;
 };
 
@@ -25,18 +28,38 @@ export const router = createBrowserRouter([
   {
     path: "/pos",
     element: (
-      <ProtectedRoute rolesAllowed={["ADMIN", "CASHIER", "WAITER"]} redirectPath="/login">
+      <ProtectedRoute
+        rolesAllowed={["ADMIN", "CASHIER", "WAITER"]}
+        redirectPath="/login"
+      >
         <PosLayout />
       </ProtectedRoute>
     ),
     children: [
       {
-        path: "tables",
-        element: <div className="text-2xl font-bold flex justify-center items-center h-full">Mapas de Mesas PrÃ³ximamente...</div>,
+        path: "orders",
+        element: <ActiveOrdersView />,
       },
       {
-        path: "order/:tableId",
-        element: <div className="text-2xl font-bold flex justify-center items-center h-full">Terminal POS PrÃ³ximamente...</div>,
+        element: <ShiftGuard />,
+        children: [
+          {
+            path: "tables",
+            element: (
+              <div className="text-2xl font-bold flex justify-center items-center h-full">
+                Mapas de Mesas Próximamente...
+              </div>
+            ),
+          },
+          {
+            path: "order/:tableId",
+            element: (
+              <div className="text-2xl font-bold flex justify-center items-center h-full">
+                Terminal POS Próximamente...
+              </div>
+            ),
+          },
+        ],
       },
     ],
   },
@@ -50,27 +73,41 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "dashboard",
-        element: <div className="text-2xl font-bold">Dashboard PrÃ³ximamente...</div>,
+        element: (
+          <div className="text-2xl font-bold">Dashboard PrÃ³ximamente...</div>
+        ),
       },
       {
         path: "products",
-        element: <div className="text-2xl font-bold">Productos PrÃ³ximamente...</div>,
+        element: (
+          <div className="text-2xl font-bold">Productos PrÃ³ximamente...</div>
+        ),
       },
       {
         path: "inventory",
-        element: <div className="text-2xl font-bold">Inventario PrÃ³ximamente...</div>,
+        element: (
+          <div className="text-2xl font-bold">Inventario PrÃ³ximamente...</div>
+        ),
       },
       {
         path: "tables",
-        element: <div className="text-2xl font-bold">Mesas PrÃ³ximamente...</div>,
+        element: (
+          <div className="text-2xl font-bold">Mesas PrÃ³ximamente...</div>
+        ),
       },
       {
         path: "users",
-        element: <div className="text-2xl font-bold">Usuarios PrÃ³ximamente...</div>,
+        element: (
+          <div className="text-2xl font-bold">Usuarios PrÃ³ximamente...</div>
+        ),
       },
       {
         path: "settings",
-        element: <div className="text-2xl font-bold">ConfiguraciÃ³n PrÃ³ximamente...</div>,
+        element: (
+          <div className="text-2xl font-bold">
+            ConfiguraciÃ³n PrÃ³ximamente...
+          </div>
+        ),
       },
     ],
   },

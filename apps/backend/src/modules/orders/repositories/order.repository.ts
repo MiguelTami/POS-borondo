@@ -53,6 +53,7 @@ export class OrderRepository {
                 dailyOrderNumber: true,
                 status: true,
                 tableId: true,
+                shiftId: true,
                 table: {
                     select: {
                         number: true,
@@ -84,6 +85,7 @@ export class OrderRepository {
                 dailyOrderNumber: true,
                 status: true,
                 tableId: true,
+                shiftId: true,
                 table: {
                     select: {
                         number: true,
@@ -116,6 +118,7 @@ export class OrderRepository {
                 dailyOrderNumber: true,
                 status: true,
                 tableId: true,
+                shiftId: true,
                 table: {
                     select: {
                         number: true,
@@ -245,6 +248,7 @@ export class OrderRepository {
                             name: true
                         }
                     },
+                    shiftId: true,
                     subOrders: {
                         select: {
                             id: true,
