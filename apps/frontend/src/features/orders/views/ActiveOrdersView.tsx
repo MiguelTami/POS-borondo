@@ -1,15 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import {
   Lock,
   MoreVertical,
   CheckCircle2,
   AlertTriangle,
   UserCheck,
+  CreditCard,
+  Banknote,
+  Smartphone,
 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { useShiftStore } from "../../shifts/slices/shiftStore";
 import { shiftService } from "../../shifts/services/shift.service";
-import { orderService, type Order } from "../services/order.service";
+import { paymentService } from "../../payments/services/payment.service";
+import {
+  orderService,
+  type Order,
+  type SubOrder,
+} from "../services/order.service";
 
 export function ActiveOrdersView() {
   const { activeShift, setActiveShift, isLoading } = useShiftStore();
@@ -17,6 +25,13 @@ export function ActiveOrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [openingShift, setOpeningShift] = useState(false);
+
+  // Payment Modal State
+  const [paymentSubOrder, setPaymentSubOrder] = useState<SubOrder | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<
+    "CASH" | "CARD" | "MOBILE_PAYMENT"
+  >("CASH");
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
     if (activeShift) {
@@ -28,6 +43,7 @@ export function ActiveOrdersView() {
     setLoadingOrders(true);
     try {
       const data = await orderService.getOrders(activeShift?.id);
+      console.log("Raw orders from API:", JSON.stringify(data, null, 2));
       setOrders(data);
     } catch (err) {
       console.error("Error fetching orders", err);
@@ -70,6 +86,36 @@ export function ActiveOrdersView() {
     }
   };
 
+  const calculateSubOrderTotal = (sub: SubOrder) => {
+    if (!sub.orderItems || sub.orderItems.length === 0) return 0;
+    return sub.orderItems.reduce(
+      (acc, item) => acc + Number(item.totalPriceSnapshot || 0),
+      0,
+    );
+  };
+
+  const handleProcessSubOrderPayment = async () => {
+    if (!paymentSubOrder || !activeShift) return;
+
+    try {
+      setProcessingPayment(true);
+      await paymentService.createPayment({
+        subOrderId: paymentSubOrder.id,
+        shiftId: activeShift.id,
+        method: paymentMethod,
+      });
+      // Optionally could mark subOrder as paid directly on front or refetch
+      await fetchOrders();
+      setPaymentSubOrder(null);
+      setPaymentMethod("CASH");
+    } catch (error: any) {
+      console.error("Payment error", error);
+      alert(error?.response?.data?.error || "Error al procesar el pago");
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
   // VISTA 1: CAJA CERRADA
   if (!activeShift && !isLoading) {
     return (
@@ -99,7 +145,10 @@ export function ActiveOrdersView() {
 
   // VISTA 2: CAJA ABIERTA (DASHBOARD ORDENES)
   // Filtrar SOLAMENTE por el turno activo
-  const shiftOrders = orders.filter((o) => o.shiftId === activeShift?.id);
+  // Nota: validamos con .toString() por si acaso hay un desajuste de tipos (string vs number)
+  const shiftOrders = orders.filter(
+    (o) => o.shiftId?.toString() === activeShift?.id?.toString(),
+  );
 
   const filteredOrders = shiftOrders
     .map((order) => {
@@ -156,16 +205,16 @@ export function ActiveOrdersView() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
             {filteredOrders.length === 0 ? (
               <div className="col-span-full text-center py-12 text-gray-400">
-                No hay órdenes para mostrar con el filtro actual.
+                No hay órdenes pendientes en este turno. (Si crees que es un
+                error, verifica la terminal/consola F12).
               </div>
             ) : (
               filteredOrders.map((order) => {
                 const isPaid = order.status === "PAID";
-                // Calcular el total global sumando los subTotales (o usando order.totalAmount si viene correctamente del backend)
-                // Por requerimiento sumamos explícitamente los subtotales:
+                // Calcular el total global sumando los subTotales de las orderItems (totalPriceSnapshot)
                 const calculatedGlobalTotal =
                   order.subOrders?.reduce(
-                    (acc, sub) => acc + Number(sub.subTotal || 0),
+                    (acc, sub) => acc + calculateSubOrderTotal(sub),
                     0,
                   ) || 0;
 
@@ -217,24 +266,32 @@ export function ActiveOrdersView() {
                     <div className="flex-1 space-y-3 mt-2">
                       {order.subOrders?.map((sub) => {
                         const subPaid = sub.status === "PAID";
+                        const isPayable =
+                          !subPaid && sub.status === "SENT_TO_CASHIER";
+                        const subTotalCalc = calculateSubOrderTotal(sub);
 
                         return (
                           <div
                             key={sub.id}
-                            className="bg-[#F8F9FB] rounded-xl p-4 flex items-center justify-between"
+                            className={`rounded-xl p-4 flex items-center justify-between border transition-colors ${
+                              isPayable
+                                ? "bg-white hover:bg-gray-50 border-gray-200 cursor-pointer"
+                                : "bg-[#F8F9FB] border-transparent"
+                            }`}
+                            onClick={() => isPayable && setPaymentSubOrder(sub)}
                           >
                             <div className="flex items-center gap-3">
                               <div
-                                className={`w-2.5 h-2.5 rounded-full ${subPaid ? "bg-blue-500" : "bg-red-500"}`}
+                                className={`w-2.5 h-2.5 rounded-full ${subPaid ? "bg-blue-500" : "bg-orange-500"}`}
                               />
                               <div>
                                 <h4 className="text-sm font-bold text-gray-900 leading-snug">
                                   {sub.label || `Sub-orden #${sub.id}`}
                                 </h4>
                                 <span className="text-[13px] text-gray-500 font-semibold block mt-1">
-                                  Subtotal:{" "}
+                                  Total:{" "}
                                   <span className="text-gray-900">
-                                    ${Number(sub.subTotal).toFixed(0)}
+                                    ${subTotalCalc.toFixed(0)}
                                   </span>
                                 </span>
                               </div>
@@ -242,14 +299,16 @@ export function ActiveOrdersView() {
                             <div className="flex items-center gap-4">
                               <div className="text-right">
                                 <div
-                                  className={`text-[10px] font-bold tracking-wider uppercase mt-1 ${!subPaid ? "text-red-500" : "text-blue-600"}`}
+                                  className={`text-[10px] font-bold tracking-wider uppercase mt-1 ${!subPaid ? "text-orange-600" : "text-blue-600"}`}
                                 >
-                                  {sub.status}
+                                  {sub.status === "SENT_TO_CASHIER"
+                                    ? "POR COBRAR"
+                                    : sub.status}
                                 </div>
                               </div>
                               {!subPaid ? (
-                                <div className="px-3 py-1 bg-white border border-gray-200 text-gray-400 text-xs font-bold rounded-lg shadow-sm">
-                                  Pendiente
+                                <div className="px-3 py-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-800 text-xs font-bold rounded-lg shadow-sm">
+                                  Pagar Item
                                 </div>
                               ) : (
                                 <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
@@ -293,6 +352,121 @@ export function ActiveOrdersView() {
           </div>
         )}
       </div>
+
+      {paymentSubOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          {(() => {
+            console.log(
+              "PAYMENT MODAL SUBORDER:",
+              JSON.stringify(paymentSubOrder, null, 2),
+            );
+            return null;
+          })()}
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
+              <h2 className="text-xl font-bold text-gray-900">
+                Confirmar Pago
+              </h2>
+              <button
+                onClick={() => setPaymentSubOrder(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-6">
+                <div className="text-sm font-bold text-gray-400 tracking-wider uppercase mb-3">
+                  Detalle de Consumo
+                </div>
+                <div className="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100 max-h-48 overflow-y-auto">
+                  {paymentSubOrder.orderItems?.map((item: any) => (
+                    <div
+                      key={item.id}
+                      className="flex justify-between items-start text-sm"
+                    >
+                      <div className="flex-1 pr-4">
+                        <span className="font-bold text-gray-800">
+                          {item.quantity}x
+                        </span>{" "}
+                        <span className="text-gray-600">
+                          {item.product?.name || "Producto N/A"}
+                        </span>
+                      </div>
+                      <div className="font-semibold text-gray-900">
+                        ${Number(item.totalPriceSnapshot).toFixed(0)}
+                      </div>
+                    </div>
+                  ))}
+                  {(!paymentSubOrder.orderItems ||
+                    paymentSubOrder.orderItems.length === 0) && (
+                    <div className="text-gray-500 italic text-sm">
+                      No items found
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center py-4 border-t border-b border-gray-100 mb-6">
+                <span className="text-gray-500 font-bold">Total a Cobrar</span>
+                <span className="text-3xl font-black text-gray-900">
+                  ${calculateSubOrderTotal(paymentSubOrder).toFixed(0)}
+                </span>
+              </div>
+
+              <div className="mb-6">
+                <div className="text-sm font-bold text-gray-400 tracking-wider uppercase mb-3">
+                  Método de Pago
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => setPaymentMethod("CASH")}
+                    className={`py-3 px-2 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
+                      paymentMethod === "CASH"
+                        ? "border-blue-600 bg-blue-50 text-blue-700"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    <Banknote className="w-6 h-6" />
+                    <span className="text-[10px] font-bold">EFECTIVO</span>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("CARD")}
+                    className={`py-3 px-2 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
+                      paymentMethod === "CARD"
+                        ? "border-blue-600 bg-blue-50 text-blue-700"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    <CreditCard className="w-6 h-6" />
+                    <span className="text-[10px] font-bold">TARJETA</span>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("MOBILE_PAYMENT")}
+                    className={`py-3 px-2 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
+                      paymentMethod === "MOBILE_PAYMENT"
+                        ? "border-blue-600 bg-blue-50 text-blue-700"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    <Smartphone className="w-6 h-6" />
+                    <span className="text-[10px] font-bold">MÓVIL</span>
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleProcessSubOrderPayment}
+                disabled={processingPayment}
+                className="w-full h-14 text-lg font-bold rounded-xl shadow-sm bg-blue-600 hover:bg-blue-700"
+              >
+                {processingPayment ? "Procesando Pago..." : "Confirmar Pago"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

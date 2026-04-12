@@ -10,13 +10,22 @@ export interface Order {
   subOrders: SubOrder[];
 }
 
+export interface OrderItem {
+  id: number;
+  quantity: number;
+  totalPriceSnapshot: string | number;
+  product: {
+    name: string;
+  };
+}
+
 export interface SubOrder {
   id: number;
   label: string | null;
   status: string;
   subTotal: number;
   paidAmount: number;
-  orderItems: any[];
+  orderItems: OrderItem[];
 }
 
 export const orderService = {

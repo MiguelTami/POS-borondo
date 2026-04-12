@@ -71,6 +71,18 @@ export class OrderRepository {
                         id: true,
                         label: true,
                         status: true,
+                        orderItems: {
+                            select: {
+                                id: true,
+                                quantity: true,
+                                totalPriceSnapshot: true,
+                                product: {
+                                    select: {
+                                        name: true
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -103,6 +115,18 @@ export class OrderRepository {
                         id: true,
                         label: true,
                         status: true,
+                        orderItems: {
+                            select: {
+                                id: true,
+                                quantity: true,
+                                totalPriceSnapshot: true,
+                                product: {
+                                    select: {
+                                        name: true
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             },
