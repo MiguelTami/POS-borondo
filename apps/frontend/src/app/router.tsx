@@ -7,6 +7,7 @@ import { useAuthStore } from "../features/auth/slices/authStore";
 import { ShiftGuard } from "../features/shifts/layouts/ShiftGuard";
 import { OpenShiftView } from "../features/shifts/views/OpenShiftView";
 import { ActiveOrdersView } from "../features/orders/views/ActiveOrdersView";
+import { WaiterOrdersView } from "../features/orders/views/WaiterOrdersView";
 
 const RootRedirect = () => {
   const { user, token } = useAuthStore();
@@ -45,11 +46,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "tables",
-            element: (
-              <div className="text-2xl font-bold flex justify-center items-center h-full">
-                Mapas de Mesas Próximamente...
-              </div>
-            ),
+            element: <WaiterOrdersView />,
           },
           {
             path: "order/:tableId",
