@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { X, ArrowRightLeft } from "lucide-react";
+import { X, ArrowRightLeft, AlertCircle } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "../../../components/ui/alert";
 import {
   inventoryService,
   type Ingredient,
@@ -41,6 +46,19 @@ export function StockAdjustModal({ onClose, onSuccess, ingredient }: Props) {
       setError("La cantidad no puede ser cero.");
       return;
     }
+
+    let stockChange = formData.quantity;
+    if (formData.type === "WASTE") {
+      stockChange = -Math.abs(formData.quantity);
+    } else if (formData.type === "RESTOCK") {
+      stockChange = Math.abs(formData.quantity);
+    }
+
+    if (Number(ingredient.stock) + stockChange < 0) {
+      setError("El stock no puede ser menor a 0. Ajuste inválido.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -82,9 +100,14 @@ export function StockAdjustModal({ onClose, onSuccess, ingredient }: Props) {
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 font-medium">
-              {error}
-            </div>
+            <Alert
+              variant="destructive"
+              className="mb-2 bg-red-50 border-red-200"
+            >
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
           <div className="space-y-2">

@@ -32,6 +32,7 @@ export function InventoryView() {
   const [search, setSearch] = useState("");
   const [filterMode, setFilterMode] = useState<FilterMode>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+  const [stockErrorPopup, setStockErrorPopup] = useState<string | null>(null);
 
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
   const [editingIngredient, setEditingIngredient] = useState<
@@ -39,6 +40,10 @@ export function InventoryView() {
   >();
 
   const [adjustIngredient, setAdjustIngredient] = useState<
+    Ingredient | undefined
+  >();
+
+  const [confirmToggleIngredient, setConfirmToggleIngredient] = useState<
     Ingredient | undefined
   >();
 
@@ -79,17 +84,36 @@ export function InventoryView() {
     setAdjustIngredient(ingredient);
   };
 
-  const handleToggleActive = async (ingredient: Ingredient) => {
+  const handleRequestToggleActive = (ingredient: Ingredient) => {
+    setStockErrorPopup(null);
+    if (ingredient.isActive && Number(ingredient.stock) > 0) {
+      setStockErrorPopup(
+        "No se puede desactivar un ingrediente con stock disponible.",
+      );
+      return;
+    }
+    setConfirmToggleIngredient(ingredient);
+  };
+
+  const executeToggleActive = async () => {
+    if (!confirmToggleIngredient) return;
+    const ingredient = confirmToggleIngredient;
+    setStockErrorPopup(null);
     try {
       if (ingredient.isActive) {
         await inventoryService.deactivateIngredient(ingredient.id);
       } else {
         await inventoryService.activateIngredient(ingredient.id);
       }
+      setConfirmToggleIngredient(undefined);
       fetchIngredients();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error toggling exact ingredient", error);
-      alert("Error al cambiar el estado del ingrediente.");
+      setStockErrorPopup(
+        error.response?.data?.message ||
+          "Error al cambiar el estado del ingrediente.",
+      );
+      setConfirmToggleIngredient(undefined);
     }
   };
 
@@ -98,9 +122,12 @@ export function InventoryView() {
   const activeCount = ingredients.filter((i) => i.isActive).length;
   const inactiveCount = ingredients.filter((i) => !i.isActive).length;
   const lowStockCount = ingredients.filter(
-    (i) => i.stock <= i.minStockAlert && i.stock > 0,
+    (i) => Number(i.stock) <= i.minStockAlert && Number(i.stock) > 0,
   ).length;
-  const outOfStockCount = ingredients.filter((i) => i.stock === 0).length;
+  // Keep the frontend count for the stats UI, but we could also get it from backend if needed
+  const outOfStockCount = ingredients.filter(
+    (i) => Number(i.stock) <= 0,
+  ).length;
 
   // Filter application
   const filteredAndSearchedIngredients = useMemo(() => {
@@ -113,10 +140,10 @@ export function InventoryView() {
       filtered = filtered.filter((i) => !i.isActive);
     } else if (filterMode === "LOW_STOCK") {
       filtered = filtered.filter(
-        (i) => i.stock <= i.minStockAlert && i.stock > 0,
+        (i) => Number(i.stock) <= i.minStockAlert && Number(i.stock) > 0,
       );
     } else if (filterMode === "OUT_OF_STOCK") {
-      filtered = filtered.filter((i) => i.stock === 0);
+      filtered = filtered.filter((i) => Number(i.stock) <= 0);
     }
 
     // Apply Search
@@ -180,6 +207,30 @@ export function InventoryView() {
           </Button>
         </div>
       </div>
+
+      {stockErrorPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden p-6 border-t-4 border-red-500">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-red-100 p-2 rounded-full">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Acción no permitida
+              </h3>
+            </div>
+            <p className="text-gray-600 mb-6">{stockErrorPopup}</p>
+            <div className="flex justify-end">
+              <Button
+                className="bg-gray-800 hover:bg-gray-900"
+                onClick={() => setStockErrorPopup(null)}
+              >
+                Entendido
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mini Stats Cards (Filter buttons) - 5 columns */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
@@ -322,7 +373,7 @@ export function InventoryView() {
               // Use minStockAlert * 2 to represent a "fully healthy" bar
               const thresholdForMax =
                 ing.minStockAlert > 0 ? ing.minStockAlert * 2 : 100;
-              const safeStock = Math.min(ing.stock, thresholdForMax);
+              const safeStock = Math.min(Number(ing.stock), thresholdForMax);
               const percent =
                 thresholdForMax === 0 ? 0 : (safeStock / thresholdForMax) * 100;
 
@@ -361,7 +412,7 @@ export function InventoryView() {
                       variant="secondary"
                       size="icon"
                       className="h-8 w-8 rounded-full shadow-sm bg-white hover:bg-gray-50 border border-gray-100 text-red-500"
-                      onClick={() => handleToggleActive(ing)}
+                      onClick={() => handleRequestToggleActive(ing)}
                       title={ing.isActive ? "Desactivar" : "Activar"}
                     >
                       {ing.isActive ? (
@@ -399,7 +450,7 @@ export function InventoryView() {
                           {ing.unit}
                         </span>
                       </span>
-                      {ing.stock <= 0 && (
+                      {Number(ing.stock) <= 0 && (
                         <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">
                           Agotado
                         </span>
@@ -436,7 +487,7 @@ export function InventoryView() {
                     <Button
                       variant={ing.isActive ? "outline" : "default"}
                       className={`flex-1 text-xs px-1 ${ing.isActive ? "text-red-500 border-red-200 hover:bg-red-50" : "bg-emerald-600"}`}
-                      onClick={() => handleToggleActive(ing)}
+                      onClick={() => handleRequestToggleActive(ing)}
                     >
                       {ing.isActive ? (
                         <>
@@ -508,6 +559,45 @@ export function InventoryView() {
             fetchIngredients();
           }}
         />
+      )}
+
+      {confirmToggleIngredient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Confirmar acción
+            </h3>
+            <p className="text-gray-600 mb-6">
+              ¿Estás seguro de que deseas{" "}
+              <strong>
+                {confirmToggleIngredient.isActive ? "desactivar" : "activar"}
+              </strong>{" "}
+              el ingrediente{" "}
+              <span className="font-bold text-gray-900">
+                {confirmToggleIngredient.name}
+              </span>
+              ?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmToggleIngredient(undefined)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className={
+                  confirmToggleIngredient.isActive
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+                }
+                onClick={executeToggleActive}
+              >
+                {confirmToggleIngredient.isActive ? "Desactivar" : "Activar"}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
