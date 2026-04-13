@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Coffee } from "lucide-react";
+import { Plus, Search, Coffee, X } from "lucide-react";
 import { Button } from "../../../components/ui/button";
-import { orderService, type Order } from "../services/order.service";
+import {
+  orderService,
+  type Order,
+  type SubOrder,
+} from "../services/order.service";
 import { CreateOrderModal } from "../components/CreateOrderModal";
 import { useAuthStore } from "../../auth/slices/authStore";
 
@@ -9,6 +13,16 @@ export function WaiterOrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+
+  // For adding to existing order
+  const [existingOrderTarget, setExistingOrderTarget] = useState<{
+    id: number;
+    tableId: number | null;
+  } | null>(null);
+
+  // For viewing suborder details
+  const [viewSubOrder, setViewSubOrder] = useState<SubOrder | null>(null);
+
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -96,44 +110,80 @@ export function WaiterOrdersView() {
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-bold text-gray-400 block uppercase tracking-wider">
-                    Orden
+                    Orden #{order.id}
                   </span>
-                  <span className="text-lg font-black text-gray-800">
-                    #{order.id}
+                  <span className="text-2xl font-black text-gray-900 mt-1 block">
+                    $
+                    {Number(
+                      order.subOrders?.reduce((accSub, sub) => {
+                        const subT =
+                          sub.orderItems?.reduce(
+                            (accItem, item) =>
+                              accItem + Number(item.totalPriceSnapshot || 0),
+                            0,
+                          ) || 0;
+                        return accSub + subT;
+                      }, 0) || 0,
+                    ).toFixed(0)}
                   </span>
                 </div>
               </div>
 
               <div className="flex-1 space-y-3 my-4">
-                {order.subOrders?.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="bg-gray-50 rounded-lg p-3 border border-gray-100"
-                  >
-                    <div className="text-sm font-bold text-gray-700">
-                      {sub.label || "Sin Etiqueta"}
+                {order.subOrders?.map((sub) => {
+                  const calculatedSubTotal =
+                    sub.orderItems?.reduce(
+                      (accItem, item) =>
+                        accItem + Number(item.totalPriceSnapshot || 0),
+                      0,
+                    ) || 0;
+                  return (
+                    <div
+                      key={sub.id}
+                      onClick={() => setViewSubOrder(sub)}
+                      className="bg-gray-50 rounded-lg p-3 border border-gray-100 hover:border-blue-300 hover:bg-blue-50/50 cursor-pointer transition-all"
+                    >
+                      <div className="text-sm font-bold text-gray-700">
+                        {sub.label || "Sin Etiqueta"}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1 flex justify-between">
+                        <span>
+                          {sub.status === "SENT_TO_CASHIER"
+                            ? "Por Cobrar"
+                            : sub.status}
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          ${Number(calculatedSubTotal).toFixed(0)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1 flex justify-between">
-                      <span>
-                        {sub.status === "SENT_TO_CASHIER"
-                          ? "Por Cobrar"
-                          : sub.status}
-                      </span>
-                      <span className="font-semibold text-gray-900">
-                        ${Number(sub.subTotal).toFixed(0)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
-              <div className="pt-4 border-t border-gray-100 flex justify-between items-end mt-auto">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                  Estado
-                </span>
-                <span className="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold uppercase tracking-wider">
-                  {order.status}
-                </span>
+              <div className="pt-4 border-t border-gray-100 flex flex-col gap-3 mt-auto">
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                    Estado
+                  </span>
+                  <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold uppercase tracking-wider">
+                    {order.status}
+                  </span>
+                </div>
+                {order.status !== "PAID" && (
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      setExistingOrderTarget({
+                        id: order.id,
+                        tableId: order.tableId,
+                      })
+                    }
+                    className="w-full mt-2 font-bold text-blue-600 border-blue-200 hover:bg-blue-50"
+                  >
+                    <Plus className="w-4 h-4 mr-2" /> Agregar Suborden
+                  </Button>
+                )}
               </div>
             </div>
           ))}
@@ -145,6 +195,80 @@ export function WaiterOrdersView() {
           onClose={() => setCreateModalOpen(false)}
           onSuccess={fetchOrders}
         />
+      )}
+
+      {existingOrderTarget && (
+        <CreateOrderModal
+          existingOrderId={existingOrderTarget.id}
+          existingTableId={existingOrderTarget.tableId || undefined}
+          onClose={() => setExistingOrderTarget(null)}
+          onSuccess={fetchOrders}
+        />
+      )}
+
+      {viewSubOrder && (
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center">
+              <div>
+                <h3 className="font-bold text-xl text-gray-900 border-b-2 border-blue-500 pb-1 inline-block">
+                  Sub-orden: {viewSubOrder.label || "Sin Nombre"}
+                </h3>
+              </div>
+              <button
+                onClick={() => setViewSubOrder(null)}
+                className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-2 max-h-[60vh] overflow-y-auto">
+              {viewSubOrder.orderItems?.length > 0 ? (
+                <ul className="divide-y divide-gray-100">
+                  {viewSubOrder.orderItems.map((item: any) => (
+                    <li
+                      key={item.id}
+                      className="py-3 px-4 flex justify-between items-center bg-white rounded-lg"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-bold text-gray-800">
+                          {item.product?.name || "Ref."}
+                        </span>
+                        <span className="text-gray-500 text-xs font-medium mt-1">
+                          Cantidad: {item.quantity}
+                        </span>
+                      </div>
+                      <span className="font-black text-gray-900 bg-gray-50 px-2 py-1 rounded">
+                        ${Number(item.totalPriceSnapshot).toFixed(0)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-6 text-center text-sm font-medium text-gray-400">
+                  No hay items en esta sub-orden.
+                </div>
+              )}
+            </div>
+
+            <div className="p-5 bg-gray-50 border-t border-gray-100 flex justify-between items-center rounded-b-2xl">
+              <span className="font-bold text-gray-400 text-sm">
+                TOTAL SUBORDEN
+              </span>
+              <span className="font-black text-blue-600 text-2xl">
+                $
+                {Number(
+                  viewSubOrder.orderItems?.reduce(
+                    (acc: number, item: any) =>
+                      acc + Number(item.totalPriceSnapshot || 0),
+                    0,
+                  ) || 0,
+                ).toFixed(0)}
+              </span>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
