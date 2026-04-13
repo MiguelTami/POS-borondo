@@ -77,6 +77,30 @@ export class ShiftRepository {
         return !!openOrder;
     }
 
+    async getSubordersSummary(shiftId: number) {
+        const groups = await prisma.subOrder.groupBy({
+            by: ['status'],
+            where: {
+                order: {
+                    shiftId
+                }
+            },
+            _count: {
+                id: true
+            }
+        });
+
+        let paidCount = 0;
+        let cancelledCount = 0;
+
+        groups.forEach(g => {
+            if (g.status === 'PAID') paidCount += g._count.id;
+            else if (g.status === 'CANCELLED') cancelledCount += g._count.id;
+        });
+
+        return { paid: paidCount, cancelled: cancelledCount };
+    }
+
     async closeShift(id: number, closedById: number, expectedRevenue: number, declaredCash: number, difference: number) {
         return prisma.shift.update({
             where: { id },

@@ -7,9 +7,14 @@ export interface Shift {
   openedById: number;
   closedById: number | null;
   totalSales: number;
+  expectedRevenue?: number | null;
   declaredCash: number | null;
   difference: number | null;
   status: "OPEN" | "CLOSED";
+  summary?: {
+    paid: number;
+    cancelled: number;
+  };
 }
 
 export const shiftService = {

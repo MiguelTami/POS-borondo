@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, DollarSign, Receipt, AlertCircle } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { useShiftStore } from "../slices/shiftStore";
-import { shiftService } from "../services/shift.service";
+import { shiftService, type Shift } from "../services/shift.service";
 
 interface Props {
   onClose: () => void;
@@ -15,6 +15,7 @@ export function CloseShiftModal({ onClose }: Props) {
   const [declaredCash, setDeclaredCash] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<Shift | null>(null);
 
   const handleCloseShift = async () => {
     if (!activeShift) return;
@@ -28,10 +29,10 @@ export function CloseShiftModal({ onClose }: Props) {
     try {
       setLoading(true);
       setError(null);
-      await shiftService.closeShift(activeShift.id, cashValue);
+      const result = await shiftService.closeShift(activeShift.id, cashValue);
       // Al cerrar el turno exitosamente, lo limpiamos del estado local
       setActiveShift(null);
-      onClose();
+      setSummary(result);
     } catch (err: any) {
       console.error("Error cerrando turno", err);
       setError(
@@ -42,6 +43,96 @@ export function CloseShiftModal({ onClose }: Props) {
       setLoading(false);
     }
   };
+
+  if (summary) {
+    const diff = Number(summary.difference || 0);
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden border border-gray-100">
+          <div className="bg-red-50 p-6 text-center border-b border-red-100">
+            <h2 className="text-2xl font-bold text-red-900">
+              Resumen de Cierre de Caja
+            </h2>
+            <p className="text-red-700 mt-2">
+              El turno ha sido cerrado exitosamente
+            </p>
+          </div>
+          <div className="p-6 space-y-5">
+            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+              <div className="flex justify-between items-center text-gray-700">
+                <div className="flex items-center gap-2">
+                  <Receipt className="w-4 h-4 text-green-600" />
+                  <span>Subórdenes Pagadas:</span>
+                </div>
+                <span className="font-semibold text-gray-900 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
+                  {summary.summary?.paid || 0}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-gray-700">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <span>Subórdenes Canceladas:</span>
+                </div>
+                <span className="font-semibold text-gray-900 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
+                  {summary.summary?.cancelled || 0}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-xl p-4 space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-blue-800 font-medium">
+                  Efectivo Esperado:
+                </span>
+                <span className="font-bold text-blue-900 text-lg">
+                  $
+                  {Number(summary.expectedRevenue || 0).toLocaleString(
+                    "en-US",
+                    { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pb-4 border-b border-blue-200">
+                <span className="text-blue-800 font-medium">
+                  Efectivo Declarado:
+                </span>
+                <span className="font-bold text-blue-900 text-lg">
+                  $
+                  {Number(summary.declaredCash || 0).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-2">
+                <span className="font-bold text-gray-900 text-lg">
+                  Diferencia:
+                </span>
+                <div
+                  className={`px-4 py-2 rounded-lg font-bold text-lg ${diff === 0 ? "bg-green-100 text-green-700" : diff < 0 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
+                >
+                  $
+                  {diff.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <Button
+                onClick={onClose}
+                className="w-full max-w-[200px] h-12 bg-gray-900 hover:bg-black text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+              >
+                Cerrar Pantalla
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -94,19 +185,19 @@ export function CloseShiftModal({ onClose }: Props) {
             </div>
           </div>
 
-          <div className="flex gap-3 mt-8">
+          <div className="flex justify-center gap-4 mt-8">
             <Button
               variant="outline"
               onClick={onClose}
               disabled={loading}
-              className="w-full h-12 font-semibold"
+              className="w-full max-w-[150px] h-12 font-semibold"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleCloseShift}
               disabled={loading || !declaredCash}
-              className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-bold"
+              className="w-full max-w-[200px] h-12 bg-red-600 hover:bg-red-700 text-white font-bold"
             >
               {loading ? "Cerrando..." : "Confirmar Cierre"}
             </Button>

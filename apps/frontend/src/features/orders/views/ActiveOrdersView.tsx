@@ -20,7 +20,8 @@ import {
 } from "../services/order.service";
 
 export function ActiveOrdersView() {
-  const { activeShift, setActiveShift, isLoading } = useShiftStore();
+  const { activeShift, setActiveShift, isLoading, setLoading } =
+    useShiftStore();
   const [filter, setFilter] = useState("All Orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -32,6 +33,25 @@ export function ActiveOrdersView() {
     "CASH" | "CARD" | "MOBILE_PAYMENT"
   >("CASH");
   const [processingPayment, setProcessingPayment] = useState(false);
+
+  // View SubOrder Mode State
+  const [viewSubOrder, setViewSubOrder] = useState<SubOrder | null>(null);
+
+  useEffect(() => {
+    const initShift = async () => {
+      try {
+        if (!activeShift) {
+          const currentShift = await shiftService.getActiveShift();
+          setActiveShift(currentShift);
+        }
+      } catch (err) {
+        console.error("Error validando turno", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initShift();
+  }, []);
 
   useEffect(() => {
     if (activeShift) {
@@ -65,10 +85,14 @@ export function ActiveOrdersView() {
     }
   };
 
+  const [confirmCancelOrder, setConfirmCancelOrder] = useState<number | null>(
+    null,
+  );
+
   const handleCancelOrder = async (orderId: number) => {
-    if (!confirm("Are you sure you want to cancel this order?")) return;
     try {
       await orderService.cancelOrder(orderId);
+      setConfirmCancelOrder(null);
       fetchOrders();
     } catch (error) {
       console.error(error);
@@ -76,9 +100,12 @@ export function ActiveOrdersView() {
     }
   };
 
+  const [confirmPayOrder, setConfirmPayOrder] = useState<number | null>(null);
+
   const handlePayOrder = async (orderId: number) => {
     try {
       await orderService.payOrder(orderId);
+      setConfirmPayOrder(null);
       fetchOrders();
     } catch (error) {
       console.error(error);
@@ -250,7 +277,7 @@ export function ActiveOrdersView() {
                       <div>
                         {!isPaid && order.status !== "CANCELLED" && (
                           <button
-                            onClick={() => handleCancelOrder(order.id)}
+                            onClick={() => setConfirmCancelOrder(order.id)}
                             className="text-xs text-red-500 hover:bg-red-50 py-1 rounded px-2 font-semibold transition-colors mr-2"
                           >
                             CANCELAR
@@ -273,12 +300,12 @@ export function ActiveOrdersView() {
                         return (
                           <div
                             key={sub.id}
-                            className={`rounded-xl p-4 flex items-center justify-between border transition-colors ${
+                            className={`rounded-xl p-4 flex items-center justify-between border transition-colors cursor-pointer ${
                               isPayable
-                                ? "bg-white hover:bg-gray-50 border-gray-200 cursor-pointer"
+                                ? "bg-white hover:bg-gray-50 border-gray-200"
                                 : "bg-[#F8F9FB] border-transparent"
                             }`}
-                            onClick={() => isPayable && setPaymentSubOrder(sub)}
+                            onClick={() => setViewSubOrder(sub)}
                           >
                             <div className="flex items-center gap-3">
                               <div
@@ -307,9 +334,15 @@ export function ActiveOrdersView() {
                                 </div>
                               </div>
                               {!subPaid ? (
-                                <div className="px-3 py-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-800 text-xs font-bold rounded-lg shadow-sm">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    isPayable && setPaymentSubOrder(sub);
+                                  }}
+                                  className="px-3 py-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-800 text-xs font-bold rounded-lg shadow-sm"
+                                >
                                   Pagar Item
-                                </div>
+                                </button>
                               ) : (
                                 <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                                   <CheckCircle2 className="w-5 h-5" />
@@ -338,7 +371,7 @@ export function ActiveOrdersView() {
                       </div>
                       {!isPaid && order.status !== "CANCELLED" && (
                         <button
-                          onClick={() => handlePayOrder(order.id)}
+                          onClick={() => setConfirmPayOrder(order.id)}
                           className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm"
                         >
                           Pagar Orden
@@ -352,7 +385,72 @@ export function ActiveOrdersView() {
           </div>
         )}
       </div>
+      {viewSubOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl flex flex-col p-6">
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+              <h2 className="text-xl font-bold text-gray-900">
+                Detalle de Sub-orden
+              </h2>
+              <button
+                onClick={() => setViewSubOrder(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <div className="text-sm font-bold text-gray-400 tracking-wider uppercase mb-3">
+                Items Incluidos
+              </div>
+              <div className="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100 max-h-64 overflow-y-auto">
+                {viewSubOrder.orderItems?.map((item: any) => (
+                  <div
+                    key={item.id}
+                    className="flex justify-between items-start text-sm"
+                  >
+                    <div className="flex-1 pr-4">
+                      <span className="font-bold text-gray-800">
+                        {item.quantity}x
+                      </span>{" "}
+                      <span className="text-gray-600">
+                        {item.product?.name || "Producto N/A"}
+                      </span>
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      ${Number(item.totalPriceSnapshot).toFixed(0)}
+                    </div>
+                  </div>
+                ))}
+                {(!viewSubOrder.orderItems ||
+                  viewSubOrder.orderItems.length === 0) && (
+                  <div className="text-gray-500 italic text-sm">
+                    Sin items
+                  </div>
+                )}
+              </div>
+            </div>
 
+            <div className="flex justify-between items-center py-4 mt-auto border-t border-gray-100">
+              <span className="text-gray-500 font-bold">Total Reportado</span>
+              <span className="text-3xl font-black text-gray-900">
+                ${calculateSubOrderTotal(viewSubOrder).toFixed(0)}
+              </span>
+            </div>
+
+            <div className="flex justify-center mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setViewSubOrder(null)}
+                className="w-full h-12 font-semibold"
+              >
+                Cerrar Pantalla
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {paymentSubOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           {(() => {
@@ -462,6 +560,70 @@ export function ActiveOrdersView() {
                 className="w-full h-14 text-lg font-bold rounded-xl shadow-sm bg-blue-600 hover:bg-blue-700"
               >
                 {processingPayment ? "Procesando Pago..." : "Confirmar Pago"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmPayOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl flex flex-col p-6 text-center">
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              ¿Confirmar Pago de Orden?
+            </h2>
+            <p className="text-sm text-gray-500 mb-8">
+              Estás a punto de marcar toda la orden #{confirmPayOrder} como
+              pagada.
+            </p>
+            <div className="flex justify-center gap-4 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmPayOrder(null)}
+                className="w-full max-w-[150px] h-12 font-semibold"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => handlePayOrder(confirmPayOrder)}
+                className="w-full max-w-[200px] h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+              >
+                Confirmar Pago
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmCancelOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl flex flex-col p-6 text-center">
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              ¿Cancelar Orden?
+            </h2>
+            <p className="text-sm text-gray-500 mb-8">
+              Estás a punto de cancelar toda la orden #{confirmCancelOrder}.
+              Esta acción no se puede deshacer.
+            </p>
+            <div className="flex justify-center gap-4 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmCancelOrder(null)}
+                className="w-full max-w-[150px] h-12 font-semibold"
+              >
+                Regresar
+              </Button>
+              <Button
+                onClick={() => handleCancelOrder(confirmCancelOrder)}
+                className="w-full max-w-[200px] h-12 bg-red-600 hover:bg-red-700 text-white font-bold"
+              >
+                Cancelar Orden
               </Button>
             </div>
           </div>

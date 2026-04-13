@@ -59,12 +59,19 @@ export class ShiftService {
         const declaredCash = Number(data.declaredCash);
         const difference = declaredCash - expectedRevenue;
 
-        return this.repository.closeShift(
+        const summary = await this.repository.getSubordersSummary(id);
+
+        const updatedShift = await this.repository.closeShift(
             id,
             closedById,
             expectedRevenue,
             declaredCash,
             difference
         );
+
+        return {
+            ...updatedShift,
+            summary
+        };
     }
 }
