@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Minus, Search } from "lucide-react";
+import { X, Plus, Minus, Search, AlertCircle } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { tableService, type Table } from "../../tables/services/table.service";
 import {
   productService,
@@ -55,6 +56,8 @@ export function CreateOrderModal({
   const [pendingProductToAdd, setPendingProductToAdd] =
     useState<Product | null>(null);
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -72,7 +75,7 @@ export function CreateOrderModal({
       setProducts(fetchedProducts);
     } catch (err) {
       console.error(err);
-      alert("Error cargando datos iniciales");
+      setError("Error cargando datos iniciales");
     }
   };
 
@@ -199,8 +202,9 @@ export function CreateOrderModal({
   };
 
   const handleSubmitOrder = async () => {
+    setError(null);
     if (!existingOrderId && !selectedTableId) {
-      alert("Por favor selecciona una mesa primero.");
+      setError("Por favor selecciona una mesa primero.");
       return;
     }
 
@@ -209,7 +213,7 @@ export function CreateOrderModal({
       0,
     );
     if (totalItems === 0) {
-      alert("La orden no tiene productos.");
+      setError("La orden no tiene productos.");
       return;
     }
 
@@ -252,7 +256,7 @@ export function CreateOrderModal({
       onClose();
     } catch (err: any) {
       console.error(err);
-      alert(
+      setError(
         err?.response?.data?.error || "Error al crear la orden y enviarla.",
       );
     } finally {
@@ -262,7 +266,27 @@ export function CreateOrderModal({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[#f0f2f5] w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="bg-[#f0f2f5] w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+        {error && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md animate-in slide-in-from-top-4 fade-in">
+            <Alert
+              variant="destructive"
+              className="bg-white shadow-lg border-red-200"
+            >
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="font-semibold">
+                {error}
+              </AlertDescription>
+              <button
+                onClick={() => setError(null)}
+                className="absolute top-3 right-3 text-red-500 hover:text-red-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </Alert>
+          </div>
+        )}
+
         {/* Header */}
         <div className="bg-white px-6 py-4 flex flex-col border-b border-gray-200 gap-4">
           <div className="flex items-center justify-between">

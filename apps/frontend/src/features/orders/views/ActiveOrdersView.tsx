@@ -8,8 +8,11 @@ import {
   CreditCard,
   Banknote,
   Smartphone,
+  AlertCircle,
+  X,
 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { useShiftStore } from "../../shifts/slices/shiftStore";
 import { shiftService } from "../../shifts/services/shift.service";
 import { paymentService } from "../../payments/services/payment.service";
@@ -33,6 +36,7 @@ export function ActiveOrdersView() {
     "CASH" | "CARD" | "MOBILE_PAYMENT"
   >("CASH");
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // View SubOrder Mode State
   const [viewSubOrder, setViewSubOrder] = useState<SubOrder | null>(null);
@@ -79,7 +83,7 @@ export function ActiveOrdersView() {
       setActiveShift(newShift);
     } catch (err: any) {
       console.error("Error abriendo el turno:", err);
-      alert(err?.response?.data?.error || "Error al abrir la caja");
+      setError(err?.response?.data?.error || "Error al abrir la caja");
     } finally {
       setOpeningShift(false);
     }
@@ -94,9 +98,9 @@ export function ActiveOrdersView() {
       await orderService.cancelOrder(orderId);
       setConfirmCancelOrder(null);
       fetchOrders();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Failed to cancel order");
+      setError(error?.response?.data?.error || "Failed to cancel order");
     }
   };
 
@@ -107,9 +111,9 @@ export function ActiveOrdersView() {
       await orderService.payOrder(orderId);
       setConfirmPayOrder(null);
       fetchOrders();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Failed to pay order");
+      setError(error?.response?.data?.error || "Failed to pay order");
     }
   };
 
@@ -137,7 +141,7 @@ export function ActiveOrdersView() {
       setPaymentMethod("CASH");
     } catch (error: any) {
       console.error("Payment error", error);
-      alert(error?.response?.data?.error || "Error al procesar el pago");
+      setError(error?.response?.data?.error || "Error al procesar el pago");
     } finally {
       setProcessingPayment(false);
     }
@@ -146,7 +150,26 @@ export function ActiveOrdersView() {
   // VISTA 1: CAJA CERRADA
   if (!activeShift && !isLoading) {
     return (
-      <div className="flex flex-col h-full w-full items-center justify-center bg-[#F6F7F9]">
+      <div className="flex flex-col h-full w-full items-center justify-center bg-[#F6F7F9] relative">
+        {error && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md animate-in slide-in-from-top-4 fade-in">
+            <Alert
+              variant="destructive"
+              className="bg-white shadow-lg border-red-200"
+            >
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="font-semibold">
+                {error}
+              </AlertDescription>
+              <button
+                onClick={() => setError(null)}
+                className="absolute top-3 right-3 text-red-500 hover:text-red-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </Alert>
+          </div>
+        )}
         <div className="w-full max-w-md rounded-2xl bg-white p-10 shadow-sm border border-gray-100 flex flex-col items-center text-center">
           <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
             <AlertTriangle className="w-10 h-10 text-blue-600" />
@@ -192,7 +215,26 @@ export function ActiveOrdersView() {
     .filter((order) => order.subOrders.length > 0); // Mostrar la órden solo si tiene subórdenes válidas para el cajero
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-[#F6F7F9]">
+    <div className="flex flex-col h-full overflow-hidden bg-[#F6F7F9] relative">
+      {error && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md animate-in slide-in-from-top-4 fade-in">
+          <Alert
+            variant="destructive"
+            className="bg-white shadow-lg border-red-200"
+          >
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="font-semibold">
+              {error}
+            </AlertDescription>
+            <button
+              onClick={() => setError(null)}
+              className="absolute top-3 right-3 text-red-500 hover:text-red-700"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </Alert>
+        </div>
+      )}
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="flex items-center justify-between mb-8">
           <div>

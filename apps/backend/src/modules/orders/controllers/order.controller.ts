@@ -17,14 +17,16 @@ export class OrderController {
 
             res.status(201).json(order);
         } catch (error: any) {
-            console.error(error.message);
+            console.error("Order creation error:", error.message);
             if (
-                error.message === "La mesa no existe" || 
-                error.message.includes("rol de mesonero") || 
-                error.message === "La mesa no está disponible" ||
-                error.message === "No hay un turno activo. Debes abrir un turno antes de crear órdenes."
+                error.message.includes("La mesa no existe") || 
+                error.message.includes("rol de mesonero") ||
+                error.message.includes("La mesa no est")
             ) {
                 return res.status(400).json({ error: error.message });
+            }
+            if (error.message.includes("No hay turno activo") || error.message.includes("No hay un turno activo")) {
+                return res.status(400).json({ error: "No hay un turno activo. Debes abrir un turno antes de crear órdenes." });
             }
 
             res.status(500).json({ error: "Failed to create order" });
