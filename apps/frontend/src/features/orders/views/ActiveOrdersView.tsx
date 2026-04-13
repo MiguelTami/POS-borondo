@@ -399,7 +399,7 @@ export function ActiveOrdersView() {
                 Cerrar
               </button>
             </div>
-            
+
             <div className="mb-6">
               <div className="text-sm font-bold text-gray-400 tracking-wider uppercase mb-3">
                 Items Incluidos
@@ -425,9 +425,7 @@ export function ActiveOrdersView() {
                 ))}
                 {(!viewSubOrder.orderItems ||
                   viewSubOrder.orderItems.length === 0) && (
-                  <div className="text-gray-500 italic text-sm">
-                    Sin items
-                  </div>
+                  <div className="text-gray-500 italic text-sm">Sin items</div>
                 )}
               </div>
             </div>
