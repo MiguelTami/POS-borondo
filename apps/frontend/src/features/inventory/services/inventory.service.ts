@@ -41,4 +41,14 @@ export const inventoryService = {
     const response = await api.post("/inventory/movements/adjust", data);
     return response.data;
   },
+
+  deactivateIngredient: async (id: number) => {
+    const response = await api.delete(`/ingredients/${id}`);
+    return response.data;
+  },
+
+  activateIngredient: async (id: number) => {
+    const response = await api.patch(`/ingredients/${id}/reactivate`);
+    return response.data;
+  },
 };

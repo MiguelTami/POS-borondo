@@ -7,6 +7,11 @@ import {
   Search,
   Edit,
   ArrowRightLeft,
+  ChevronLeft,
+  ChevronRight,
+  EyeOff,
+  Eye,
+  Filter,
 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -17,10 +22,16 @@ import {
 import { IngredientModal } from "../components/IngredientModal";
 import { StockAdjustModal } from "../components/StockAdjustModal";
 
+type FilterMode = "ALL" | "LOW_STOCK" | "OUT_OF_STOCK" | "ACTIVE" | "INACTIVE";
+
+const ITEMS_PER_PAGE = 12;
+
 export function InventoryView() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [filterMode, setFilterMode] = useState<FilterMode>("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
   const [editingIngredient, setEditingIngredient] = useState<
@@ -41,7 +52,6 @@ export function InventoryView() {
       const data = await inventoryService.getAllIngredients();
       setIngredients(data);
     } catch (err: any) {
-      // It might throw 400 or 404 if none exist, that's fine.
       if (
         err.response?.data?.message === "No hay ingredientes registrados" ||
         err.response?.status === 404
@@ -69,20 +79,78 @@ export function InventoryView() {
     setAdjustIngredient(ingredient);
   };
 
-  const filteredIngredients = useMemo(() => {
-    return ingredients.filter((i) =>
-      i.name.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [ingredients, search]);
+  const handleToggleActive = async (ingredient: Ingredient) => {
+    try {
+      if (ingredient.isActive) {
+        await inventoryService.deactivateIngredient(ingredient.id);
+      } else {
+        await inventoryService.activateIngredient(ingredient.id);
+      }
+      fetchIngredients();
+    } catch (error) {
+      console.error("Error toggling exact ingredient", error);
+      alert("Error al cambiar el estado del ingrediente.");
+    }
+  };
 
+  // Computations for Stats Filters
   const totalItems = ingredients.length;
+  const activeCount = ingredients.filter((i) => i.isActive).length;
+  const inactiveCount = ingredients.filter((i) => !i.isActive).length;
   const lowStockCount = ingredients.filter(
     (i) => i.stock <= i.minStockAlert && i.stock > 0,
   ).length;
   const outOfStockCount = ingredients.filter((i) => i.stock === 0).length;
 
+  // Filter application
+  const filteredAndSearchedIngredients = useMemo(() => {
+    let filtered = ingredients;
+
+    // Apply FilterMode
+    if (filterMode === "ACTIVE") {
+      filtered = filtered.filter((i) => i.isActive);
+    } else if (filterMode === "INACTIVE") {
+      filtered = filtered.filter((i) => !i.isActive);
+    } else if (filterMode === "LOW_STOCK") {
+      filtered = filtered.filter(
+        (i) => i.stock <= i.minStockAlert && i.stock > 0,
+      );
+    } else if (filterMode === "OUT_OF_STOCK") {
+      filtered = filtered.filter((i) => i.stock === 0);
+    }
+
+    // Apply Search
+    if (search.trim()) {
+      filtered = filtered.filter((i) =>
+        i.name.toLowerCase().includes(search.toLowerCase()),
+      );
+    }
+
+    return filtered;
+  }, [ingredients, filterMode, search]);
+
+  // Pagination bounds
+  const totalPages = Math.ceil(
+    filteredAndSearchedIngredients.length / ITEMS_PER_PAGE,
+  );
+
+  // Prevent page overflow when filtering changes bounds
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [filteredAndSearchedIngredients, currentPage, totalPages]);
+
+  const pagedIngredients = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredAndSearchedIngredients.slice(
+      startIndex,
+      startIndex + ITEMS_PER_PAGE,
+    );
+  }, [filteredAndSearchedIngredients, currentPage]);
+
   return (
-    <div className="flex flex-col h-full bg-[#f8f9fc] p-8 overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#f8f9fc] p-4 sm:p-8 overflow-y-auto">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
@@ -106,211 +174,319 @@ export function InventoryView() {
           </div>
           <Button
             onClick={handleCreate}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm px-6 font-semibold"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm px-6 font-semibold shrink-0"
           >
-            <Plus className="h-4 w-4 mr-2" /> Nuevo Ingrediente
+            <Plus className="h-4 w-4 mr-2" /> Nuevo
           </Button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col items-start justify-between">
-          <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
-            <Package className="h-6 w-6 text-blue-600" />
-          </div>
-          <div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {totalItems}
+      {/* Mini Stats Cards (Filter buttons) - 5 columns */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+        <button
+          onClick={() => {
+            setFilterMode("ALL");
+            setCurrentPage(1);
+          }}
+          className={`bg-white rounded-xl p-4 border text-left transition-all hover:shadow-md ${
+            filterMode === "ALL"
+              ? "border-blue-500 ring-2 ring-blue-500/20 shadow-md"
+              : "border-gray-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-gray-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+              <Filter className="h-3 w-3" /> Totales
             </div>
-            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-              Total Items
-            </div>
+            <Package className="h-4 w-4 text-gray-400" />
           </div>
-        </div>
+          <div className="text-2xl font-black text-gray-900">{totalItems}</div>
+        </button>
 
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col items-start justify-between">
-          <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-6">
-            <AlertTriangle className="h-6 w-6 text-orange-500" />
-          </div>
-          <div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {lowStockCount}
+        <button
+          onClick={() => {
+            setFilterMode("ACTIVE");
+            setCurrentPage(1);
+          }}
+          className={`bg-white rounded-xl p-4 border text-left transition-all hover:shadow-md ${
+            filterMode === "ACTIVE"
+              ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-md"
+              : "border-gray-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-gray-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+              <Filter className="h-3 w-3" /> Activos
             </div>
-            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-              Low Stock Alerts
-            </div>
+            <Eye className="h-4 w-4 text-emerald-500" />
           </div>
-        </div>
+          <div className="text-2xl font-black text-gray-900">{activeCount}</div>
+        </button>
 
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col items-start justify-between">
-          <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-6">
-            <AlertCircle className="h-6 w-6 text-red-600" />
-          </div>
-          <div>
-            <div className="text-4xl font-bold text-gray-900 mb-1">
-              {outOfStockCount}
+        <button
+          onClick={() => {
+            setFilterMode("LOW_STOCK");
+            setCurrentPage(1);
+          }}
+          className={`bg-white rounded-xl p-4 border text-left transition-all hover:shadow-md ${
+            filterMode === "LOW_STOCK"
+              ? "border-orange-500 ring-2 ring-orange-500/20 shadow-md"
+              : "border-gray-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-gray-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+              <Filter className="h-3 w-3" /> Bajo Stock
             </div>
-            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-              Out of Stock
-            </div>
+            <AlertTriangle className="h-4 w-4 text-orange-500" />
           </div>
-        </div>
+          <div className="text-2xl font-black text-gray-900">
+            {lowStockCount}
+          </div>
+        </button>
+
+        <button
+          onClick={() => {
+            setFilterMode("OUT_OF_STOCK");
+            setCurrentPage(1);
+          }}
+          className={`bg-white rounded-xl p-4 border text-left transition-all hover:shadow-md ${
+            filterMode === "OUT_OF_STOCK"
+              ? "border-red-500 ring-2 ring-red-500/20 shadow-md"
+              : "border-gray-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-gray-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+              <Filter className="h-3 w-3" /> Sin Stock
+            </div>
+            <AlertCircle className="h-4 w-4 text-red-600" />
+          </div>
+          <div className="text-2xl font-black text-gray-900">
+            {outOfStockCount}
+          </div>
+        </button>
+
+        <button
+          onClick={() => {
+            setFilterMode("INACTIVE");
+            setCurrentPage(1);
+          }}
+          className={`bg-white rounded-xl p-4 border text-left transition-all hover:shadow-md ${
+            filterMode === "INACTIVE"
+              ? "border-gray-500 ring-2 ring-gray-500/20 shadow-md"
+              : "border-gray-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-gray-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+              <Filter className="h-3 w-3" /> Inactivos
+            </div>
+            <EyeOff className="h-4 w-4 text-gray-400" />
+          </div>
+          <div className="text-2xl font-black text-gray-900">
+            {inactiveCount}
+          </div>
+        </button>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto min-h-[400px]">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-gray-100/80">
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Nombre del Ingrediente
-                </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Stock Actual
-                </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Unidad
-                </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Umbral Min.
-                </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            {loading ? (
-              <tbody>
-                <tr>
-                  <td colSpan={5} className="text-center py-10 text-gray-500">
-                    Cargando ingredientes...
-                  </td>
-                </tr>
-              </tbody>
-            ) : filteredIngredients.length === 0 ? (
-              <tbody>
-                <tr>
-                  <td colSpan={5} className="text-center py-12">
-                    <Package className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-                    <p className="text-gray-500 font-medium">
-                      No se encontraron ingredientes.
-                    </p>
+      {/* Grid of Ingredients */}
+      <div className="flex-1 flex flex-col">
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center text-gray-500">
+            Cargando ingredientes...
+          </div>
+        ) : pagedIngredients.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center py-12">
+            <Package className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+            <h3 className="text-lg font-bold text-gray-600 mb-1">
+              No hay resultados
+            </h3>
+            <p className="text-gray-500 font-medium mb-4 text-sm text-center">
+              No encontramos ingredientes para este filtro.
+            </p>
+            {filterMode !== "ALL" && (
+              <Button
+                onClick={() => setFilterMode("ALL")}
+                variant="outline"
+                className="text-gray-600"
+              >
+                Limpiar filtros
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+            {pagedIngredients.map((ing) => {
+              // Calculate percentage ratio for gradient clipping
+              // Use minStockAlert * 2 to represent a "fully healthy" bar
+              const thresholdForMax =
+                ing.minStockAlert > 0 ? ing.minStockAlert * 2 : 100;
+              const safeStock = Math.min(ing.stock, thresholdForMax);
+              const percent =
+                thresholdForMax === 0 ? 0 : (safeStock / thresholdForMax) * 100;
+
+              return (
+                <div
+                  key={ing.id}
+                  className={`bg-white rounded-2xl p-5 border transition-all hover:shadow-md relative group flex flex-col ${
+                    !ing.isActive
+                      ? "border-gray-200 opacity-60 bg-gray-50/50"
+                      : "border-gray-100"
+                  }`}
+                >
+                  {/* Hover Actions (Desktop) */}
+                  <div className="hidden md:flex absolute top-3 right-3 gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    {ing.isActive && (
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-8 w-8 rounded-full shadow-sm bg-white hover:bg-gray-50 border border-gray-100 text-gray-600"
+                        onClick={() => handleAdjustStock(ing)}
+                        title="Ajustar Stock"
+                      >
+                        <ArrowRightLeft className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
-                      onClick={handleCreate}
-                      variant="link"
-                      className="text-blue-600 mt-2"
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8 rounded-full shadow-sm bg-white hover:bg-gray-50 border border-gray-100 text-blue-600"
+                      onClick={() => handleEdit(ing)}
+                      title="Editar"
                     >
-                      Crear el primero
+                      <Edit className="h-4 w-4" />
                     </Button>
-                  </td>
-                </tr>
-              </tbody>
-            ) : (
-              <tbody className="divide-y divide-gray-100/80">
-                {filteredIngredients.map((ing) => {
-                  const stockRatio =
-                    ing.minStockAlert > 0 ? ing.stock / ing.minStockAlert : 1;
-                  const isOutOfStock = ing.stock <= 0;
-                  const isLowStock = !isOutOfStock && stockRatio <= 1;
-
-                  return (
-                    <tr
-                      key={ing.id}
-                      className="hover:bg-gray-50/50 transition-colors group"
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8 rounded-full shadow-sm bg-white hover:bg-gray-50 border border-gray-100 text-red-500"
+                      onClick={() => handleToggleActive(ing)}
+                      title={ing.isActive ? "Desactivar" : "Activar"}
                     >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center ${!ing.isActive ? "bg-gray-100 text-gray-400" : "bg-blue-50 text-blue-600"}`}
-                          >
-                            <Package className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p
-                              className={`font-bold text-sm ${!ing.isActive ? "text-gray-400 line-through" : "text-gray-900"}`}
-                            >
-                              {ing.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              ID: {ing.id}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
+                      {ing.isActive ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
 
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          {/* Stock Status Bar */}
-                          <div className="w-20 sm:w-32 h-1.5 rounded-full bg-gray-100 overflow-hidden relative">
-                            {ing.stock > 0 && (
-                              <div
-                                className={`absolute left-0 top-0 bottom-0 rounded-full transition-all ${
-                                  isLowStock ? "bg-orange-500" : "bg-blue-600"
-                                }`}
-                                style={{
-                                  width: `${Math.min((stockRatio / 2) * 100, 100)}%`,
-                                }}
-                              />
-                            )}
-                          </div>
-                          <span
-                            className={`font-bold text-sm ${isOutOfStock ? "text-red-500" : isLowStock ? "text-orange-500" : "text-gray-900"}`}
-                          >
-                            {ing.stock}
-                          </span>
-                        </div>
-                      </td>
+                  <div className="flex justify-between items-start mb-6 pr-16 md:pr-0 transition-opacity group-hover:md:pr-24">
+                    <div>
+                      <h3
+                        className={`font-bold text-lg leading-tight mb-1 line-clamp-2 ${
+                          !ing.isActive
+                            ? "text-gray-400 line-through"
+                            : "text-gray-800"
+                        }`}
+                      >
+                        {ing.name}
+                      </h3>
+                      <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100 uppercase tracking-wider">
+                        Umbral: {ing.minStockAlert}{" "}
+                        {ing.unit === "UNIT" ? "U" : ing.unit}
+                      </span>
+                    </div>
+                  </div>
 
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-gray-500 font-medium">
+                  {/* Stock UI Footer */}
+                  <div className="mt-auto">
+                    <div className="flex justify-between items-end mb-2">
+                      <span className="text-2xl font-black text-gray-800 tracking-tight">
+                        {ing.stock}{" "}
+                        <span className="font-semibold text-gray-400 text-sm tracking-normal">
                           {ing.unit}
                         </span>
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-gray-900 font-semibold">
-                          {ing.minStockAlert} {ing.unit === "UNIT" ? "U" : ""}
+                      </span>
+                      {ing.stock <= 0 && (
+                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">
+                          Agotado
                         </span>
-                      </td>
+                      )}
+                    </div>
 
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            disabled={!ing.isActive}
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg"
-                            onClick={() => handleAdjustStock(ing)}
-                            title="Ajustar Stock"
-                          >
-                            <ArrowRightLeft className="h-4 w-4 text-gray-600" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg"
-                            onClick={() => handleEdit(ing)}
-                            title="Editar Ingrediente"
-                          >
-                            <Edit className="h-4 w-4 text-blue-600" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            )}
-          </table>
-        </div>
+                    <div className="relative w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                      {/* By keeping a 100% width gradient and using clipPath, we only reveal the left part of the gradient depending on the stock %. Left is red, Right is blue */}
+                      <div
+                        className="absolute inset-0 h-full w-full bg-gradient-to-r from-red-500 via-orange-400 to-blue-500 rounded-full origin-left transition-all duration-500"
+                        style={{ clipPath: `inset(0 ${100 - percent}% 0 0)` }}
+                      />
+                    </div>
+                  </div>
 
-        {/* Pagination summary logic */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-          <span>Mostrando {filteredIngredients.length} ingredientes</span>
-        </div>
+                  {/* Actions (Mobile) */}
+                  <div className="flex md:hidden mt-5 gap-2 pt-4 border-t border-gray-100">
+                    {ing.isActive && (
+                      <Button
+                        variant="outline"
+                        className="flex-1 text-xs px-1"
+                        onClick={() => handleAdjustStock(ing)}
+                      >
+                        <ArrowRightLeft className="h-3 w-3 mr-1" /> Ajustar
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      className="flex-1 text-xs px-1"
+                      onClick={() => handleEdit(ing)}
+                    >
+                      <Edit className="h-3 w-3 mr-1" /> Editar
+                    </Button>
+                    <Button
+                      variant={ing.isActive ? "outline" : "default"}
+                      className={`flex-1 text-xs px-1 ${ing.isActive ? "text-red-500 border-red-200 hover:bg-red-50" : "bg-emerald-600"}`}
+                      onClick={() => handleToggleActive(ing)}
+                    >
+                      {ing.isActive ? (
+                        <>
+                          <EyeOff className="h-3 w-3 mr-1" />
+                          Ocultar
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-3 w-3 mr-1" />
+                          Activar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && totalPages > 1 && (
+        <div className="mt-auto pt-4 pb-2 flex items-center justify-between border-t border-gray-200/60 text-sm">
+          <span className="text-gray-500 font-medium">
+            Página {currentPage} de {totalPages} (
+            {filteredAndSearchedIngredients.length} resultados)
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-xl text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-xl text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {isIngredientModalOpen && (
         <IngredientModal
