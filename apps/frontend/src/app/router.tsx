@@ -8,6 +8,7 @@ import { ShiftGuard } from "../features/shifts/layouts/ShiftGuard";
 import { OpenShiftView } from "../features/shifts/views/OpenShiftView";
 import { ActiveOrdersView } from "../features/orders/views/ActiveOrdersView";
 import { WaiterOrdersView } from "../features/orders/views/WaiterOrdersView";
+import { InventoryView } from "../features/inventory/views/InventoryView";
 
 const RootRedirect = () => {
   const { user, token } = useAuthStore();
@@ -82,9 +83,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "inventory",
-        element: (
-          <div className="text-2xl font-bold">Inventario PrÃ³ximamente...</div>
-        ),
+        element: <InventoryView />,
       },
       {
         path: "tables",
