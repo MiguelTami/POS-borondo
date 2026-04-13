@@ -98,6 +98,11 @@ export function CreateOrderModal({
   };
 
   const handleAddToCart = (product: Product) => {
+    const maxQty = getMaxProductQuantity(product);
+    const inCart = getCartProductQuantity(product.id);
+
+    if (inCart >= maxQty) return;
+
     if (!activeSubOrderId) {
       setPendingProductToAdd(product);
       setIsNameModalOpen(true);
@@ -126,7 +131,13 @@ export function CreateOrderModal({
     );
   };
 
-  const handleChangeQuantity = (productId: number, delta: number) => {
+  const handleChangeQuantity = (product: Product, delta: number) => {
+    if (delta > 0) {
+      const maxQty = getMaxProductQuantity(product);
+      const inCart = getCartProductQuantity(product.id);
+      if (inCart >= maxQty) return;
+    }
+
     setSubOrders((prev) =>
       prev.map((sub) => {
         if (sub.id !== activeSubOrderId) return sub;
@@ -134,7 +145,7 @@ export function CreateOrderModal({
           ...sub,
           items: sub.items
             .map((i) => {
-              if (i.product.id === productId) {
+              if (i.product.id === product.id) {
                 return { ...i, quantity: Math.max(0, i.quantity + delta) };
               }
               return i;
@@ -147,6 +158,29 @@ export function CreateOrderModal({
 
   const activeSubOrder =
     subOrders.find((s) => s.id === activeSubOrderId) || null;
+
+  const getMaxProductQuantity = (product: Product) => {
+    if (!product.recipes || product.recipes.length === 0) return Infinity; // No ingredients limit
+    let minPossible = Infinity;
+    for (const r of product.recipes) {
+      const req = Number(r.quantityRequired);
+      const stock = Number(r.ingredient.stock);
+      if (req > 0) {
+        const possible = Math.floor(stock / req);
+        if (possible < minPossible) minPossible = possible;
+      }
+    }
+    return minPossible;
+  };
+
+  const getCartProductQuantity = (productId: number) => {
+    let total = 0;
+    for (const sub of subOrders) {
+      const it = sub.items.find((i) => i.product.id === productId);
+      if (it) total += it.quantity;
+    }
+    return total;
+  };
 
   const filteredProducts = products.filter((p) => {
     const matchCategory =
@@ -320,20 +354,38 @@ export function CreateOrderModal({
             {/* Products Grid */}
             <div className="flex-1 overflow-y-auto pr-2 pb-6">
               <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    onClick={() => handleAddToCart(product)}
-                    className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between"
-                  >
-                    <h3 className="font-bold text-gray-800 break-words line-clamp-2 mb-2 leading-tight">
-                      {product.name}
-                    </h3>
-                    <div className="text-blue-600 font-black text-lg mt-auto">
-                      ${Number(product.price).toFixed(2)}
+                {filteredProducts.map((product) => {
+                  const maxQty = getMaxProductQuantity(product);
+                  const inCart = getCartProductQuantity(product.id);
+                  const exhausted = inCart >= maxQty;
+
+                  return (
+                    <div
+                      key={product.id}
+                      onClick={() => {
+                        if (!exhausted) handleAddToCart(product);
+                      }}
+                      className={`bg-white p-5 rounded-2xl shadow-sm border transition-all flex flex-col justify-between relative overflow-hidden ${
+                        exhausted
+                          ? "opacity-60 cursor-not-allowed border-red-200 bg-red-50/20"
+                          : "border-gray-100 hover:border-blue-300 hover:shadow-md cursor-pointer"
+                      }`}
+                    >
+                      <h3 className="font-bold text-gray-800 break-words line-clamp-2 mb-2 leading-tight">
+                        {product.name}
+                      </h3>
+                      <div className="text-blue-600 font-black text-lg mt-auto">
+                        ${Number(product.price).toFixed(2)}
+                      </div>
+
+                      {exhausted && (
+                        <div className="absolute top-0 right-0 bg-red-100 border-l border-b border-red-200 text-red-700 px-2 py-1 text-[10px] font-black rounded-bl-lg">
+                          SIN STOCK
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {filteredProducts.length === 0 && (
                 <div className="text-center py-12 text-gray-400 font-medium">
@@ -410,7 +462,7 @@ export function CreateOrderModal({
                         <div className="flex items-center bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                           <button
                             onClick={() =>
-                              handleChangeQuantity(item.product.id, -1)
+                              handleChangeQuantity(item.product, -1)
                             }
                             className="px-3 py-1 hover:bg-gray-50 text-gray-600"
                           >
@@ -421,7 +473,7 @@ export function CreateOrderModal({
                           </span>
                           <button
                             onClick={() =>
-                              handleChangeQuantity(item.product.id, 1)
+                              handleChangeQuantity(item.product, 1)
                             }
                             className="px-3 py-1 hover:bg-gray-50 text-gray-600"
                           >

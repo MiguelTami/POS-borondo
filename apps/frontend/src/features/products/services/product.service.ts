@@ -12,6 +12,13 @@ export interface Product {
   price: number;
   isActive: boolean;
   categoryId: number;
+  recipes?: {
+    quantityRequired: number | string;
+    ingredient: {
+      stock: number | string;
+      name: string;
+    };
+  }[];
 }
 
 export const productService = {
