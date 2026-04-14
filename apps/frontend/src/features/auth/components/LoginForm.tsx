@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuthStore } from "../slices/authStore";
 import { loginUsuario } from "../api/login";
-import type { LoginPayload } from "../api/login";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,8 @@ import { Label } from "@/components/ui/label";
 
 // Esquema de validaciÃ³n igual al backend
 const loginSchema = z.object({
-    name: z.string().min(1, "El usuario es requerido"),
-    password: z.string().min(1, "La contraseña es requerida"),
+  name: z.string().min(1, "El usuario es requerido"),
+  password: z.string().min(1, "La contraseña es requerida"),
 });
 
 export function LoginForm() {
@@ -27,17 +26,20 @@ export function LoginForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginPayload>({
+  } = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginPayload) => {
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
       setError(null);
       setLoading(true);
       const res = await loginUsuario(data);
+      if (!res || !res.user) {
+        throw new Error("Respuesta inválida del servidor");
+      }
       setAuth(res.user, res.token);
-      
+
       // Redirigir basado en el rol
       if (res.user.role === "ADMIN") {
         navigate("/admin/dashboard");
@@ -45,7 +47,12 @@ export function LoginForm() {
         navigate("/pos/tables");
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || "Credenciales incorrectas o error en el servidor");
+      console.error(err);
+      setError(
+        err.response?.data?.error ||
+          err.message ||
+          "Credenciales incorrectas o error en el servidor",
+      );
     } finally {
       setLoading(false);
     }
@@ -74,7 +81,9 @@ export function LoginForm() {
             autoComplete="username"
             placeholder="Introduce tu usuario"
             disabled={loading}
-            className={errors.name ? "border-red-500 focus-visible:ring-red-200" : ""}
+            className={
+              errors.name ? "border-red-500 focus-visible:ring-red-200" : ""
+            }
           />
           {errors.name && (
             <span className="text-red-500 text-xs block">
@@ -92,7 +101,9 @@ export function LoginForm() {
             autoComplete="current-password"
             placeholder="Introduce tu contraseña"
             disabled={loading}
-            className={errors.password ? "border-red-500 focus-visible:ring-red-200" : ""}
+            className={
+              errors.password ? "border-red-500 focus-visible:ring-red-200" : ""
+            }
           />
           {errors.password && (
             <span className="text-red-500 text-xs block">
@@ -101,11 +112,7 @@ export function LoginForm() {
           )}
         </div>
 
-        <Button
-          type="submit"
-          className="w-full mt-2"
-          disabled={loading}
-        >
+        <Button type="submit" className="w-full mt-2" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

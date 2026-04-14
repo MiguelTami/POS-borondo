@@ -41,6 +41,12 @@ export class UserRepository {
         });
     }
 
+    async getUserWithPasswordById(id: number) {
+        return prisma.user.findUnique({
+            where: { id }
+        });
+    }
+
     async createUser(data: CreateUserDTO) {
         return prisma.user.create({
             data: {

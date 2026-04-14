@@ -18,7 +18,7 @@ export function AdminLayout() {
     { name: "Inventario", to: "/admin/inventory", icon: Package },
     { name: "Mesas", to: "/admin/tables", icon: TableIcon },
     { name: "Usuarios", to: "/admin/users", icon: Users },
-    { name: "ConfiguraciÃ³n", to: "/admin/settings", icon: Settings },
+    { name: "Configuración", to: "/admin/settings", icon: Settings },
   ];
 
   return (
@@ -64,7 +64,7 @@ export function AdminLayout() {
             className="mt-4 flex w-full justify-center items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 hover:bg-red-600 hover:text-white transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            Cerrar SesiÃ³n
+            Cerrar Sesión
           </button>
         </div>
       </aside>

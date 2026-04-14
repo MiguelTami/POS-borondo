@@ -5,6 +5,13 @@ import { TableModal } from "../components/TableModal";
 import { Button } from "../../../components/ui/button";
 import { Search, Plus, Edit, Hash, Utensils, Info } from "lucide-react";
 import { Input } from "../../../components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../components/ui/dialog";
 
 type FilterStatus =
   | "ALL"
@@ -21,6 +28,15 @@ export const TablesView: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<TableType | undefined>();
+
+  const [tableToReserve, setTableToReserve] = useState<TableType | undefined>();
+  const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
+
+  const [tableToMakeAvailable, setTableToMakeAvailable] = useState<
+    TableType | undefined
+  >();
+  const [isMakeAvailableModalOpen, setIsMakeAvailableModalOpen] =
+    useState(false);
 
   const fetchTables = async () => {
     setLoading(true);
@@ -51,6 +67,48 @@ export const TablesView: React.FC = () => {
   const handleSave = () => {
     setIsModalOpen(false);
     fetchTables();
+  };
+
+  const handleUpdateStatus = async (
+    id: number,
+    status: "AVAILABLE" | "RESERVED",
+  ) => {
+    try {
+      await tableService.updateTable(id, { status });
+      fetchTables();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleReserveClick = (table: TableType) => {
+    if (table.status === "AVAILABLE") {
+      setTableToReserve(table);
+      setIsReserveModalOpen(true);
+    }
+  };
+
+  const confirmReserve = async () => {
+    if (tableToReserve) {
+      await handleUpdateStatus(tableToReserve.id, "RESERVED");
+      setIsReserveModalOpen(false);
+      setTableToReserve(undefined);
+    }
+  };
+
+  const handleMakeAvailableClick = (table: TableType) => {
+    if (table.status === "RESERVED") {
+      setTableToMakeAvailable(table);
+      setIsMakeAvailableModalOpen(true);
+    }
+  };
+
+  const confirmMakeAvailable = async () => {
+    if (tableToMakeAvailable) {
+      await handleUpdateStatus(tableToMakeAvailable.id, "AVAILABLE");
+      setIsMakeAvailableModalOpen(false);
+      setTableToMakeAvailable(undefined);
+    }
   };
 
   const filteredTables = useMemo(() => {
@@ -239,6 +297,26 @@ export const TablesView: React.FC = () => {
               </div>
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center mt-2">
                 <StatusBadge status={table.status} />
+                {table.status === "AVAILABLE" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleReserveClick(table)}
+                    className="h-7 text-xs px-2 text-amber-600 border-amber-200 hover:bg-amber-50"
+                  >
+                    Reservar
+                  </Button>
+                )}
+                {table.status === "RESERVED" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleMakeAvailableClick(table)}
+                    className="h-7 text-xs px-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                  >
+                    Disponible
+                  </Button>
+                )}
               </div>
             </div>
           ))}
@@ -252,6 +330,78 @@ export const TablesView: React.FC = () => {
           onSave={handleSave}
           table={selectedTable}
         />
+      )}
+
+      {isReserveModalOpen && tableToReserve && (
+        <Dialog open={isReserveModalOpen} onOpenChange={setIsReserveModalOpen}>
+          <DialogContent className="sm:max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-bold text-gray-900">
+                Confirmar Reserva
+              </DialogTitle>
+              <p className="text-sm text-gray-500 mt-2">
+                ¿Estás seguro que deseas marcar la mesa{" "}
+                <strong>#{tableToReserve.number}</strong> como reservada?
+              </p>
+            </DialogHeader>
+            <DialogFooter className="flex gap-3 sm:justify-end mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsReserveModalOpen(false);
+                  setTableToReserve(undefined);
+                }}
+                className="rounded-xl border-gray-200"
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="rounded-xl text-white bg-amber-600 hover:bg-amber-700"
+                onClick={confirmReserve}
+              >
+                Confirmar Reserva
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {isMakeAvailableModalOpen && tableToMakeAvailable && (
+        <Dialog
+          open={isMakeAvailableModalOpen}
+          onOpenChange={setIsMakeAvailableModalOpen}
+        >
+          <DialogContent className="sm:max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-bold text-gray-900">
+                Confirmar Disponibilidad
+              </DialogTitle>
+              <p className="text-sm text-gray-500 mt-2">
+                ¿Estás seguro que deseas marcar la mesa{" "}
+                <strong>#{tableToMakeAvailable.number}</strong> como disponible
+                nuevamente?
+              </p>
+            </DialogHeader>
+            <DialogFooter className="flex gap-3 sm:justify-end mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsMakeAvailableModalOpen(false);
+                  setTableToMakeAvailable(undefined);
+                }}
+                className="rounded-xl border-gray-200"
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="rounded-xl text-white bg-emerald-600 hover:bg-emerald-700"
+                onClick={confirmMakeAvailable}
+              >
+                Confirmar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

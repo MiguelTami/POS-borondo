@@ -8,6 +8,7 @@ export const CreateUserSchema = z.object({
 
 export const UpdateUserSchema = z.object({
     name: z.string().min(1, 'El nombre de usuario no puede estar vacío').optional(),
+    currentPassword: z.string().min(6, 'La contraseña actual debe tener al menos 6 caracteres').optional(),
     password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional(),
     role: z.enum(['ADMIN', 'CASHIER', 'WAITER']).optional()
 }).strict();

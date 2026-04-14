@@ -64,7 +64,6 @@ export const TableModal: React.FC<TableModalProps> = ({
       if (isEditing) {
         const payload: UpdateTablePayload = {
           number: Number(number),
-          status,
         };
         await tableService.updateTable(table.id, payload);
       } else {
@@ -115,22 +114,6 @@ export const TableModal: React.FC<TableModalProps> = ({
               className="rounded-xl border-gray-200 bg-white shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500"
             />
           </div>
-
-          {isEditing && (
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">Estado</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-                className="flex w-full min-w-0 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="AVAILABLE">Disponible</option>
-                <option value="OCCUPIED">Ocupada</option>
-                <option value="RESERVED">Reservada</option>
-                <option value="OUT_OF_SERVICE">Fuera de Servicio</option>
-              </select>
-            </div>
-          )}
 
           <DialogFooter className="pt-4 border-t border-gray-100 flex gap-3 sm:justify-end mt-2">
             <Button

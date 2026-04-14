@@ -5,6 +5,13 @@ import { UserModal } from "../components/UserModal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../components/ui/dialog";
+import {
   Plus,
   Search,
   Edit,
@@ -24,6 +31,9 @@ export const UsersView: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>();
+
+  const [userToToggle, setUserToToggle] = useState<User | undefined>();
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -56,17 +66,25 @@ export const UsersView: React.FC = () => {
     fetchUsers();
   };
 
-  const toggleStatus = async (user: User) => {
+  const confirmToggleStatus = async () => {
+    if (!userToToggle) return;
     try {
-      if (user.isActive) {
-        await userService.deactivateUser(user.id);
+      if (userToToggle.isActive) {
+        await userService.deactivateUser(userToToggle.id);
       } else {
-        await userService.activateUser(user.id);
+        await userService.activateUser(userToToggle.id);
       }
+      setIsConfirmModalOpen(false);
+      setUserToToggle(undefined);
       fetchUsers();
     } catch (error) {
       console.error("Failed to toggle user status", error);
     }
+  };
+
+  const toggleStatus = (user: User) => {
+    setUserToToggle(user);
+    setIsConfirmModalOpen(true);
   };
 
   const filteredUsers = useMemo(() => {
@@ -233,6 +251,43 @@ export const UsersView: React.FC = () => {
           onSave={handleSave}
           user={selectedUser}
         />
+      )}
+
+      {isConfirmModalOpen && userToToggle && (
+        <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
+          <DialogContent className="sm:max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-bold text-gray-900">
+                {userToToggle.isActive
+                  ? "Desactivar Usuario"
+                  : "Activar Usuario"}
+              </DialogTitle>
+              <p className="text-sm text-gray-500 mt-2">
+                ¿Estás seguro que deseas{" "}
+                {userToToggle.isActive ? "desactivar" : "activar"} al usuario{" "}
+                <strong>{userToToggle.name}</strong>?
+              </p>
+            </DialogHeader>
+            <DialogFooter className="flex gap-3 sm:justify-end mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsConfirmModalOpen(false);
+                  setUserToToggle(undefined);
+                }}
+                className="rounded-xl border-gray-200"
+              >
+                Cancelar
+              </Button>
+              <Button
+                className={`rounded-xl text-white ${userToToggle.isActive ? "bg-rose-600 hover:bg-rose-700" : "bg-emerald-600 hover:bg-emerald-700"}`}
+                onClick={confirmToggleStatus}
+              >
+                Confirmar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

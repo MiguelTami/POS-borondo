@@ -54,7 +54,21 @@ export class UserService {
         const updateData: UpdateUserDTO = { ...data };
 
         if (updateData.password) {
+            if (!updateData.currentPassword) {
+                throw new Error("Se requiere la contraseña actual para cambiar la contraseña");
+            }
+            const userWithPassword = await this.repository.getUserWithPasswordById(id);
+            if (!userWithPassword) {
+                throw new Error("Usuario no encontrado");
+            }
+            const isMatch = await bcrypt.compare(updateData.currentPassword, userWithPassword.password);
+            if (!isMatch) {
+                throw new Error("La contraseña actual es incorrecta");
+            }
+            delete updateData.currentPassword;
             updateData.password = await bcrypt.hash(updateData.password, 10);
+        } else {
+            delete updateData.currentPassword;
         }
 
         return await this.repository.updateUser(id, updateData);

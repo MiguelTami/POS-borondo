@@ -10,7 +10,7 @@ import {
 } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -26,7 +26,9 @@ export const UserModal: React.FC<UserModalProps> = ({
   user,
 }) => {
   const [name, setName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"ADMIN" | "CASHIER" | "WAITER">("WAITER");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,11 +40,15 @@ export const UserModal: React.FC<UserModalProps> = ({
       if (user) {
         setName(user.name);
         setRole(user.role);
+        setCurrentPassword("");
         setPassword("");
+        setShowPassword(false);
       } else {
         setName("");
         setRole("WAITER");
+        setCurrentPassword("");
         setPassword("");
+        setShowPassword(false);
       }
       setError(null);
     }
@@ -61,13 +67,20 @@ export const UserModal: React.FC<UserModalProps> = ({
       setError("La contraseña es requerida para nuevos usuarios");
       return;
     }
+    if (isEditing && password && !currentPassword) {
+      setError(
+        "Para cambiar la contraseña, debes ingresar la contraseña actual",
+      );
+      return;
+    }
 
     setLoading(true);
     try {
       if (isEditing) {
         const payload: UpdateUserPayload = { name, role };
-        if (password) {
+        if (password && currentPassword) {
           payload.password = password;
+          payload.currentPassword = currentPassword;
         }
         await userService.updateUser(user.id, payload);
       } else {
@@ -117,17 +130,60 @@ export const UserModal: React.FC<UserModalProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700">
-              {isEditing ? "Nueva Contraseña (Opcional)" : "Contraseña"}
-            </label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="********"
-              className="rounded-xl border-gray-200 bg-white shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500"
-            />
+          <div className="space-y-4">
+            {isEditing && (
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">
+                  Contraseña Actual
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="********"
+                    className="rounded-xl border-gray-200 bg-white shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700">
+                {isEditing ? "Nueva Contraseña" : "Contraseña"}
+              </label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="********"
+                  className="rounded-xl border-gray-200 bg-white shadow-sm focus-visible:ring-2 focus-visible:ring-blue-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">

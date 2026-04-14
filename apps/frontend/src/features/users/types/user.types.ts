@@ -15,6 +15,7 @@ export interface CreateUserPayload {
 
 export interface UpdateUserPayload {
   name?: string;
+  currentPassword?: string;
   password?: string;
   role?: "ADMIN" | "CASHIER" | "WAITER";
 }

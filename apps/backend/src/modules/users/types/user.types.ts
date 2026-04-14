@@ -8,6 +8,7 @@ export interface CreateUserDTO {
 
 export interface UpdateUserDTO {
     name?: string;
+    currentPassword?: string;
     password?: string;
     role?: Role;
 }

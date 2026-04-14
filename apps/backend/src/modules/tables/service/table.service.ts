@@ -40,10 +40,12 @@ export class TablesService {
             throw new Error("La mesa no existe");
         }
 
-        const tableNumber = await this.repository.getTableByNumber(data.number);
-        if (tableNumber && tableNumber.id !== id) {
-            throw new Error("La mesa con ese número ya existe");
-        } 
+        if (data.number !== undefined) {
+            const tableNumber = await this.repository.getTableByNumber(data.number);
+            if (tableNumber && tableNumber.id !== id) {
+                throw new Error("La mesa con ese número ya existe");
+            } 
+        }
 
         return this.repository.updateTable(id, data);
     }
