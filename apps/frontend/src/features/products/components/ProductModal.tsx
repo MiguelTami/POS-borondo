@@ -4,7 +4,7 @@ import {
   type Category,
   type CreateProductDTO,
   productService,
-  type Recipe,
+  
 } from "../services/product.service";
 import {
   inventoryService,

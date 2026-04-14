@@ -54,7 +54,7 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-sm p-8 bg-white rounded-lg shadow-xl border border-gray-100">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">Borondo POS</h2>
+        <h2 className="text-2xl font-bold text-gray-800">KPRICHOS POS</h2>
         <p className="text-gray-500 mt-2">Inicia sesión para continuar</p>
       </div>
 

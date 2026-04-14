@@ -9,6 +9,8 @@ import { ActiveOrdersView } from "../features/orders/views/ActiveOrdersView";
 import { WaiterOrdersView } from "../features/orders/views/WaiterOrdersView";
 import { InventoryView } from "../features/inventory/views/InventoryView";
 import { ProductsView } from "../features/products/views/ProductsView";
+import { UsersView } from "../features/users/views/UsersView";
+import { TablesView } from "../features/tables/views/TablesView";
 
 const RootRedirect = () => {
   const { user, token } = useAuthStore();
@@ -72,7 +74,7 @@ export const router = createBrowserRouter([
       {
         path: "dashboard",
         element: (
-          <div className="text-2xl font-bold">Dashboard PrÃ³ximamente...</div>
+          <div className="text-2xl font-bold">Dashboard Próximamente...</div>
         ),
       },
       {
@@ -85,21 +87,17 @@ export const router = createBrowserRouter([
       },
       {
         path: "tables",
-        element: (
-          <div className="text-2xl font-bold">Mesas PrÃ³ximamente...</div>
-        ),
+        element: <TablesView />,
       },
       {
         path: "users",
-        element: (
-          <div className="text-2xl font-bold">Usuarios PrÃ³ximamente...</div>
-        ),
+        element: <UsersView />,
       },
       {
         path: "settings",
         element: (
           <div className="text-2xl font-bold">
-            ConfiguraciÃ³n PrÃ³ximamente...
+            Configuración Próximamente...
           </div>
         ),
       },

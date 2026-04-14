@@ -8,7 +8,7 @@ export function LoginView() {
         <div className="hidden lg:flex w-1/2 bg-blue-600 justify-center items-center flex-col text-white p-12 relative overflow-hidden">
             <div className="z-10 text-center">
             <Store className="w-24 h-24 mx-auto mb-6 opacity-90" />
-            <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-white">Borondo POS</h1>
+            <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-white">KPRICHOS POS</h1>
             <p className="text-blue-100 text-lg max-w-md mx-auto leading-relaxed">
                 Sistema Ágil de Punto de Venta para restaurantes, bares y delis. 
                 Mejora tus ventas y controla tu inventario al instante.

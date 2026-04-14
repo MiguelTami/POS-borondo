@@ -5,7 +5,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "../../auth/slices/authStore";
 
 export const ShiftGuard = () => {
-  const { activeShift, setActiveShift, isLoading, setLoading } =
+  const { activeShift, setActiveShift, isLoading } =
     useShiftStore();
   const { user } = useAuthStore();
   const [fetching, setFetching] = useState(isLoading);

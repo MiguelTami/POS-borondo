@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Coffee, X } from "lucide-react";
+import { Plus, Coffee, X } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import {
   orderService,
@@ -23,7 +23,7 @@ export function WaiterOrdersView() {
   // For viewing suborder details
   const [viewSubOrder, setViewSubOrder] = useState<SubOrder | null>(null);
 
-  const { user } = useAuthStore();
+  useAuthStore(); // eslint-disable-next-line
 
   useEffect(() => {
     fetchOrders();

@@ -3,7 +3,8 @@ import { X, Plus, Minus, Search, AlertCircle } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
-import { tableService, type Table } from "../../tables/services/table.service";
+import { tableService } from "../../tables/services/table.service";
+import type { Table } from "../../tables/types/table.types";
 import {
   productService,
   type Category,

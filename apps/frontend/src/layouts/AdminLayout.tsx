@@ -26,7 +26,7 @@ export function AdminLayout() {
       {/* Sidebar para Admin */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col hidden md:flex min-h-screen shadow-lg">
         <div className="h-16 flex items-center justify-center border-b border-slate-800">
-          <span className="text-xl font-bold tracking-wider text-white px-6">BORONDO Admin</span>
+          <span className="text-xl font-bold tracking-wider text-white px-6">KPRICHOS Admin</span>
         </div>
         
         <div className="flex-1 overflow-y-auto py-4">
@@ -73,7 +73,7 @@ export function AdminLayout() {
       <main className="flex-1 w-full bg-slate-50 flex flex-col h-screen overflow-hidden">
         {/* Aqui el header mobile y otros breadcrumbs si deseas */}
         <header className="md:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 flex text-white items-center justify-between">
-           <span className="font-bold">BORONDO Admin</span>
+           <span className="font-bold">KPRICHOS Admin</span>
            <button onClick={handleLogout}><LogOut className="w-5 h-5" /></button>
         </header>
 
