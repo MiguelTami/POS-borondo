@@ -18,8 +18,7 @@ export class RecipesController {
             res.status(200).json(ingredientsList)
         } catch (error) {
             if (error.message === 'El producto está inactivo' || 
-                error.message === 'Producto no encontrado' ||
-                error.message === 'EL producto no tiene ingredientes asociados') {
+                error.message === 'Producto no encontrado') {
                 return res.status(400).json({ message: error.message });
             }
            res.status(500).json({

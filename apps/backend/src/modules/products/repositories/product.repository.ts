@@ -36,11 +36,14 @@ export class ProductsRepository {
                 },
                 recipes: {
                     select: {
+                        id: true,
+                        ingredientId: true,
                         quantityRequired: true,
                         ingredient: {
                             select: {
                                 stock: true,
-                                name: true
+                                name: true,
+                                unit: true
                             }
                         }
                     }

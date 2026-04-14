@@ -36,10 +36,10 @@ export class RecipesService {
         const ingredientsList = await this.repository.getIngredientsRecipe(productId);
 
         if (ingredientsList.length === 0) {
-            throw new Error('EL producto no tiene ingredientes asociados');
+            return [];
         }
 
-        return await this.repository.getIngredientsRecipe(productId)
+        return ingredientsList;
     }
 
     async getIngredientsProduct(productId: number, ingredientId: number) {

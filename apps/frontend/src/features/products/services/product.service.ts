@@ -104,6 +104,14 @@ export const productService = {
     return response.data;
   },
 
+  updateRecipe: async (
+    recipeId: number,
+    data: Partial<CreateRecipeDTO>,
+  ): Promise<Recipe> => {
+    const response = await api.patch<Recipe>(`/recipes/${recipeId}`, data);
+    return response.data;
+  },
+
   deleteRecipe: async (recipeId: number) => {
     const response = await api.delete(`/recipes/${recipeId}`);
     return response.data;

@@ -5,6 +5,7 @@ import {
   type Category,
 } from "../services/product.service";
 import { ProductModal } from "../components/ProductModal";
+import { ProductDetailModal } from "../components/ProductDetailModal";
 import { CategoryModal } from "../components/CategoryModal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -34,6 +35,9 @@ export const ProductsView: React.FC = () => {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
+  const [selectedProductDetail, setSelectedProductDetail] = useState<
+    Product | undefined
+  >();
 
   const fetchCategories = async () => {
     try {
@@ -246,18 +250,22 @@ export const ProductsView: React.FC = () => {
               return (
                 <div
                   key={p.id}
-                  className={`bg-white rounded-2xl p-5 border transition-all hover:shadow-md relative group flex flex-col ${
+                  className={`bg-white rounded-2xl p-5 border transition-all hover:shadow-md relative group flex flex-col cursor-pointer ${
                     !p.isActive
                       ? "border-gray-200 opacity-60 bg-gray-50/50"
                       : "border-gray-100"
                   }`}
+                  onClick={() => setSelectedProductDetail(p)}
                 >
                   <div className="hidden md:flex absolute top-3 right-3 gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                     <Button
                       variant="secondary"
                       size="icon"
                       className="h-8 w-8 rounded-full shadow-sm bg-white hover:bg-gray-50 border border-gray-100 text-gray-600"
-                      onClick={() => handleEditProduct(p)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditProduct(p);
+                      }}
                       title="Editar Producto"
                     >
                       <Edit className="h-4 w-4" />
@@ -266,7 +274,10 @@ export const ProductsView: React.FC = () => {
                       variant="secondary"
                       size="icon"
                       className={`h-8 w-8 rounded-full shadow-sm bg-white border border-gray-100 ${p.isActive ? "hover:bg-red-50 text-red-600" : "hover:bg-green-50 text-green-600"}`}
-                      onClick={() => toggleProductStatus(p)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleProductStatus(p);
+                      }}
                       title={p.isActive ? "Desactivar" : "Activar"}
                     >
                       {p.isActive ? (
@@ -344,6 +355,14 @@ export const ProductsView: React.FC = () => {
             setIsCategoryModalOpen(false);
             fetchCategories();
           }}
+        />
+      )}
+
+      {selectedProductDetail && (
+        <ProductDetailModal
+          isOpen={!!selectedProductDetail}
+          onClose={() => setSelectedProductDetail(undefined)}
+          product={selectedProductDetail}
         />
       )}
     </div>
