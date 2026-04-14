@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, DollarSign, Receipt, AlertCircle } from "lucide-react";
+import { X, Receipt, AlertCircle } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";

@@ -1,10 +1,8 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect } from "react";
 import {
-  Lock,
   MoreVertical,
   CheckCircle2,
   AlertTriangle,
-  UserCheck,
   CreditCard,
   Banknote,
   Smartphone,
