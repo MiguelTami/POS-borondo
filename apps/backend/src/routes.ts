@@ -9,6 +9,7 @@ import paymentRoutes from "./modules/payments/routes/payment.routes";
 import userRoutes from "./modules/users/routes/user.routes";
 import shiftRoutes from "./modules/shifts/routes/shift.routes";
 import inventoryRoutes from "./modules/inventory/routes/inventory.routes";
+import statisticsRoutes from "./modules/statistics/routes/statistics.routes";
 import { authenticate } from "./middlewares/auth.middleware";
 
 const router = Router();
@@ -26,5 +27,6 @@ router.use("/orders", orderRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/shifts", shiftRoutes);
 router.use("/inventory", inventoryRoutes);
+router.use("/statistics", statisticsRoutes);
 
 export default router;

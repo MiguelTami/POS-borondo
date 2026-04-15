@@ -9,6 +9,7 @@ import { ActiveOrdersView } from "../features/orders/views/ActiveOrdersView";
 import { WaiterOrdersView } from "../features/orders/views/WaiterOrdersView";
 import { InventoryView } from "../features/inventory/views/InventoryView";
 import { ProductsView } from "../features/products/views/ProductsView";
+import { StatisticsView } from "../features/statistics/views/StatisticsView";
 import { UsersView } from "../features/users/views/UsersView";
 import { TablesView } from "../features/tables/views/TablesView";
 
@@ -73,9 +74,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "dashboard",
-        element: (
-          <div className="text-2xl font-bold">Dashboard Próximamente...</div>
-        ),
+        element: <StatisticsView />,
       },
       {
         path: "products",
