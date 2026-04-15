@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { StatisticsController } from "../controllers/statistics.controller";
-import { authenticate } from "../../../middlewares/auth.middleware";
+import { authorizeRole } from "../../../middlewares/auth.middleware";
 import { validate } from "../../../middlewares/validate.middleware";
 import { getStatisticsSchema, getShiftOrdersSchema } from "../schemas/statistics.schema";
 
@@ -8,7 +8,7 @@ const router = Router();
 const controller = new StatisticsController();
 
 // Aplicar middleware de autenticación a todas las rutas
-router.use(authenticate);
+router.use(authorizeRole(["ADMIN"]));
 
 // Listar ventas e ingresos
 router.get(

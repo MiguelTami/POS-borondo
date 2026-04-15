@@ -4,6 +4,7 @@ export interface SummaryData {
   shiftsCount: number;
   averageOrderValue: number;
   revenueByMethod: Record<string, number>;
+  revenueOverTime: { date: string; amount: number }[];
 }
 
 export interface TopProduct {
@@ -21,6 +22,16 @@ export interface TopIngredient {
   quantityUsed: number;
 }
 
+export interface ShiftSubOrderData {
+  id: number;
+  label: string;
+  status: string;
+  total: number;
+  createdAt: string;
+  items: any[];
+  payments: any[];
+}
+
 export interface ShiftOrderData {
   id: number;
   dailyOrderNumber: number;
@@ -31,6 +42,7 @@ export interface ShiftOrderData {
   total: number;
   payments: any[];
   items: any[];
+  subOrders: ShiftSubOrderData[];
 }
 
 export interface ShiftOrdersResponse {

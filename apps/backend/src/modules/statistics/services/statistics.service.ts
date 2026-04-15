@@ -1,4 +1,4 @@
-import { startOfDay, endOfDay, parseISO } from "date-fns";
+import { startOfDay, endOfDay, parseISO, differenceInDays, format } from "date-fns";
 import { StatisticsRepository } from "../repositories/statistics.repository";
 import { DateRangeQueryDTO } from "../types/statistics.types";
 
@@ -45,6 +45,31 @@ export class StatisticsService {
       {} as Record<string, number>,
     );
 
+    // Revenue over time (timeline)
+    const sortedPayments = [...payments].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    );
+
+    const diffDays = differenceInDays(end, start);
+    let dateFormatStr = "yyyy-MM-dd";
+    if (diffDays <= 1) {
+      dateFormatStr = "HH:00"; // Hour
+    } else if (diffDays <= 31) {
+      dateFormatStr = "MMM dd"; // Day
+    } else {
+      dateFormatStr = "yyyy-MM"; // Month
+    }
+
+    const revenueMap = new Map<string, number>();
+    sortedPayments.forEach((payment) => {
+      const key = format(payment.createdAt, dateFormatStr);
+      revenueMap.set(key, (revenueMap.get(key) || 0) + Number(payment.amount));
+    });
+
+    const revenueOverTime = Array.from(revenueMap.entries()).map(
+      ([date, amount]) => ({ date, amount }),
+    );
+
     // Active shifts in the period
     const shiftsInfo = await this.repository.getShiftsByDateRange(start, end);
 
@@ -52,6 +77,7 @@ export class StatisticsService {
       totalRevenue,
       ordersCount,
       revenueByMethod,
+      revenueOverTime,
       shiftsCount: shiftsInfo.length,
       averageOrderValue: ordersCount ? totalRevenue / ordersCount : 0,
     };
@@ -69,15 +95,20 @@ export class StatisticsService {
       let total = 0;
       let payments: any[] = [];
       let items: any[] = [];
+      const mappedSubOrders: any[] = [];
 
       order.subOrders.forEach((sub) => {
-        total += sub.orderItems.reduce(
+        const subTotal = sub.orderItems.reduce(
           (sum, item) => sum + Number(item.totalPriceSnapshot),
           0,
         );
+        total += subTotal;
+        const subPayments = sub.payments;
         sub.payments.forEach((p) => payments.push(p));
+
+        const subItems: any[] = [];
         sub.orderItems.forEach((item) => {
-          items.push({
+          const mappedItem = {
             productId: item.productId,
             productName: item.product.name,
             quantity: item.quantity,
@@ -87,7 +118,19 @@ export class StatisticsService {
             modifiers: item.modifiers.map(
               (m) => `${m.type} ${m.ingredient.name}`,
             ),
-          });
+          };
+          items.push(mappedItem);
+          subItems.push(mappedItem);
+        });
+
+        mappedSubOrders.push({
+          id: sub.id,
+          label: sub.label,
+          status: sub.status,
+          total: subTotal,
+          items: subItems,
+          payments: subPayments,
+          createdAt: sub.createdAt,
         });
       });
 
@@ -101,6 +144,7 @@ export class StatisticsService {
         total,
         payments,
         items,
+        subOrders: mappedSubOrders,
       };
     });
 

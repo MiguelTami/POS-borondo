@@ -1,79 +1,57 @@
-import { useState, useEffect } from "react";
-import { format, subDays, startOfMonth, startOfDay, endOfDay } from "date-fns";
-import type {
-  SummaryData,
-  TopProduct,
-  StatisticsFilters,
-} from "../types/statistics.types";
-import { statisticsService } from "../services/statistics.service";
-import { SummaryCards } from "../components/SummaryCards";
-import { TopProductsChart } from "../components/TopProductsChart";
-import { RevenueByMethodChart } from "../components/RevenueByMethodChart";
+import { useState } from "react";
+import { FinancesView } from "./FinancesView";
+import { ShiftOrdersView } from "./ShiftOrdersView";
+import { TopProductsView } from "./TopProductsView";
 
 export function StatisticsView() {
-  const [summary, setSummary] = useState<SummaryData | null>(null);
-  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
-  const [period, setPeriod] = useState("daily");
-
-  useEffect(() => {
-    fetchStats();
-  }, [period]);
-
-  const fetchStats = async () => {
-    try {
-      const now = new Date();
-      let startDate: Date;
-      const endDate = endOfDay(now);
-
-      if (period === "weekly") {
-        startDate = startOfDay(subDays(now, 7));
-      } else if (period === "monthly") {
-        startDate = startOfDay(startOfMonth(now));
-      } else {
-        startDate = startOfDay(now);
-      }
-
-      const params: StatisticsFilters = {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-      };
-
-      const pSummary = await statisticsService.getSummary(params);
-      setSummary(pSummary);
-
-      const pProducts = await statisticsService.getTopProducts(params);
-      setTopProducts(pProducts);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const [activeTab, setActiveTab] = useState<
+    "finances" | "shifts" | "products"
+  >("finances");
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between md:items-center border-b pb-4 gap-4">
         <h1 className="text-3xl font-bold tracking-tight">
           Estadísticas y Reportes
         </h1>
-        <div className="flex gap-2">
-          <select
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 bg-white"
+        <div className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setActiveTab("finances")}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === "finances"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
-            <option value="daily">Diario</option>
-            <option value="weekly">Semanal</option>
-            <option value="monthly">Mensual</option>
-          </select>
+            Finanzas
+          </button>
+          <button
+            onClick={() => setActiveTab("shifts")}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === "shifts"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Órdenes por Turno
+          </button>
+          <button
+            onClick={() => setActiveTab("products")}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === "products"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Productos Top
+          </button>
         </div>
       </div>
 
-      {summary && <SummaryCards summary={summary} />}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TopProductsChart data={topProducts} />
-        <RevenueByMethodChart
-          revenueByMethod={summary?.revenueByMethod || {}}
-        />
+      <div className="pt-2 min-h-[500px]">
+        {activeTab === "finances" && <FinancesView />}
+        {activeTab === "shifts" && <ShiftOrdersView />}
+        {activeTab === "products" && <TopProductsView />}
       </div>
     </div>
   );
