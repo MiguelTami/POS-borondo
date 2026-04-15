@@ -10,23 +10,26 @@ export function FinancesView() {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchStats = useCallback(async (startDate: Date | undefined, endDate: Date | undefined) => {
-    if (!startDate || !endDate) return;
-    setIsLoading(true);
-    try {
-      const params: StatisticsFilters = {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-      };
+  const fetchStats = useCallback(
+    async (startDate: Date | undefined, endDate: Date | undefined) => {
+      if (!startDate || !endDate) return;
+      setIsLoading(true);
+      try {
+        const params: StatisticsFilters = {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        };
 
-      const pSummary = await statisticsService.getSummary(params);
-      setSummary(pSummary);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        const pSummary = await statisticsService.getSummary(params);
+        setSummary(pSummary);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
 
   return (
     <div className="space-y-6">

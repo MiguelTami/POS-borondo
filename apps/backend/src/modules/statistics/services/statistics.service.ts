@@ -1,4 +1,10 @@
-import { startOfDay, endOfDay, parseISO, differenceInDays, format } from "date-fns";
+import {
+  startOfDay,
+  endOfDay,
+  parseISO,
+  differenceInDays,
+  format,
+} from "date-fns";
 import { StatisticsRepository } from "../repositories/statistics.repository";
 import { DateRangeQueryDTO } from "../types/statistics.types";
 

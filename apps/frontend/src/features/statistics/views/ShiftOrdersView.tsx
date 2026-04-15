@@ -252,83 +252,96 @@ export function ShiftOrdersView() {
                         </div>
                       </div>
 
-                      {expandedOrders.includes(o.id) && (
-                        <div className="bg-gray-50/50 border-t border-dashed border-gray-200 pl-16 pr-4 py-4 animate-in slide-in-from-top-2 duration-500 ease-in-out">
-                          {o.subOrders && o.subOrders.length > 0 ? (
-                            <table className="w-full text-sm">
-                              <thead className="text-xs text-gray-500 uppercase bg-gray-100/50">
-                                <tr>
-                                  <th className="px-4 py-2 text-left font-medium rounded-l-md">
-                                    Pedido por
-                                  </th>
-                                  <th className="px-4 py-2 text-left font-medium">
-                                    Hora
-                                  </th>
-                                  <th className="px-4 py-2 text-left font-medium">
-                                    Estado
-                                  </th>
-                                  <th className="px-4 py-2 text-left font-medium">
-                                    Items
-                                  </th>
-                                  <th className="px-4 py-2 text-center font-medium">
-                                    Total
-                                  </th>
-                                  <th className="px-4 py-2 text-right font-medium rounded-r-md">
-                                    Detalle
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {o.subOrders.map((sub) => (
-                                  <tr
-                                    key={sub.id}
-                                    className="border-b border-gray-100 last:border-0 hover:bg-white transition-colors group"
-                                  >
-                                    <td className="px-4 py-3 font-medium text-gray-700 group-hover:text-blue-600">
-                                      {sub.label}
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-500">
-                                      {format(new Date(sub.createdAt), "HH:mm")}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                      <span
-                                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                          sub.status === "PAID"
-                                            ? "text-green-700 bg-green-50"
-                                            : sub.status === "CANCELLED"
-                                              ? "text-red-700 bg-red-50"
-                                              : "text-yellow-700 bg-yellow-50"
-                                        }`}
-                                      >
-                                        {sub.status}
-                                      </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-500">
-                                      {sub.items.length} items
-                                    </td>
-                                    <td className="px-4 py-3 font-semibold text-gray-700 text-center">
-                                      ${sub.total.toLocaleString()}
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                      <button
-                                        onClick={() => setSelectedSubOrder(sub)}
-                                        className="text-xs font-medium text-gray-600 hover:text-blue-600 bg-white border border-gray-200 hover:border-blue-300 px-3 py-1.5 rounded transition-colors group-hover:shadow-sm"
-                                      >
-                                        <ReceiptText className="w-3.5 h-3.5 inline mr-1" />
-                                        Suborden
-                                      </button>
-                                    </td>
+                      <div
+                        className={`grid transition-all duration-300 ease-in-out ${
+                          expandedOrders.includes(o.id)
+                            ? "grid-rows-[1fr] opacity-100"
+                            : "grid-rows-[0fr] opacity-0"
+                        }`}
+                      >
+                        <div className="overflow-hidden">
+                          <div className="bg-gray-50/50 border-t border-dashed border-gray-200 pl-16 pr-4 py-4">
+                            {o.subOrders && o.subOrders.length > 0 ? (
+                              <table className="w-full text-sm">
+                                <thead className="text-xs text-gray-500 uppercase bg-gray-100/50">
+                                  <tr>
+                                    <th className="px-4 py-2 text-left font-medium rounded-l-md">
+                                      Pedido por
+                                    </th>
+                                    <th className="px-4 py-2 text-left font-medium">
+                                      Hora
+                                    </th>
+                                    <th className="px-4 py-2 text-left font-medium">
+                                      Estado
+                                    </th>
+                                    <th className="px-4 py-2 text-left font-medium">
+                                      Items
+                                    </th>
+                                    <th className="px-4 py-2 text-center font-medium">
+                                      Total
+                                    </th>
+                                    <th className="px-4 py-2 text-right font-medium rounded-r-md">
+                                      Detalle
+                                    </th>
                                   </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          ) : (
-                            <div className="text-center py-4 text-sm text-gray-400 font-medium">
-                              Sin sub-órdenes
-                            </div>
-                          )}
+                                </thead>
+                                <tbody>
+                                  {o.subOrders.map((sub) => (
+                                    <tr
+                                      key={sub.id}
+                                      className="border-b border-gray-100 last:border-0 hover:bg-white transition-colors group"
+                                    >
+                                      <td className="px-4 py-3 font-medium text-gray-700 group-hover:text-blue-600">
+                                        {sub.label}
+                                      </td>
+                                      <td className="px-4 py-3 text-gray-500">
+                                        {format(
+                                          new Date(sub.createdAt),
+                                          "HH:mm",
+                                        )}
+                                      </td>
+                                      <td className="px-4 py-3">
+                                        <span
+                                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                                            sub.status === "PAID"
+                                              ? "text-green-700 bg-green-50"
+                                              : sub.status === "CANCELLED"
+                                                ? "text-red-700 bg-red-50"
+                                                : "text-yellow-700 bg-yellow-50"
+                                          }`}
+                                        >
+                                          {sub.status}
+                                        </span>
+                                      </td>
+                                      <td className="px-4 py-3 text-gray-500">
+                                        {sub.items.length} items
+                                      </td>
+                                      <td className="px-4 py-3 font-semibold text-gray-700 text-center">
+                                        ${sub.total.toLocaleString()}
+                                      </td>
+                                      <td className="px-4 py-3 text-right">
+                                        <button
+                                          onClick={() =>
+                                            setSelectedSubOrder(sub)
+                                          }
+                                          className="text-xs font-medium text-gray-600 hover:text-blue-600 bg-white border border-gray-200 hover:border-blue-300 px-3 py-1.5 rounded transition-colors group-hover:shadow-sm"
+                                        >
+                                          <ReceiptText className="w-3.5 h-3.5 inline mr-1" />
+                                          Suborden
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            ) : (
+                              <div className="text-center py-4 text-sm text-gray-400 font-medium">
+                                Sin sub-órdenes
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
