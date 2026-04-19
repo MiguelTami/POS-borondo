@@ -455,75 +455,117 @@ export function ActiveOrdersView() {
                         return (
                           <div
                             key={sub.id}
-                            className={`rounded-xl p-4 flex items-center justify-between border transition-colors cursor-pointer ${
+                            className={`rounded-xl p-4 flex flex-col justify-between border transition-colors cursor-pointer ${
                               isPayable
                                 ? "bg-white hover:bg-gray-50 border-gray-200"
                                 : "bg-[#F8F9FB] border-transparent"
                             }`}
                             onClick={() => setViewSubOrder(sub)}
                           >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-2.5 h-2.5 rounded-full ${subPaid ? "bg-blue-500" : "bg-orange-500"}`}
-                              />
-                              <div>
-                                <h4 className="text-sm font-bold text-gray-900 leading-snug">
-                                  {sub.label || `Sub-orden #${sub.id}`}
-                                </h4>
-                                <span className="text-[13px] text-gray-500 font-semibold block mt-1">
-                                  Total:{" "}
-                                  <span className="text-gray-900">
-                                    ${subTotalCalc.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                  </span>
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
+                            <div className="flex items-center justify-between mb-3 w-full">
+                              <div className="flex items-center gap-3">
                                 <div
-                                  className={`text-[10px] font-bold tracking-wider uppercase mt-1 ${!subPaid ? "text-orange-600" : "text-blue-600"}`}
-                                >
-                                  {sub.status === "SENT_TO_CASHIER"
-                                    ? "POR MANDAR A COCINA"
-                                    : sub.status === "SENT_TO_KITCHEN"
-                                      ? "EN COCINA / POR COBRAR"
-                                      : sub.status}
+                                  className={`w-2.5 h-2.5 rounded-full ${subPaid ? "bg-blue-500" : "bg-orange-500"}`}
+                                />
+                                <div>
+                                  <h4 className="text-sm font-bold text-gray-900 leading-snug">
+                                    {sub.label || `Sub-orden #${sub.id}`}
+                                  </h4>
+                                  <span className="text-[13px] text-gray-500 font-semibold block mt-1">
+                                    Total:{" "}
+                                    <span className="text-gray-900">
+                                      $
+                                      {subTotalCalc.toLocaleString(undefined, {
+                                        maximumFractionDigits: 0,
+                                      })}
+                                    </span>
+                                  </span>
                                 </div>
                               </div>
-                              {!subPaid ? (
-                                <div className="flex gap-2">
-                                  {isKitchenSendable && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setKitchenSubOrder({
-                                          ...sub,
-                                          orderId: order.id,
-                                        });
-                                      }}
-                                      className="px-3 py-1 bg-orange-100 border border-orange-200 hover:bg-orange-200 text-orange-800 text-xs font-bold rounded-lg shadow-sm"
-                                    >
-                                      Enviar a Cocina
-                                    </button>
-                                  )}
-                                  {isPayable && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setPaymentSubOrder(sub);
-                                      }}
-                                      className="px-3 py-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-800 text-xs font-bold rounded-lg shadow-sm"
-                                    >
-                                      Pagar Item
-                                    </button>
-                                  )}
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <div
+                                    className={`text-[10px] font-bold tracking-wider uppercase mt-1 ${!subPaid ? "text-orange-600" : "text-blue-600"}`}
+                                  >
+                                    {sub.status === "SENT_TO_CASHIER"
+                                      ? "POR MANDAR A COCINA"
+                                      : sub.status === "SENT_TO_KITCHEN"
+                                        ? "EN COCINA / POR COBRAR"
+                                        : sub.status}
+                                  </div>
                                 </div>
-                              ) : (
-                                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                                  <CheckCircle2 className="w-5 h-5" />
-                                </div>
-                              )}
+                                {!subPaid ? (
+                                  <div
+                                    className="flex gap-2"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {isKitchenSendable && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setKitchenSubOrder({
+                                            ...sub,
+                                            orderId: order.id,
+                                          });
+                                        }}
+                                        className="px-3 py-1 bg-orange-100 border border-orange-200 hover:bg-orange-200 text-orange-800 text-xs font-bold rounded-lg shadow-sm"
+                                      >
+                                        Enviar a Cocina
+                                      </button>
+                                    )}
+                                    {isPayable && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setPaymentSubOrder(sub);
+                                        }}
+                                        className="px-3 py-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-800 text-xs font-bold rounded-lg shadow-sm"
+                                      >
+                                        Pagar Item
+                                      </button>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <CheckCircle2 className="w-5 h-5" />
+                                  </div>
+                                )}
+                              </div>
                             </div>
+
+                            {/* Items Preview with notes */}
+                            {sub.orderItems && sub.orderItems.length > 0 && (
+                              <div className="space-y-1.5 mt-2 bg-gray-100/50 p-2.5 rounded-lg border border-gray-100">
+                                {sub.orderItems.map((item) => (
+                                  <div
+                                    key={item.id}
+                                    className="flex flex-col text-xs text-gray-600"
+                                  >
+                                    <div className="flex justify-between items-center">
+                                      <span>
+                                        <span className="font-bold text-gray-800">
+                                          {item.quantity}x
+                                        </span>{" "}
+                                        {item.product.name}
+                                      </span>
+                                      <span className="font-semibold text-gray-800">
+                                        $
+                                        {Number(
+                                          item.totalPriceSnapshot,
+                                        ).toLocaleString(undefined, {
+                                          maximumFractionDigits: 0,
+                                        })}
+                                      </span>
+                                    </div>
+                                    {item.notes && (
+                                      <div className="pl-4 mt-0.5 text-amber-600 italic">
+                                        ↳ {item.notes}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -541,7 +583,10 @@ export function ActiveOrdersView() {
                           Total Global
                         </span>
                         <div className="text-3xl font-bold text-gray-900 mt-1">
-                          ${calculatedGlobalTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                          $
+                          {calculatedGlobalTotal.toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })}
                         </div>
                       </div>
                       {!isPaid && order.status !== "CANCELLED" && (
@@ -583,19 +628,29 @@ export function ActiveOrdersView() {
                 {viewSubOrder.orderItems?.map((item: any) => (
                   <div
                     key={item.id}
-                    className="flex justify-between items-start text-sm"
+                    className="flex flex-col text-sm border-b border-gray-200/50 last:border-0 pb-2 last:pb-0"
                   >
-                    <div className="flex-1 pr-4">
-                      <span className="font-bold text-gray-800">
-                        {item.quantity}x
-                      </span>{" "}
-                      <span className="text-gray-600">
-                        {item.product?.name || "Producto N/A"}
-                      </span>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 pr-4 text-gray-800">
+                        <span className="font-bold">{item.quantity}x</span>{" "}
+                        <span className="font-medium">
+                          {item.product?.name || "Producto N/A"}
+                        </span>
+                      </div>
+                      <div className="font-bold text-gray-900">
+                        $
+                        {Number(item.totalPriceSnapshot).toLocaleString(
+                          undefined,
+                          { maximumFractionDigits: 0 },
+                        )}
+                      </div>
                     </div>
-                    <div className="font-semibold text-gray-900">
-                      ${Number(item.totalPriceSnapshot).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                    </div>
+                    {item.notes && (
+                      <div className="pl-6 mt-1 text-xs text-amber-600 italic font-medium relative flex items-center">
+                        <span className="absolute left-3 top-0 bottom-0 w-px bg-amber-200"></span>
+                        Nota: {item.notes}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {(!viewSubOrder.orderItems ||
@@ -608,7 +663,11 @@ export function ActiveOrdersView() {
             <div className="flex justify-between items-center py-4 mt-auto border-t border-gray-100">
               <span className="text-gray-500 font-bold">Total Reportado</span>
               <span className="text-3xl font-black text-gray-900">
-                ${calculateSubOrderTotal(viewSubOrder).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                $
+                {calculateSubOrderTotal(viewSubOrder).toLocaleString(
+                  undefined,
+                  { maximumFractionDigits: 0 },
+                )}
               </span>
             </div>
 
@@ -699,7 +758,11 @@ export function ActiveOrdersView() {
                         </span>
                       </div>
                       <div className="font-semibold text-gray-900">
-                        ${Number(item.totalPriceSnapshot).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        $
+                        {Number(item.totalPriceSnapshot).toLocaleString(
+                          undefined,
+                          { maximumFractionDigits: 0 },
+                        )}
                       </div>
                     </div>
                   ))}
@@ -715,7 +778,11 @@ export function ActiveOrdersView() {
               <div className="flex justify-between items-center py-4 border-t border-b border-gray-100 mb-6">
                 <span className="text-gray-500 font-bold">Total a Cobrar</span>
                 <span className="text-3xl font-black text-gray-900">
-                  ${calculateSubOrderTotal(paymentSubOrder).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  $
+                  {calculateSubOrderTotal(paymentSubOrder).toLocaleString(
+                    undefined,
+                    { maximumFractionDigits: 0 },
+                  )}
                 </span>
               </div>
 

@@ -75,6 +75,7 @@ export class OrderRepository {
                             select: {
                                 id: true,
                                 quantity: true,
+                                notes: true,
                                 totalPriceSnapshot: true,
                                 product: {
                                     select: {
@@ -119,6 +120,7 @@ export class OrderRepository {
                             select: {
                                 id: true,
                                 quantity: true,
+                                notes: true,
                                 totalPriceSnapshot: true,
                                 product: {
                                     select: {
@@ -185,6 +187,7 @@ export class OrderRepository {
                             select: {
                                 id: true,
                                 quantity: true,
+                                notes: true,
                                 product: {
                                     select: {
                                         recipes: {

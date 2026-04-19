@@ -23,14 +23,14 @@ export function WaiterOrdersView() {
   } | null>(null);
 
   const [tables, setTables] = useState<Table[]>([]);
-  
-    useEffect(() => {
-      tableService.getTables().then(setTables);
-    }, []);
-  
-    function getTableNumber(tableId: number | null) {
-      return tables.find(t => t.id === tableId)?.number || "N/A";
-    }
+
+  useEffect(() => {
+    tableService.getTables().then(setTables);
+  }, []);
+
+  function getTableNumber(tableId: number | null) {
+    return tables.find((t) => t.id === tableId)?.number || "N/A";
+  }
 
   // For viewing suborder details
   const [viewSubOrder, setViewSubOrder] = useState<SubOrder | null>(null);
@@ -171,7 +171,11 @@ export function WaiterOrdersView() {
                             : sub.status}
                         </span>
                         <span className="font-semibold text-gray-900">
-                          ${Number(calculatedSubTotal).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                          $
+                          {Number(calculatedSubTotal).toLocaleString(
+                            undefined,
+                            { maximumFractionDigits: 0 },
+                          )}
                         </span>
                       </div>
                     </div>
@@ -247,19 +251,32 @@ export function WaiterOrdersView() {
                   {viewSubOrder.orderItems.map((item: any) => (
                     <li
                       key={item.id}
-                      className="py-3 px-4 flex justify-between items-center bg-white rounded-lg"
+                      className="py-3 px-4 flex flex-col bg-white rounded-lg"
                     >
-                      <div className="flex flex-col">
-                        <span className="font-bold text-gray-800">
-                          {item.product?.name || "Ref."}
-                        </span>
-                        <span className="text-gray-500 text-xs font-medium mt-1">
-                          Cantidad: {item.quantity}
+                      <div className="flex justify-between items-center">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-gray-800">
+                            {item.product?.name || "Ref."}
+                          </span>
+                          <span className="text-gray-500 text-xs font-medium mt-1">
+                            Cantidad: {item.quantity}
+                          </span>
+                        </div>
+                        <span className="font-black text-gray-900 bg-gray-50 px-2 py-1 rounded">
+                          $
+                          {Number(item.totalPriceSnapshot).toLocaleString(
+                            undefined,
+                            { maximumFractionDigits: 0 },
+                          )}
                         </span>
                       </div>
-                      <span className="font-black text-gray-900 bg-gray-50 px-2 py-1 rounded">
-                        ${Number(item.totalPriceSnapshot).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                      </span>
+
+                      {item.notes && (
+                        <div className="pl-4 mt-2 text-xs text-amber-600 font-medium italic relative flex items-center">
+                          <span className="absolute left-1.5 top-0 bottom-0 w-px bg-amber-200"></span>
+                          Nota: {item.notes}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>

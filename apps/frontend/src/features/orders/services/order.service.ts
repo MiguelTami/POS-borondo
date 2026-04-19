@@ -14,6 +14,7 @@ export interface OrderItem {
   id: number;
   quantity: number;
   totalPriceSnapshot: string | number;
+  notes?: string;
   product: {
     name: string;
   };

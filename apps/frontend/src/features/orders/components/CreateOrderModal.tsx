@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Minus, Search, AlertCircle } from "lucide-react";
+import {
+  X,
+  Plus,
+  Minus,
+  Search,
+  AlertCircle,
+  MessageSquare,
+} from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
@@ -15,6 +22,7 @@ import { orderService } from "../services/order.service";
 interface LocalOrderItem {
   product: Product;
   quantity: number;
+  notes?: string;
 }
 
 interface LocalSubOrder {
@@ -56,6 +64,13 @@ export function CreateOrderModal({
   const [newSubOrderName, setNewSubOrderName] = useState("");
   const [pendingProductToAdd, setPendingProductToAdd] =
     useState<Product | null>(null);
+
+  // Modal de notas
+  const [noteModalOpen, setNoteModalOpen] = useState<{
+    isOpen: boolean;
+    itemIndex: number | null;
+  }>({ isOpen: false, itemIndex: null });
+  const [tempNote, setTempNote] = useState("");
 
   const [error, setError] = useState<string | null>(null);
 
@@ -99,6 +114,37 @@ export function CreateOrderModal({
     setActiveSubOrderId(newId);
     setIsNameModalOpen(false);
     setPendingProductToAdd(null);
+  };
+
+  const handleOpenNoteModal = (index: number, existingNote?: string) => {
+    setTempNote(existingNote || "");
+    setNoteModalOpen({ isOpen: true, itemIndex: index });
+  };
+
+  const handleSaveNote = () => {
+    const currentIndex = noteModalOpen.itemIndex;
+    if (currentIndex === null) return;
+
+    setSubOrders((prev) =>
+      prev.map((sub) => {
+        if (sub.id !== activeSubOrderId) return sub;
+
+        const newItems = [...sub.items];
+        
+        const itemToUpdate = newItems[currentIndex];
+        if (itemToUpdate) {
+            newItems[currentIndex] = {
+            ...itemToUpdate,
+            notes: tempNote.trim() || undefined,
+            };
+        }
+
+        return { ...sub, items: newItems };
+      }),
+    );
+
+    setNoteModalOpen({ isOpen: false, itemIndex: null });
+    setTempNote("");
   };
 
   const handleAddToCart = (product: Product) => {
@@ -239,6 +285,7 @@ export function CreateOrderModal({
             createdSubOrder.id,
             item.product.id,
             item.quantity,
+            item.notes,
           );
         }
 
@@ -400,7 +447,10 @@ export function CreateOrderModal({
                         {product.name}
                       </h3>
                       <div className="text-blue-600 font-black text-lg mt-auto">
-                        ${Number(product.price).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        $
+                        {Number(product.price).toLocaleString(undefined, {
+                          maximumFractionDigits: 0,
+                        })}
                       </div>
 
                       {exhausted && (
@@ -467,21 +517,39 @@ export function CreateOrderModal({
 
                 {/* Cart Items */}
                 <div className="flex-1 overflow-y-auto px-5 space-y-3 pb-6">
-                  {activeSubOrder.items.map((item) => (
+                  {activeSubOrder.items.map((item, index) => (
                     <div
-                      key={item.product.id}
+                      key={`${item.product.id}-${index}`}
                       className="flex flex-col p-3 rounded-xl border border-gray-100 bg-gray-50/50"
                     >
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-1">
                         <span className="font-bold text-sm text-gray-800 flex-1 pr-2">
                           {item.product.name}
                         </span>
                         <span className="font-bold text-gray-900">
                           $
-                          {(Number(item.product.price) * item.quantity).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                          {(
+                            Number(item.product.price) * item.quantity
+                          ).toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })}
                         </span>
                       </div>
+
+                      {item.notes && (
+                        <span className="text-xs text-gray-500 mb-2 italic">
+                          ↳ {item.notes}
+                        </span>
+                      )}
+
                       <div className="flex justify-between items-center mt-2">
+                        <button
+                          onClick={() => handleOpenNoteModal(index, item.notes)}
+                          className="px-2 py-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center"
+                          title="Añadir o editar nota"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                        </button>
                         <div className="flex items-center bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                           <button
                             onClick={() =>
@@ -521,7 +589,11 @@ export function CreateOrderModal({
                       Subtotal ({activeSubOrder.label})
                     </span>
                     <span className="text-gray-800 font-bold">
-                      ${getSubOrderTotal(activeSubOrder).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      $
+                      {getSubOrderTotal(activeSubOrder).toLocaleString(
+                        undefined,
+                        { maximumFractionDigits: 0 },
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between mt-4 pt-4 border-t border-gray-100">
@@ -535,7 +607,9 @@ export function CreateOrderModal({
                       $
                       {subOrders
                         .reduce((acc, sub) => acc + getSubOrderTotal(sub), 0)
-                        .toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        .toLocaleString(undefined, {
+                          maximumFractionDigits: 0,
+                        })}
                     </span>
                   </div>
 
@@ -617,6 +691,65 @@ export function CreateOrderModal({
           </div>
         </div>
       )}
+
+      {noteModalOpen.isOpen &&
+        activeSubOrder &&
+        noteModalOpen.itemIndex !== null && (
+          <div className="fixed inset-0 z-[60] flex justify-center items-center bg-black/40 backdrop-blur-sm p-4">
+            <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl flex flex-col overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-blue-50">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-blue-600" />
+                  Añadir nota
+                </h3>
+                <button
+                  onClick={() =>
+                    setNoteModalOpen({ isOpen: false, itemIndex: null })
+                  }
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6">
+                <p className="text-sm font-bold text-gray-700 mb-3">
+                  Producto:{" "}
+                  {activeSubOrder.items[noteModalOpen.itemIndex].product.name}
+                </p>
+                <textarea
+                  autoFocus
+                  placeholder="Ej. Sin cebolla, bien cocido..."
+                  value={tempNote}
+                  onChange={(e) => setTempNote(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSaveNote();
+                    }
+                  }}
+                  className="flex w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 h-24 resize-none"
+                />
+                <div className="flex gap-3 justify-end mt-6">
+                  <Button
+                    variant="outline"
+                    className="px-6"
+                    onClick={() =>
+                      setNoteModalOpen({ isOpen: false, itemIndex: null })
+                    }
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    className="px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200"
+                    onClick={handleSaveNote}
+                  >
+                    Guardar nota
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 }

@@ -152,7 +152,8 @@ export class OrderController {
                 return res.status(404).json({ error: error.message });
             }
             if (error.message === "No se puede cancelar una orden que ya ha sido pagada" ||
-                error.message === "No se puede cancelar una orden que tiene subórdenes pagadas"
+                error.message === "No se puede cancelar una orden que tiene subórdenes pagadas" ||
+                error.message === "No se puede cancelar una orden que tiene subórdenes enviadas a la cocina"
             ) {
                 return res.status(400).json({ error: error.message });
             }

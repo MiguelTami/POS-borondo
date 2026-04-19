@@ -150,6 +150,11 @@ export class OrderService {
             throw new Error("No se puede cancelar una orden que tiene subórdenes pagadas");
         }
 
+        const hasKitchenSubOrders = order.subOrders.some((subOrder: any) => subOrder.status === "SENT_TO_KITCHEN");
+        if (hasKitchenSubOrders) {
+            throw new Error("No se puede cancelar una orden que tiene subórdenes enviadas a la cocina");
+        }
+
         return this.repository.cancelOrder(id);
     }  
 }

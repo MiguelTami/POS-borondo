@@ -15,7 +15,7 @@ export class PrinterService {
       Buffer.from("--------------------------------\n"),
       ...comandaInfo.items.map((item: any) =>
         Buffer.from(
-          `${item.quantity}x ${item.productName} ${item.notes ? `\n  *Nota: ${item.notes}` : ""}\n`,
+          `${item.quantity}x ${item.productName}\n${item.notes ? `   *Nota: ${item.notes}\n` : ""}`,
         ),
       ),
       Buffer.from("\n\n\n\n\n"), // Espacios para poder cortar
@@ -61,7 +61,7 @@ export class PrinterService {
       Buffer.from("--------------------------------\n"),
       ...receiptInfo.items.map((item: any) =>
         Buffer.from(
-          `${item.quantity}x ${item.productName}: $${item.totalPrice}\n`,
+          `${item.quantity}x ${item.productName}: $${item.totalPrice}\n${item.notes ? `   *Nota: ${item.notes}\n` : ""}`,
         ),
       ),
       Buffer.from("--------------------------------\n"),
