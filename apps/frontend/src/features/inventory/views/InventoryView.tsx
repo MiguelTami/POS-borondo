@@ -1,3 +1,4 @@
+import { formatUnit } from "../../../lib/utils";
 import { useState, useEffect, useMemo } from "react";
 import {
   Package,
@@ -436,7 +437,7 @@ export function InventoryView() {
                       </h3>
                       <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100 uppercase tracking-wider">
                         Umbral: {ing.minStockAlert}{" "}
-                        {ing.unit === "UNIT" ? "U" : ing.unit}
+                        {formatUnit(ing.unit)}
                       </span>
                     </div>
                   </div>
@@ -447,7 +448,7 @@ export function InventoryView() {
                       <span className="text-2xl font-black text-gray-800 tracking-tight">
                         {ing.stock}{" "}
                         <span className="font-semibold text-gray-400 text-sm tracking-normal">
-                          {ing.unit}
+                          {formatUnit(ing.unit)}
                         </span>
                       </span>
                       {Number(ing.stock) <= 0 && (

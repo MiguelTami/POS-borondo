@@ -77,6 +77,16 @@ export const orderService = {
     return response.data;
   },
 
+  sendSubOrderToKitchen: async (
+    orderId: number,
+    subOrderId: number,
+  ): Promise<any> => {
+    const response = await api.patch(
+      `/orders/${orderId}/sub-orders/${subOrderId}/send-to-kitchen`,
+    );
+    return response.data;
+  },
+
   payOrder: async (orderId: number): Promise<any> => {
     const response = await api.patch(`/orders/${orderId}/pay`);
     return response.data;

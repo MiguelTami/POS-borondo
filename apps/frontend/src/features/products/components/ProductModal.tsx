@@ -1,10 +1,10 @@
+import { formatUnit } from "../../../lib/utils";
 import React, { useState, useEffect } from "react";
 import {
   type Product,
   type Category,
   type CreateProductDTO,
   productService,
-  
 } from "../services/product.service";
 import {
   inventoryService,
@@ -393,7 +393,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                             />
                           </td>
                           <td className="px-4 py-3 text-gray-500">
-                            {r.unit || "-"}
+                            {formatUnit(r.unit) || "-"}
                           </td>
                           <td className="px-4 py-3 text-right">
                             <Button

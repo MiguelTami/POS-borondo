@@ -39,10 +39,16 @@ export function WaiterOrdersView() {
 
   useEffect(() => {
     fetchOrders();
+
+    const intervalId = setInterval(() => {
+      fetchOrders(false);
+    }, 5000); // Fetch orders every 5 seconds
+
+    return () => clearInterval(intervalId);
   }, []);
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  const fetchOrders = async (showLoader = true) => {
+    if (showLoader) setLoading(true);
     try {
       const data = await orderService.getOrders();
       // Optional: Filter orders created by this waiter if needed. Or just display all.
@@ -51,7 +57,7 @@ export function WaiterOrdersView() {
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (showLoader) setLoading(false);
     }
   };
 

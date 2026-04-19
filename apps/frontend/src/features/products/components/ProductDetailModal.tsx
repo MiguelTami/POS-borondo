@@ -1,3 +1,4 @@
+import { formatUnit } from "../../../lib/utils";
 import React from "react";
 import {
   Dialog,
@@ -41,7 +42,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           </div>
         </DialogHeader>
 
-        <div className="mt-4 space-y-4" style={{ marginBottom: "0", marginTop: "0" }}>
+        <div
+          className="mt-4 space-y-4"
+          style={{ marginBottom: "0", marginTop: "0" }}
+        >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
@@ -91,7 +95,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                           {r.quantityRequired}
                         </td>
                         <td className="px-5 py-4 text-gray-500">
-                          {r.ingredient?.unit || "-"}
+                          {formatUnit(r.ingredient?.unit) || "-"}
                         </td>
                       </tr>
                     ))}

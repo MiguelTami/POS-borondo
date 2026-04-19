@@ -38,7 +38,7 @@ export function RevenueOverTimeChart({ data }: RevenueOverTimeChartProps) {
                 tickLine={false}
               />
               <Tooltip
-                formatter={(value: number) => [
+                formatter={(value: any) => [
                   `$${value.toLocaleString()}`,
                   "Ingresos",
                 ]}

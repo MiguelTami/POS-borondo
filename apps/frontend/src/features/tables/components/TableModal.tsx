@@ -29,7 +29,7 @@ export const TableModal: React.FC<TableModalProps> = ({
   table,
 }) => {
   const [number, setNumber] = useState<string>("");
-  const [status, setStatus] = useState<
+  const [_status, setStatus] = useState<
     "AVAILABLE" | "OCCUPIED" | "RESERVED" | "OUT_OF_SERVICE"
   >("AVAILABLE");
   const [loading, setLoading] = useState(false);

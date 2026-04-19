@@ -36,10 +36,10 @@ export class StatisticsService {
     );
 
     // Orders count
-    const ordersCount = await this.repository.countOrdersByDateRange(
-      start,
-      end,
-    );
+    const [ordersCount, subOrdersCount] = await Promise.all([
+      this.repository.countOrdersByDateRange(start, end),
+      this.repository.countSubOrdersByDateRange(start, end),
+    ]);
 
     // Revenue by payment method
     const revenueByMethod = payments.reduce(
@@ -79,13 +79,31 @@ export class StatisticsService {
     // Active shifts in the period
     const shiftsInfo = await this.repository.getShiftsByDateRange(start, end);
 
+    // Add shifts totals
+    const expectedRevenue = shiftsInfo.reduce(
+      (acc, shift) => acc + Number(shift.expectedRevenue || 0),
+      0,
+    );
+    const declaredCash = shiftsInfo.reduce(
+      (acc, shift) => acc + Number(shift.declaredCash || 0),
+      0,
+    );
+    const difference = shiftsInfo.reduce(
+      (acc, shift) => acc + Number(shift.difference || 0),
+      0,
+    );
+
     return {
       totalRevenue,
+      expectedRevenue,
+      declaredCash,
+      difference,
       ordersCount,
       revenueByMethod,
       revenueOverTime,
       shiftsCount: shiftsInfo.length,
       averageOrderValue: ordersCount ? totalRevenue / ordersCount : 0,
+      averageSubOrderValue: subOrdersCount ? totalRevenue / subOrdersCount : 0,
     };
   }
 

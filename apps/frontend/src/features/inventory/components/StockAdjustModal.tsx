@@ -1,3 +1,4 @@
+import { formatUnit } from "../../../lib/utils";
 import { useState } from "react";
 import { X, ArrowRightLeft, AlertCircle } from "lucide-react";
 import { Button } from "../../../components/ui/button";
@@ -96,7 +97,7 @@ export function StockAdjustModal({ onClose, onSuccess, ingredient }: Props) {
           <div className="text-sm font-medium text-gray-500 mb-2">
             Ingrediente:{" "}
             <span className="text-gray-900 font-bold">{ingredient.name}</span> (
-            {ingredient.unit})
+            {formatUnit(ingredient.unit)})
           </div>
 
           {error && (

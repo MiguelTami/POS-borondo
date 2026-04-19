@@ -13,11 +13,17 @@ interface RevenueByMethodChartProps {
   revenueByMethod: Record<string, number>;
 }
 
+const METHOD_LABELS: Record<string, string> = {
+  CASH: "Efectivo",
+  CARD: "Tarjeta",
+  MOBILE_PAYMENT: "Móvil",
+};
+
 export function RevenueByMethodChart({
   revenueByMethod,
 }: RevenueByMethodChartProps) {
   const data = Object.entries(revenueByMethod).map(([name, value]) => ({
-    name,
+    name: METHOD_LABELS[name] || name,
     value,
   }));
 
@@ -39,7 +45,7 @@ export function RevenueByMethodChart({
                   `${name} ${(percent * 100).toFixed(0)}%`
                 }
               >
-                {data.map((entry, index) => (
+                {data.map((_entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}

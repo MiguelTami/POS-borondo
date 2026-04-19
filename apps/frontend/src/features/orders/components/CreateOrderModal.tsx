@@ -311,7 +311,7 @@ export function CreateOrderModal({
               <h3 className="text-sm font-bold tracking-tight uppercase text-gray-500">
                 Seleccionar Mesa{" "}
                 {selectedTableId
-                  ? `(Mesa ${tables.find((t) => t.id === selectedTableId)?.id})`
+                  ? `(Mesa ${tables.find((t) => t.id === selectedTableId)?.number})`
                   : ""}
               </h3>
               <div className="flex gap-3 overflow-x-auto p-2 pb-4 scrollbar-hide">
@@ -332,7 +332,7 @@ export function CreateOrderModal({
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      Mesa {t.id} {isAvailable ? "" : "(Ocupada)"}
+                      Mesa {t.number} {isAvailable ? "" : "(Ocupada)"}
                     </button>
                   );
                 })}

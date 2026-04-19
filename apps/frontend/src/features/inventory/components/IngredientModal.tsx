@@ -1,3 +1,4 @@
+import { formatUnit } from "../../../lib/utils";
 import { useState, useEffect } from "react";
 import { X, Save } from "lucide-react";
 import { Button } from "../../../components/ui/button";
@@ -113,7 +114,7 @@ export function IngredientModal({
             <select
               id="unit"
               name="unit"
-              value={formData.unit}
+              value={formatUnit(formData.unit)}
               onChange={handleChange}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
               required

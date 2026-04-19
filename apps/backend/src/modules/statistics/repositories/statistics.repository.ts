@@ -1,6 +1,17 @@
 import { prisma } from "../../../config/prisma";
 
 export class StatisticsRepository {
+  async countSubOrdersByDateRange(start: Date, end: Date) {
+    return prisma.subOrder.count({
+      where: {
+        createdAt: {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+  }
+
   async getPaymentsByDateRange(start: Date, end: Date) {
     return prisma.payment.findMany({
       where: {
@@ -37,6 +48,7 @@ export class StatisticsRepository {
         closedAt: true,
         difference: true,
         expectedRevenue: true,
+        declaredCash: true,
       },
     });
   }

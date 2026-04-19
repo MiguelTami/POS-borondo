@@ -11,6 +11,14 @@ import {
 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../components/ui/dialog";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
 import { useShiftStore } from "../../shifts/slices/shiftStore";
 import { shiftService } from "../../shifts/services/shift.service";
 import { paymentService } from "../../payments/services/payment.service";
@@ -29,7 +37,8 @@ export function ActiveOrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [openingShift, setOpeningShift] = useState(false);
-
+  const [isOpenShiftModalOpen, setIsOpenShiftModalOpen] = useState(false);
+  const [pettyCashAmount, setPettyCashAmount] = useState("");
   const [tables, setTables] = useState<Table[]>([]);
 
   useEffect(() => {
@@ -37,11 +46,16 @@ export function ActiveOrdersView() {
   }, []);
 
   function getTableNumber(tableId: number | null) {
-    return tables.find(t => t.id === tableId)?.number || "N/A";
+    return tables.find((t) => t.id === tableId)?.number || "N/A";
   }
 
   // Payment Modal State
   const [paymentSubOrder, setPaymentSubOrder] = useState<SubOrder | null>(null);
+  const [printReceipt, setPrintReceipt] = useState(false);
+  const [kitchenSubOrder, setKitchenSubOrder] = useState<
+    (SubOrder & { orderId?: number }) | null
+  >(null);
+  const [sendingToKitchen, setSendingToKitchen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<
     "CASH" | "CARD" | "MOBILE_PAYMENT"
   >("CASH");
@@ -69,28 +83,36 @@ export function ActiveOrdersView() {
 
   useEffect(() => {
     if (activeShift) {
-      fetchOrders();
+      fetchOrders(true);
+
+      const intervalId = setInterval(() => {
+        fetchOrders(false);
+      }, 5000); // Fetch orders every 5 seconds
+
+      return () => clearInterval(intervalId);
     }
   }, [activeShift]);
 
-  const fetchOrders = async () => {
-    setLoadingOrders(true);
+  const fetchOrders = async (showLoader = true) => {
+    if (showLoader) setLoadingOrders(true);
     try {
       const data = await orderService.getOrders(activeShift?.id);
-      console.log("Raw orders from API:", JSON.stringify(data, null, 2));
       setOrders(data);
     } catch (err) {
       console.error("Error fetching orders", err);
     } finally {
-      setLoadingOrders(false);
+      if (showLoader) setLoadingOrders(false);
     }
   };
 
   const handleOpenShift = async () => {
     try {
       setOpeningShift(true);
-      const newShift = await shiftService.openShift();
+      const newShift = await shiftService.openShift({
+        pettyCash: parseFloat(pettyCashAmount) || 0,
+      });
       setActiveShift(newShift);
+      setIsOpenShiftModalOpen(false);
     } catch (err: any) {
       console.error("Error abriendo el turno:", err);
       setError(err?.response?.data?.error || "Error al abrir la caja");
@@ -135,6 +157,24 @@ export function ActiveOrdersView() {
     );
   };
 
+  const handleSendToKitchen = async () => {
+    if (!kitchenSubOrder || !kitchenSubOrder.orderId) return;
+    try {
+      setSendingToKitchen(true);
+      await orderService.sendSubOrderToKitchen(
+        kitchenSubOrder.orderId,
+        kitchenSubOrder.id,
+      );
+      await fetchOrders();
+      setKitchenSubOrder(null);
+    } catch (err: any) {
+      console.error("Error al enviar a cocina", err);
+      setError(err?.response?.data?.error || "Error al procesar comanda");
+    } finally {
+      setSendingToKitchen(false);
+    }
+  };
+
   const handleProcessSubOrderPayment = async () => {
     if (!paymentSubOrder || !activeShift) return;
 
@@ -144,11 +184,13 @@ export function ActiveOrdersView() {
         subOrderId: paymentSubOrder.id,
         shiftId: activeShift.id,
         method: paymentMethod,
+        printReceipt,
       });
       // Optionally could mark subOrder as paid directly on front or refetch
       await fetchOrders();
       setPaymentSubOrder(null);
       setPaymentMethod("CASH");
+      setPrintReceipt(false);
     } catch (error: any) {
       console.error("Payment error", error);
       setError(error?.response?.data?.error || "Error al procesar el pago");
@@ -192,12 +234,64 @@ export function ActiveOrdersView() {
             en caja para empezar a ver, gestionar y cobrar órdenes.
           </p>
           <Button
-            onClick={handleOpenShift}
-            disabled={openingShift}
+            onClick={() => setIsOpenShiftModalOpen(true)}
             className="w-full h-14 text-md font-bold rounded-xl shadow-sm bg-blue-600 hover:bg-blue-700"
           >
-            {openingShift ? "Abriendo Turno..." : "Abrir Nuevo Turno"}
+            Abrir Nuevo Turno
           </Button>
+
+          <Dialog
+            open={isOpenShiftModalOpen}
+            onOpenChange={setIsOpenShiftModalOpen}
+          >
+            <DialogContent className="sm:max-w-md p-6 overflow-hidden shadow-2xl rounded-2xl">
+              <DialogHeader className="pb-4 border-b border-gray-100 flex justify-between h-auto items-start">
+                <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-blue-600" />
+                  Abrir Turno
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="py-2 space-y-4">
+                <Label
+                  htmlFor="pettyCash"
+                  className="text-sm font-semibold text-gray-700"
+                >
+                  Caja Menor Inicial (Opcional)
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
+                    $
+                  </span>
+                  <Input
+                    id="pettyCash"
+                    type="number"
+                    placeholder="0.00"
+                    value={pettyCashAmount}
+                    onChange={(e) => setPettyCashAmount(e.target.value)}
+                    className="pl-8 text-lg font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-gray-100 flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsOpenShiftModalOpen(false)}
+                  className="rounded-xl flex-1 font-semibold"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleOpenShift}
+                  disabled={openingShift}
+                  className="rounded-xl flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                >
+                  {openingShift ? "Abriendo Caja..." : "Confirmar e Iniciar"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     );
@@ -214,10 +308,17 @@ export function ActiveOrdersView() {
     .map((order) => {
       // Filtramos las subórdenes para que el cajero solo vea las pertinentes
       const visibleSubOrders = (order.subOrders || []).filter((sub) => {
-        if (filter === "Pending") return sub.status === "SENT_TO_CASHIER";
+        if (filter === "Pending")
+          return (
+            sub.status === "SENT_TO_CASHIER" || sub.status === "SENT_TO_KITCHEN"
+          );
         if (filter === "Paid") return sub.status === "PAID";
         // All Orders: mostrar ambas
-        return sub.status === "SENT_TO_CASHIER" || sub.status === "PAID";
+        return (
+          sub.status === "SENT_TO_CASHIER" ||
+          sub.status === "SENT_TO_KITCHEN" ||
+          sub.status === "PAID"
+        );
       });
 
       return { ...order, subOrders: visibleSubOrders };
@@ -345,8 +446,10 @@ export function ActiveOrdersView() {
                     <div className="flex-1 space-y-3 mt-2">
                       {order.subOrders?.map((sub) => {
                         const subPaid = sub.status === "PAID";
-                        const isPayable =
+                        const isKitchenSendable =
                           !subPaid && sub.status === "SENT_TO_CASHIER";
+                        const isPayable =
+                          !subPaid && sub.status === "SENT_TO_KITCHEN";
                         const subTotalCalc = calculateSubOrderTotal(sub);
 
                         return (
@@ -381,20 +484,40 @@ export function ActiveOrdersView() {
                                   className={`text-[10px] font-bold tracking-wider uppercase mt-1 ${!subPaid ? "text-orange-600" : "text-blue-600"}`}
                                 >
                                   {sub.status === "SENT_TO_CASHIER"
-                                    ? "POR COBRAR"
-                                    : sub.status}
+                                    ? "POR MANDAR A COCINA"
+                                    : sub.status === "SENT_TO_KITCHEN"
+                                      ? "EN COCINA / POR COBRAR"
+                                      : sub.status}
                                 </div>
                               </div>
                               {!subPaid ? (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    isPayable && setPaymentSubOrder(sub);
-                                  }}
-                                  className="px-3 py-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-800 text-xs font-bold rounded-lg shadow-sm"
-                                >
-                                  Pagar Item
-                                </button>
+                                <div className="flex gap-2">
+                                  {isKitchenSendable && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setKitchenSubOrder({
+                                          ...sub,
+                                          orderId: order.id,
+                                        });
+                                      }}
+                                      className="px-3 py-1 bg-orange-100 border border-orange-200 hover:bg-orange-200 text-orange-800 text-xs font-bold rounded-lg shadow-sm"
+                                    >
+                                      Enviar a Cocina
+                                    </button>
+                                  )}
+                                  {isPayable && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPaymentSubOrder(sub);
+                                      }}
+                                      className="px-3 py-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-800 text-xs font-bold rounded-lg shadow-sm"
+                                    >
+                                      Pagar Item
+                                    </button>
+                                  )}
+                                </div>
                               ) : (
                                 <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                                   <CheckCircle2 className="w-5 h-5" />
@@ -501,6 +624,39 @@ export function ActiveOrdersView() {
           </div>
         </div>
       )}
+
+      {kitchenSubOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl flex flex-col p-6 text-center">
+            <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="w-8 h-8 text-orange-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              ¿Enviar a la Cocina?
+            </h2>
+            <p className="text-sm text-gray-500 mb-8">
+              Esto imprimirá la comanda para preparar la sub-orden.
+            </p>
+            <div className="flex justify-center gap-4 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setKitchenSubOrder(null)}
+                className="w-full max-w-[150px] h-12 font-semibold"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSendToKitchen}
+                disabled={sendingToKitchen}
+                className="w-full max-w-[200px] h-12 bg-orange-600 hover:bg-orange-700 text-white font-bold"
+              >
+                {sendingToKitchen ? "Enviando..." : "Confirmar"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {paymentSubOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           {(() => {
@@ -602,6 +758,22 @@ export function ActiveOrdersView() {
                     <span className="text-[10px] font-bold">MÓVIL</span>
                   </button>
                 </div>
+              </div>
+
+              <div className="mb-6 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="printReceipt"
+                  className="w-5 h-5 rounded text-blue-600"
+                  checked={printReceipt}
+                  onChange={(e) => setPrintReceipt(e.target.checked)}
+                />
+                <label
+                  htmlFor="printReceipt"
+                  className="font-bold text-gray-700"
+                >
+                  Imprimir Recibo de Venta
+                </label>
               </div>
 
               <Button

@@ -1,3 +1,4 @@
+import { formatUnit } from "../../../lib/utils";
 import React, { useState, useMemo } from "react";
 import {
   Dialog,
@@ -78,7 +79,7 @@ export const IngredientPickerModal: React.FC<IngredientPickerModalProps> = ({
                   </div>
                   <div className="mt-auto">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
-                      Unidad: {ing.unit}
+                      Unidad: {formatUnit(ing.unit)}
                     </span>
                   </div>
                 </div>

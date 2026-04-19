@@ -49,13 +49,13 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Category</DialogTitle>
+          <DialogTitle>Nueva Categoría</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="text-red-500 text-sm">{error}</div>}
 
           <div className="space-y-2">
-            <Label htmlFor="category-name">Category Name</Label>
+            <Label htmlFor="category-name">Nombre de la Categoría</Label>
             <Input
               id="category-name"
               value={name}
@@ -72,7 +72,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               onClick={onClose}
               disabled={loading}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? "Creating..." : "Create"}

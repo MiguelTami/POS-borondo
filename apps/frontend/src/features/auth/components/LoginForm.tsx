@@ -43,6 +43,8 @@ export function LoginForm() {
       // Redirigir basado en el rol
       if (res.user.role === "ADMIN") {
         navigate("/admin/dashboard");
+      } else if (res.user.role === "CASHIER") {
+        navigate("/pos/orders");
       } else {
         navigate("/pos/tables");
       }

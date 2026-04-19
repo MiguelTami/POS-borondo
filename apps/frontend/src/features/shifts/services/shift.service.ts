@@ -8,6 +8,7 @@ export interface Shift {
   closedById: number | null;
   totalSales: number;
   expectedRevenue?: number | null;
+  pettyCash: number | null;
   declaredCash: number | null;
   difference: number | null;
   status: "OPEN" | "CLOSED";
@@ -30,8 +31,8 @@ export const shiftService = {
     }
   },
 
-  openShift: async (): Promise<Shift> => {
-    const response = await api.post<Shift>("/shifts/open");
+  openShift: async (data?: { pettyCash: number }): Promise<Shift> => {
+    const response = await api.post<Shift>("/shifts/open", data);
     return response.data;
   },
 

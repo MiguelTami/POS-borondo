@@ -3,10 +3,13 @@ import { useShiftStore } from "../slices/shiftStore";
 import { shiftService } from "../services/shift.service";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
 
 export const OpenShiftView = () => {
   const { setActiveShift } = useShiftStore();
   const navigate = useNavigate();
+  const [pettyCash, setPettyCash] = useState("0");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +18,9 @@ export const OpenShiftView = () => {
       setLoading(true);
       setError(null);
 
-      const newShift = await shiftService.openShift();
+      const newShift = await shiftService.openShift({
+        pettyCash: parseFloat(pettyCash) || 0,
+      });
       setActiveShift(newShift);
 
       // Si funciona, ir a la vista de mesas/POS root
@@ -44,6 +49,28 @@ export const OpenShiftView = () => {
             {error}
           </div>
         )}
+
+        <div className="space-y-2 mb-6">
+          <Label
+            htmlFor="pettyCash"
+            className="text-sm font-bold text-gray-700"
+          >
+            Caja Menor Inicial
+          </Label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+              $
+            </span>
+            <Input
+              id="pettyCash"
+              type="number"
+              placeholder="0.00"
+              value={pettyCash}
+              onChange={(e) => setPettyCash(e.target.value)}
+              className="pl-8 !text-lg h-12"
+            />
+          </div>
+        </div>
 
         <Button
           onClick={handleOpenShift}

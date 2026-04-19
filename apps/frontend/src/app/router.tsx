@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { LoginView } from "../features/auth/views/LoginView";
+import { OpenShiftView } from "../features/shifts/views/OpenShiftView";
 import { ProtectedRoute } from "../layouts/ProtectedRoute";
 import { PosLayout } from "../layouts/PosLayout";
 import { AdminLayout } from "../layouts/AdminLayout";
@@ -41,6 +42,10 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      {
+        path: "open-shift",
+        element: <OpenShiftView />,
+      },
       {
         path: "orders",
         element: <ActiveOrdersView />,

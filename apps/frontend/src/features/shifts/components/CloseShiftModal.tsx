@@ -82,7 +82,19 @@ export function CloseShiftModal({ onClose }: Props) {
             <div className="bg-blue-50 rounded-xl p-4 space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-blue-800 font-medium">
-                  Efectivo Esperado:
+                  Caja Menor Inicial:
+                </span>
+                <span className="font-bold text-blue-900 text-lg">
+                  $
+                  {Number(summary.pettyCash || 0).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-blue-800 font-medium">
+                  Ingresos del Turno (Esperado):
                 </span>
                 <span className="font-bold text-blue-900 text-lg">
                   $

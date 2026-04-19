@@ -1,8 +1,12 @@
 export interface SummaryData {
   totalRevenue: number;
+  expectedRevenue: number;
+  declaredCash: number;
+  difference: number;
   ordersCount: number;
   shiftsCount: number;
   averageOrderValue: number;
+  averageSubOrderValue: number;
   revenueByMethod: Record<string, number>;
   revenueOverTime: { date: string; amount: number }[];
 }

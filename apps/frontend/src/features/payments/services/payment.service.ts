@@ -4,6 +4,7 @@ export interface CreatePaymentPayload {
   subOrderId: number;
   shiftId: number;
   method: "CASH" | "CARD" | "MOBILE_PAYMENT";
+  printReceipt?: boolean;
 }
 
 export const paymentService = {
