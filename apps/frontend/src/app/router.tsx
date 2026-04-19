@@ -97,14 +97,6 @@ export const router = createBrowserRouter([
         path: "users",
         element: <UsersView />,
       },
-      {
-        path: "settings",
-        element: (
-          <div className="text-2xl font-bold">
-            Configuración Próximamente...
-          </div>
-        ),
-      },
     ],
   },
   {

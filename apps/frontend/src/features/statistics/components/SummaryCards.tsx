@@ -41,7 +41,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
                     : "text-green-500 font-bold"
                 }
               >
-                ${summary.difference?.toLocaleString() || 0}
+                ${((summary.declaredCash || 0) -(summary.expectedRevenue || 0)).toLocaleString()}
               </span>
             </div>
           </div>

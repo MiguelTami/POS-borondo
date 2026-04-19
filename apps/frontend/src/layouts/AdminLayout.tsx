@@ -26,7 +26,6 @@ export function AdminLayout() {
     { name: "Inventario", to: "/admin/inventory", icon: Package },
     { name: "Mesas", to: "/admin/tables", icon: TableIcon },
     { name: "Usuarios", to: "/admin/users", icon: Users },
-    { name: "Configuración", to: "/admin/settings", icon: Settings },
   ];
 
   return (
