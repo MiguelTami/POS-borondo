@@ -4,7 +4,6 @@ import {
   Home,
   Package,
   Users,
-  Settings,
   Tag,
   Table as TableIcon,
 } from "lucide-react";

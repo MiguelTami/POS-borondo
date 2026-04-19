@@ -316,7 +316,7 @@ export const ProductsView: React.FC = () => {
                         Precio
                       </div>
                       <div className="text-sm font-black text-gray-800">
-                        ${Number(p.price).toFixed(2)}
+                        ${Number(p.price).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </div>
                     </div>
                     {p.recipes && p.recipes.length > 0 && (

@@ -473,7 +473,7 @@ export function ActiveOrdersView() {
                                 <span className="text-[13px] text-gray-500 font-semibold block mt-1">
                                   Total:{" "}
                                   <span className="text-gray-900">
-                                    ${subTotalCalc.toFixed(0)}
+                                    ${subTotalCalc.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                   </span>
                                 </span>
                               </div>
@@ -541,7 +541,7 @@ export function ActiveOrdersView() {
                           Total Global
                         </span>
                         <div className="text-3xl font-bold text-gray-900 mt-1">
-                          ${calculatedGlobalTotal.toFixed(0)}
+                          ${calculatedGlobalTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </div>
                       </div>
                       {!isPaid && order.status !== "CANCELLED" && (
@@ -594,7 +594,7 @@ export function ActiveOrdersView() {
                       </span>
                     </div>
                     <div className="font-semibold text-gray-900">
-                      ${Number(item.totalPriceSnapshot).toFixed(0)}
+                      ${Number(item.totalPriceSnapshot).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </div>
                   </div>
                 ))}
@@ -608,7 +608,7 @@ export function ActiveOrdersView() {
             <div className="flex justify-between items-center py-4 mt-auto border-t border-gray-100">
               <span className="text-gray-500 font-bold">Total Reportado</span>
               <span className="text-3xl font-black text-gray-900">
-                ${calculateSubOrderTotal(viewSubOrder).toFixed(0)}
+                ${calculateSubOrderTotal(viewSubOrder).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </span>
             </div>
 
@@ -699,7 +699,7 @@ export function ActiveOrdersView() {
                         </span>
                       </div>
                       <div className="font-semibold text-gray-900">
-                        ${Number(item.totalPriceSnapshot).toFixed(0)}
+                        ${Number(item.totalPriceSnapshot).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </div>
                     </div>
                   ))}
@@ -715,7 +715,7 @@ export function ActiveOrdersView() {
               <div className="flex justify-between items-center py-4 border-t border-b border-gray-100 mb-6">
                 <span className="text-gray-500 font-bold">Total a Cobrar</span>
                 <span className="text-3xl font-black text-gray-900">
-                  ${calculateSubOrderTotal(paymentSubOrder).toFixed(0)}
+                  ${calculateSubOrderTotal(paymentSubOrder).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
               </div>
 

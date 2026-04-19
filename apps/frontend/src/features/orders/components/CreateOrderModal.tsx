@@ -400,7 +400,7 @@ export function CreateOrderModal({
                         {product.name}
                       </h3>
                       <div className="text-blue-600 font-black text-lg mt-auto">
-                        ${Number(product.price).toFixed(2)}
+                        ${Number(product.price).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </div>
 
                       {exhausted && (
@@ -478,9 +478,7 @@ export function CreateOrderModal({
                         </span>
                         <span className="font-bold text-gray-900">
                           $
-                          {(Number(item.product.price) * item.quantity).toFixed(
-                            2,
-                          )}
+                          {(Number(item.product.price) * item.quantity).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </span>
                       </div>
                       <div className="flex justify-between items-center mt-2">
@@ -523,7 +521,7 @@ export function CreateOrderModal({
                       Subtotal ({activeSubOrder.label})
                     </span>
                     <span className="text-gray-800 font-bold">
-                      ${getSubOrderTotal(activeSubOrder).toFixed(2)}
+                      ${getSubOrderTotal(activeSubOrder).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </span>
                   </div>
                   <div className="flex justify-between mt-4 pt-4 border-t border-gray-100">
@@ -537,7 +535,7 @@ export function CreateOrderModal({
                       $
                       {subOrders
                         .reduce((acc, sub) => acc + getSubOrderTotal(sub), 0)
-                        .toFixed(2)}
+                        .toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </span>
                   </div>
 

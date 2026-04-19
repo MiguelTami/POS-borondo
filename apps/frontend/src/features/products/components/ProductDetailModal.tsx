@@ -52,7 +52,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 Precio Venta
               </p>
               <p className="text-xl font-black text-gray-900">
-                ${Number(product.price).toFixed(2)}
+                ${Number(product.price).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
             </div>
             <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">

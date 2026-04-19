@@ -142,7 +142,7 @@ export function WaiterOrdersView() {
                           ) || 0;
                         return accSub + subT;
                       }, 0) || 0,
-                    ).toFixed(0)}
+                    ).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </span>
                 </div>
               </div>
@@ -171,7 +171,7 @@ export function WaiterOrdersView() {
                             : sub.status}
                         </span>
                         <span className="font-semibold text-gray-900">
-                          ${Number(calculatedSubTotal).toFixed(0)}
+                          ${Number(calculatedSubTotal).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </span>
                       </div>
                     </div>
@@ -258,7 +258,7 @@ export function WaiterOrdersView() {
                         </span>
                       </div>
                       <span className="font-black text-gray-900 bg-gray-50 px-2 py-1 rounded">
-                        ${Number(item.totalPriceSnapshot).toFixed(0)}
+                        ${Number(item.totalPriceSnapshot).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </span>
                     </li>
                   ))}
@@ -282,7 +282,7 @@ export function WaiterOrdersView() {
                       acc + Number(item.totalPriceSnapshot || 0),
                     0,
                   ) || 0,
-                ).toFixed(0)}
+                ).toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </span>
             </div>
           </div>
