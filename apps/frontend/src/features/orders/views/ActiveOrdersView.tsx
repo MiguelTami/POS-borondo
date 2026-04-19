@@ -19,6 +19,8 @@ import {
   type Order,
   type SubOrder,
 } from "../services/order.service";
+import { tableService } from "@/features/tables/services/table.service";
+import type { Table } from "@/features/tables/types/table.types";
 
 export function ActiveOrdersView() {
   const { activeShift, setActiveShift, isLoading, setLoading } =
@@ -27,6 +29,16 @@ export function ActiveOrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [openingShift, setOpeningShift] = useState(false);
+
+  const [tables, setTables] = useState<Table[]>([]);
+
+  useEffect(() => {
+    tableService.getTables().then(setTables);
+  }, []);
+
+  function getTableNumber(tableId: number | null) {
+    return tables.find(t => t.id === tableId)?.number || "N/A";
+  }
 
   // Payment Modal State
   const [paymentSubOrder, setPaymentSubOrder] = useState<SubOrder | null>(null);
@@ -242,7 +254,7 @@ export function ActiveOrdersView() {
             <p className="text-gray-500 text-sm">
               Manejando actualmente{" "}
               <span className="font-semibold text-blue-600">
-                {filteredOrders.length} documentos
+                {filteredOrders.length} órdenes
               </span>{" "}
               en el sistema.
             </p>
@@ -298,7 +310,7 @@ export function ActiveOrdersView() {
                             Mesa
                           </span>
                           <span className="text-xl font-bold text-gray-800 leading-tight">
-                            {order.tableId || "T/A"}
+                            {getTableNumber(order.tableId) || "T/A"}
                           </span>
                         </div>
                         <div>

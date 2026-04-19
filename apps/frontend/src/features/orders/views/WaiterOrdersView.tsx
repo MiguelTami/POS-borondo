@@ -8,6 +8,8 @@ import {
 } from "../services/order.service";
 import { CreateOrderModal } from "../components/CreateOrderModal";
 import { useAuthStore } from "../../auth/slices/authStore";
+import { tableService } from "@/features/tables/services/table.service";
+import type { Table } from "@/features/tables/types/table.types";
 
 export function WaiterOrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -19,6 +21,16 @@ export function WaiterOrdersView() {
     id: number;
     tableId: number | null;
   } | null>(null);
+
+  const [tables, setTables] = useState<Table[]>([]);
+  
+    useEffect(() => {
+      tableService.getTables().then(setTables);
+    }, []);
+  
+    function getTableNumber(tableId: number | null) {
+      return tables.find(t => t.id === tableId)?.number || "N/A";
+    }
 
   // For viewing suborder details
   const [viewSubOrder, setViewSubOrder] = useState<SubOrder | null>(null);
@@ -105,7 +117,7 @@ export function WaiterOrdersView() {
                     Mesa
                   </span>
                   <span className="text-xl leading-none">
-                    {order.tableId || "?"}
+                    {getTableNumber(order.tableId) || "?"}
                   </span>
                 </div>
                 <div className="text-right">
