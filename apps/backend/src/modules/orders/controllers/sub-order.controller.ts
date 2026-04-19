@@ -121,6 +121,29 @@ export class SubOrderController {
         }
     }
 
+    sendSubOrderToKitchen = async (req: Request, res: Response) => {
+        try {
+            const subOrder = await this.subOrderService.sendSubOrderToKitchen(req.validatedParams.orderId, req.validatedParams.subOrderId);
+
+            res.status(200).json(subOrder);
+        } catch (error) {
+            console.error(error.message);
+            if (
+                error.message === "Solo se pueden enviar a la cocina las sub-órdenes que hayan sido enviadas al cajero" ||
+                error.message === "La sub-orden ya ha sido enviada a la cocina"
+            ) {
+                return res.status(400).json({ error: error.message });
+            }
+            if (error.message === "SubOrden no encontrada") {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === "SubOrden no pertenece a la orden") {
+                return res.status(403).json({ error: error.message });
+            }
+            res.status(500).json({ error: "Failed to send sub-order to kitchen" });
+        }
+    }
+
     cancelSubOrder = async (req: Request, res: Response) => {
         try {
             const subOrder = await this.subOrderService.cancelSubOrder(req.validatedParams.orderId, req.validatedParams.subOrderId);

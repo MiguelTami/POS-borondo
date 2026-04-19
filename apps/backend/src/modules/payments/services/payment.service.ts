@@ -3,6 +3,7 @@ import { CreatePaymentDTO, GetPaymentsFilters } from "../types/payment.types";
 import { PaymentMethod } from "@prisma/client";
 import { SubOrderService } from "../../orders/services/sub-order.service";
 import { ShiftService } from "../../shifts/services/shift.service";
+import { PrinterService } from "../../orders/services/printer.service";
 
 export class PaymentService {
 
@@ -23,7 +24,7 @@ export class PaymentService {
         return await this.repository.getPayments(filters);
     }
 
-    async createPayment(subOrderId: number, shiftId: number, method: string, cashierId: number) {
+    async createPayment(subOrderId: number, shiftId: number, method: string, cashierId: number, printReceipt: boolean = false) {
         const activeShift = await this.shiftService.getActiveShift();
         const activeShiftId = activeShift.id;
         
@@ -36,8 +37,8 @@ export class PaymentService {
         if (subOrder.status === "CANCELLED" || subOrder.status === "PAID") {
             throw new Error("No se pueden agregar pagos a una sub-orden que está cancelada o pagada");
         }
-        if (subOrder.status !== "SENT_TO_CASHIER") {
-            throw new Error("No se pueden agregar pagos a una sub-orden que no ha sido enviada al cajero");
+        if (subOrder.status !== "SENT_TO_KITCHEN") {
+            throw new Error("No se pueden agregar pagos a una sub-orden que no ha sido enviada a cocina");
         }
 
         const calculatedTotal = orderItems.reduce((total, item) => {
@@ -50,7 +51,22 @@ export class PaymentService {
             cashierId: cashierId
         };
         
-        return await this.repository.createPayment(subOrderId, shiftId, data);
+        const result = await this.repository.createPayment(subOrderId, shiftId, data);
+
+        if (printReceipt) {
+            const receiptInfo = {
+                label: subOrder.label,
+                items: orderItems.map((item: any) => ({
+                    quantity: item.quantity,
+                    productName: item.product?.name || "Producto",
+                    totalPrice: item.totalPriceSnapshot
+                })),
+                total: calculatedTotal
+            };
+            PrinterService.printReceipt(receiptInfo);
+        }
+
+        return result;
     }
 
     async getPaymentById(paymentId: number) {

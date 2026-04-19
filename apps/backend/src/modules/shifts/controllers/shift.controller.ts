@@ -12,7 +12,8 @@ export class ShiftController {
     openShift = async (req: Request, res: Response) => {
         try {
             const openedById = req.user!.id;
-            const shift = await this.service.openShift(openedById);
+            const { pettyCash } = req.validatedBody;
+            const shift = await this.service.openShift(openedById, pettyCash);
 
             res.status(201).json(shift);
         } catch (error) {

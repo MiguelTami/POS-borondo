@@ -29,14 +29,15 @@ export class PaymentController {
         const subOrderId = rawData.subOrderId;
         const shiftId = rawData.shiftId;
         const method = rawData.method;
+        const printReceipt = rawData.printReceipt;
         const cashierId = req.user!.id;
         try {
-            const payment = await this.service.createPayment(subOrderId, shiftId, method, cashierId);
+            const payment = await this.service.createPayment(subOrderId, shiftId, method, cashierId, printReceipt);
             res.status(201).json(payment);
         } catch (error) {
             console.error("Error al crear el pago:", error.message);
             if (error.message === "No se pueden agregar pagos a una sub-orden que está cancelada o pagada" || 
-                error.message === "No se pueden agregar pagos a una sub-orden que no ha sido enviada al cajero" ||
+                error.message === "No se pueden agregar pagos a una sub-orden que no ha sido enviada a cocina" ||
                 error.message === "Solo se pueden agregar pagos al turno activo") {
                 return res.status(400).json({ error: error.message });
             }

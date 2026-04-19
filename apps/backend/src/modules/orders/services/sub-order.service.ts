@@ -1,6 +1,7 @@
 import { SubOrderRepository } from "../repositories/sub-order.repository";
 import { SubOrderResponse } from "../types/sub-order.types";
 import { OrderService } from "./order.service";
+import { PrinterService } from "./printer.service";
 
 export class SubOrderService {
 
@@ -68,10 +69,11 @@ export class SubOrderService {
 
     async sendSubOrderToCashier(orderId: number, subOrderId: number, userId: number) {
         const subOrder = await this.getSubOrderById(orderId, subOrderId);
+        // existing validations
         if (subOrder.orderItems.length === 0) {
             throw new Error("No se puede enviar al cajero una sub-orden sin productos");
         }
-        if (subOrder.status === "SENT_TO_CASHIER") {
+        if (subOrder.status === "SENT_TO_CASHIER" || subOrder.status === "SENT_TO_KITCHEN") {
             throw new Error("La sub-orden ya ha sido enviada al cajero");
         }
         if (subOrder.status !== "OPEN") {
@@ -118,6 +120,34 @@ export class SubOrderService {
         }
 
         return this.repository.sendSubOrderToCashier(subOrderId, userId, deductions);
+    }
+
+    async sendSubOrderToKitchen(orderId: number, subOrderId: number) {
+        const subOrder = await this.getSubOrderById(orderId, subOrderId);
+        
+        if (subOrder.status === "SENT_TO_KITCHEN") {
+            throw new Error("La sub-orden ya ha sido enviada a la cocina");
+        }
+        if (subOrder.status !== "SENT_TO_CASHIER") {
+            throw new Error("Solo se pueden enviar a la cocina las sub-órdenes que hayan sido enviadas al cajero");
+        }
+
+        const updatedSubOrder = await this.repository.sendSubOrderToKitchen(subOrderId);
+
+        // Preparar info para la comanda
+        const comandaInfo = {
+            label: subOrder.label,
+            items: subOrder.orderItems.map((item: any) => ({
+                quantity: item.quantity,
+                productName: item.product.name,
+                notes: item.notes
+            }))
+        };
+
+        // Imprimir comanda de forma asíncrona (no bloqueante)
+        PrinterService.printKitchenTicket(comandaInfo);
+
+        return updatedSubOrder;
     }
 
     async cancelSubOrder(orderId: number, subOrderId: number) {

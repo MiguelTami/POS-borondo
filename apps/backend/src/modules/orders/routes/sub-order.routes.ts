@@ -17,6 +17,7 @@ router.get("/:subOrderId", authorizeRole(['WAITER']), validate(combinedParamsSch
 router.patch("/:subOrderId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), validate(updateSubOrderSchema, 'body'), controller.updateSubOrder);
 router.delete("/:subOrderId", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.deleteSubOrder);
 router.patch("/:subOrderId/send-to-cashier", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.sendSubOrderToCashier);
+router.patch("/:subOrderId/send-to-kitchen", authorizeRole(['WAITER', 'CASHIER']), validate(combinedParamsSchema, 'params'), controller.sendSubOrderToKitchen);
 router.patch("/:subOrderId/cancel", authorizeRole(['WAITER']), validate(combinedParamsSchema, 'params'), controller.cancelSubOrder);
 
 

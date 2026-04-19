@@ -4,6 +4,7 @@ export const CreatePaymentSchema = z.object({
     subOrderId: z.number().int().positive(),
     shiftId: z.number().int().positive(),
     method: z.enum(['CASH', 'CARD', 'MOBILE_PAYMENT']),
+    printReceipt: z.boolean().optional().default(false),
 }).strict();
 
 export const UpdatePaymentSchema = z.object({

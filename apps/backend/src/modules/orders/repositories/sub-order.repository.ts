@@ -256,6 +256,13 @@ export class SubOrderRepository {
         });
     }
 
+    async sendSubOrderToKitchen(subOrderId: number) {
+        return prisma.subOrder.update({
+            where: { id: subOrderId },
+            data: { status: 'SENT_TO_KITCHEN' }
+        });
+    }
+
     async cancelSubOrder(subOrderId: number) {
         return prisma.subOrder.update({
             where: {

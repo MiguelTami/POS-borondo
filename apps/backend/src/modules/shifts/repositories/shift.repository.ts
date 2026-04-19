@@ -4,9 +4,9 @@ import { GetShiftsQueryDTO } from "../types/shift.types";
 
 export class ShiftRepository {
 
-    async openShift(openedById: number) {
+    async openShift(openedById: number, pettyCash: number) {
         return prisma.shift.create({
-            data: { openedById }
+            data: { openedById, pettyCash }
         });
     }
 

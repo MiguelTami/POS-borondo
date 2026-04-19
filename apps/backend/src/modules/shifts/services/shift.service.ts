@@ -10,13 +10,13 @@ export class ShiftService {
         this.repository = new ShiftRepository();
     }
 
-    async openShift(openedById: number) {
+    async openShift(openedById: number, pettyCash: number) {
         const activeShift = await this.repository.getActiveShift();
         if (activeShift) {
             throw new Error("Ya existe un turno abierto");
         }
 
-        return this.repository.openShift(openedById);
+        return this.repository.openShift(openedById, pettyCash);
     }
 
     async getActiveShift() {
@@ -57,7 +57,8 @@ export class ShiftService {
 
         const expectedRevenue = await this.repository.calculateExpectedRevenue(id);
         const declaredCash = Number(data.declaredCash);
-        const difference = declaredCash - expectedRevenue;
+        const pettyCash = Number(shift.pettyCash); // La caja base del turno
+        const difference = declaredCash - (expectedRevenue + pettyCash);
 
         const summary = await this.repository.getSubordersSummary(id);
 
