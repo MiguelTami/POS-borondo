@@ -188,6 +188,7 @@ model Shift {
   id Int @id @default(autoincrement())
   openedAt DateTime @default(now())
   closedAt DateTime?
+  pettyCash Decimal @db.Decimal(10, 2) @default(0)
   expectedRevenue Decimal? @db.Decimal(10, 2)
   declaredCash Decimal? @db.Decimal(10, 2)
   difference Decimal? @db.Decimal(10, 2)
@@ -248,6 +249,7 @@ enum Unit {
 enum OrderStatus {
   OPEN
   SENT_TO_CASHIER
+  SENT_TO_KITCHEN
   PAID
   CANCELLED
 }

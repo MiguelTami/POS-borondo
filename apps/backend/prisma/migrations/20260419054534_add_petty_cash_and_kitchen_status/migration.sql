@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "OrderStatus" ADD VALUE 'SENT_TO_KITCHEN';
+
+-- AlterTable
+ALTER TABLE "Shift" ADD COLUMN     "pettyCash" DECIMAL(10,2) NOT NULL DEFAULT 0;
