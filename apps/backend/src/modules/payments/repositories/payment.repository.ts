@@ -52,7 +52,7 @@ export class PaymentRepository {
         return prisma.$transaction(async (tx) => {
             await tx.subOrder.update({
                 where: { id: subOrderId },
-                data: {status: "PAID"}
+                data: { paidAt: new Date() }
             });
             return await tx.payment.create({
                 data: {
@@ -66,6 +66,7 @@ export class PaymentRepository {
                             id: true,
                             label: true,
                             status: true,
+                            paidAt: true,
                             order: {
                                 select: {
                                     id: true,
@@ -103,6 +104,7 @@ export class PaymentRepository {
                         id: true,
                         label: true,
                         status: true,
+                        paidAt: true,
                         order: {
                             select: {
                                 id: true,
@@ -140,6 +142,7 @@ export class PaymentRepository {
                         id: true,
                         label: true,
                         status: true,
+                        paidAt: true,
                         order: {
                             select: {
                                 id: true,
@@ -177,6 +180,7 @@ export class PaymentRepository {
                         id: true,
                         label: true,
                         status: true,
+                        paidAt: true,
                         order: {
                             select: {
                                 id: true,
@@ -206,7 +210,7 @@ export class PaymentRepository {
         return prisma.$transaction(async (tx) => {
             await tx.subOrder.update({
                 where: { id: subOrderId },
-                data: {status: "SENT_TO_CASHIER"}
+                data: { paidAt: null, status: "SENT_TO_KITCHEN" }
             });
             return await tx.payment.delete({
                 where: {

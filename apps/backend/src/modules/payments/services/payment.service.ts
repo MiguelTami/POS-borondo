@@ -34,7 +34,7 @@ export class PaymentService {
         const subOrder = await this.subOrderService.getSubOrderByIdOnly(subOrderId);
         const orderItems = subOrder.orderItems;
 
-        if (subOrder.status === "CANCELLED" || subOrder.status === "PAID") {
+        if (subOrder.status === "CANCELLED" || subOrder.status === "PAID" || subOrder.paidAt) {
             throw new Error("No se pueden agregar pagos a una sub-orden que está cancelada o pagada");
         }
         if (subOrder.status !== "SENT_TO_KITCHEN") {

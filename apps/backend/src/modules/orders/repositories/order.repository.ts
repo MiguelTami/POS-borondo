@@ -71,6 +71,7 @@ export class OrderRepository {
                         id: true,
                         label: true,
                         status: true,
+                        paidAt: true,
                         orderItems: {
                             select: {
                                 id: true,
@@ -116,6 +117,7 @@ export class OrderRepository {
                         id: true,
                         label: true,
                         status: true,
+                        paidAt: true,
                         orderItems: {
                             select: {
                                 id: true,
@@ -162,6 +164,7 @@ export class OrderRepository {
                         id: true,
                         label: true,
                         status: true,
+                        paidAt: true,
                     }
                 }
             }
@@ -293,7 +296,7 @@ export class OrderRepository {
             const order = await tx.order.findUnique({
                 where: { id },
                 include: {
-                    subOrders: {select: { status: true }}
+                    subOrders: {select: { status: true, paidAt: true }}
                 }
             })
 
@@ -301,7 +304,7 @@ export class OrderRepository {
                 throw new Error(`Order with ID ${id} not found.`);
             }
 
-            const hasUnpaidSubOrders = order.subOrders.some(subOrder => subOrder.status !== "PAID" && subOrder.status !== "CANCELLED");
+            const hasUnpaidSubOrders = order.subOrders.some(subOrder => !subOrder.paidAt && subOrder.status !== "CANCELLED");
 
             if (hasUnpaidSubOrders) {
                 throw new Error("No se puede pagar una orden que tiene subórdenes que no han sido pagadas o canceladas");
@@ -310,6 +313,14 @@ export class OrderRepository {
             await tx.table.update({
                 where: { id: order.tableId },
                 data: { status: "AVAILABLE" }
+            });
+
+            await tx.subOrder.updateMany({
+                where: {
+                    orderId: id,
+                    status: { not: "CANCELLED" }
+                },
+                data: { status: "PAID" }
             });
 
             return tx.order.update({
@@ -337,6 +348,7 @@ export class OrderRepository {
                             id: true,
                             label: true,
                             status: true,
+                            paidAt: true,
                         }
                     }
                 }

@@ -12,6 +12,7 @@ export class SubOrderRepository {
                 id: true,
                 label: true,
                 status: true,
+                paidAt: true,
                 order: {
                     select: {
                         id: true,
@@ -45,6 +46,7 @@ export class SubOrderRepository {
                 id: true,
                 label: true,
                 status: true,
+                paidAt: true,
                 order: {
                     select: {
                         id: true,
@@ -86,6 +88,7 @@ export class SubOrderRepository {
                 id: true,
                 label: true,
                 status: true,
+                paidAt: true,
                 order: {
                     select: {
                         id: true,
@@ -199,6 +202,7 @@ export class SubOrderRepository {
                     id: true,
                     label: true,
                     status: true,
+                    paidAt: true,
                     order: {
                         select: {
                             id: true,
@@ -275,6 +279,7 @@ export class SubOrderRepository {
                 id: true,
                 label: true,
                 status: true,
+                paidAt: true,
                 order: {
                     select: {
                         id: true,

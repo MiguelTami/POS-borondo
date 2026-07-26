@@ -42,14 +42,23 @@ const orderFilterLabels: Record<OrderFilter, string> = {
 const statusPriority: Record<string, number> = {
   SENT_TO_CASHIER: 0,
   SENT_TO_KITCHEN: 1,
-  OPEN: 2,
-  PAID: 3,
-  CANCELLED: 4,
+  OPEN: 3,
+  PAID: 4,
+  CANCELLED: 5,
 };
+
+function isSubOrderPaid(subOrder: SubOrder) {
+  return Boolean(subOrder.paidAt) || subOrder.status === "PAID";
+}
+
+function getSubOrderPriority(subOrder: SubOrder) {
+  if (isSubOrderPaid(subOrder)) return 2;
+  return statusPriority[subOrder.status] ?? 99;
+}
 
 function getOrderPriority(order: Order) {
   const subOrderPriorities = (order.subOrders || []).map(
-    (sub) => statusPriority[sub.status] ?? 99,
+    (sub) => getSubOrderPriority(sub),
   );
 
   if (subOrderPriorities.length > 0) {
@@ -348,16 +357,14 @@ export function ActiveOrdersView() {
         // Filtramos las subórdenes para que el cajero solo vea las pertinentes
         const visibleSubOrders = (order.subOrders || []).filter((sub) => {
           if (filter === "PENDING")
-            return (
-              sub.status === "SENT_TO_CASHIER" ||
-              sub.status === "SENT_TO_KITCHEN"
-            );
-          if (filter === "PAID") return sub.status === "PAID";
+            return order.status !== "PAID" && order.status !== "CANCELLED";
+          if (filter === "PAID") return order.status === "PAID";
           // Todas: mostrar ambas
           return (
             sub.status === "SENT_TO_CASHIER" ||
             sub.status === "SENT_TO_KITCHEN" ||
-            sub.status === "PAID"
+            sub.status === "PAID" ||
+            Boolean(sub.paidAt)
           );
         });
 
@@ -432,6 +439,12 @@ export function ActiveOrdersView() {
             ) : (
               filteredOrders.map((order) => {
                 const isPaid = order.status === "PAID";
+                const canPayOrder =
+                  !isPaid &&
+                  order.status !== "CANCELLED" &&
+                  (order.subOrders || []).every(
+                    (sub) => isSubOrderPaid(sub) || sub.status === "CANCELLED",
+                  );
                 // Calcular el total global sumando los subTotales de las orderItems (totalPriceSnapshot)
                 const calculatedGlobalTotal =
                   order.subOrders?.reduce(
@@ -486,7 +499,7 @@ export function ActiveOrdersView() {
                     {/* Suborders list */}
                     <div className="flex-1 space-y-3 mt-2">
                       {order.subOrders?.map((sub) => {
-                        const subPaid = sub.status === "PAID";
+                        const subPaid = isSubOrderPaid(sub);
                         const isKitchenSendable =
                           !subPaid && sub.status === "SENT_TO_CASHIER";
                         const isPayable =
@@ -528,7 +541,9 @@ export function ActiveOrdersView() {
                                   <div
                                     className={`text-[10px] font-bold tracking-wider uppercase mt-1 ${!subPaid ? "text-orange-600" : "text-blue-600"}`}
                                   >
-                                    {formatSubOrderStatus(sub.status)}
+                                    {subPaid
+                                      ? "Cobrada"
+                                      : formatSubOrderStatus(sub.status)}
                                   </div>
                                 </div>
                                 {!subPaid ? (
@@ -626,7 +641,7 @@ export function ActiveOrdersView() {
                           })}
                         </div>
                       </div>
-                      {!isPaid && order.status !== "CANCELLED" && (
+                      {canPayOrder && (
                         <button
                           onClick={() => setConfirmPayOrder(order.id)}
                           className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm"

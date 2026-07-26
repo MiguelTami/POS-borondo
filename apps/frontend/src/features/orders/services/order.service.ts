@@ -24,6 +24,7 @@ export interface SubOrder {
   id: number;
   label: string | null;
   status: string;
+  paidAt?: string | null;
   subTotal: number;
   paidAmount: number;
   orderItems: OrderItem[];
