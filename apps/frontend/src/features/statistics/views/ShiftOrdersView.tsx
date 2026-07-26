@@ -8,6 +8,11 @@ import type {
   ShiftOrderData,
   ShiftSubOrderData,
 } from "../types/statistics.types";
+import {
+  formatOrderStatus,
+  formatPaymentMethod,
+  formatSubOrderStatus,
+} from "@/lib/posLabels";
 
 interface Shift {
   id: number;
@@ -232,7 +237,7 @@ export function ShiftOrdersView() {
                                   : "bg-yellow-100 text-yellow-800 border border-yellow-200"
                             }`}
                           >
-                            {o.status}
+                            {formatOrderStatus(o.status)}
                           </span>
                         </div>
                         <div className="col-span-1 p-4 font-semibold text-gray-800">
@@ -310,7 +315,7 @@ export function ShiftOrdersView() {
                                                 : "text-yellow-700 bg-yellow-50"
                                           }`}
                                         >
-                                          {sub.status}
+                                          {formatSubOrderStatus(sub.status)}
                                         </span>
                                       </td>
                                       <td className="px-4 py-3 text-gray-500">
@@ -467,7 +472,7 @@ export function ShiftOrdersView() {
                     className="flex justify-between bg-blue-50 p-4 rounded-xl border border-blue-100/60 items-center"
                   >
                     <span className="font-semibold text-blue-800">
-                      {p.method}
+                      {formatPaymentMethod(p.method)}
                     </span>
                     <span className="font-black text-blue-900 text-lg">
                       ${Number(p.amount).toLocaleString()}
@@ -512,7 +517,7 @@ export function ShiftOrdersView() {
                     : "bg-yellow-100 text-yellow-700"
                 }`}
               >
-                {selectedSubOrder.status}
+                {formatSubOrderStatus(selectedSubOrder.status)}
               </span>
             </div>
           </div>
@@ -561,7 +566,7 @@ export function ShiftOrdersView() {
                       className="flex justify-between bg-gray-50 p-3 rounded-lg border border-gray-100"
                     >
                       <span className="font-medium text-gray-600">
-                        {p.method}
+                        {formatPaymentMethod(p.method)}
                       </span>
                       <span className="font-bold text-gray-800">
                         ${Number(p.amount).toLocaleString()}

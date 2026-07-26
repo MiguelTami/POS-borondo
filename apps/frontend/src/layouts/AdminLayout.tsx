@@ -8,6 +8,7 @@ import {
   Table as TableIcon,
 } from "lucide-react";
 import { useAuthStore } from "../features/auth/slices/authStore";
+import { formatRole } from "../lib/posLabels";
 
 export function AdminLayout() {
   const logout = useAuthStore((state) => state.logout);
@@ -29,7 +30,6 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
-      {/* Sidebar para Admin */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col hidden md:flex min-h-screen shadow-lg">
         <div className="h-16 flex items-center justify-center border-b border-slate-800">
           <span className="text-xl font-bold tracking-wider text-white px-6">
@@ -44,7 +44,6 @@ export function AdminLayout() {
                 key={item.name}
                 to={item.to}
                 className={({ isActive }) =>
-                  // Si estÃ¡ activa bg-blue-600, si no opacidad
                   `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                     isActive
                       ? "bg-blue-600 text-white"
@@ -71,7 +70,7 @@ export function AdminLayout() {
               <p className="text-sm font-medium text-white">
                 {user?.name || "Admin"}
               </p>
-              <p className="text-xs text-gray-400">{user?.role}</p>
+              <p className="text-xs text-gray-400">{formatRole(user?.role)}</p>
             </div>
           </div>
           <button
@@ -84,9 +83,7 @@ export function AdminLayout() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 w-full bg-slate-50 flex flex-col h-screen overflow-hidden">
-        {/* Aqui el header mobile y otros breadcrumbs si deseas */}
         <header className="md:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 flex text-white items-center justify-between">
           <span className="font-bold">KPRICHOS Admin</span>
           <button onClick={handleLogout}>

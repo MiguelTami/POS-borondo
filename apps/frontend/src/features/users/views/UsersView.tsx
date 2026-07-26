@@ -20,6 +20,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { formatRole } from "@/lib/posLabels";
 
 type FilterMode = "ALL" | "ACTIVE" | "INACTIVE";
 
@@ -78,7 +79,7 @@ export const UsersView: React.FC = () => {
       setUserToToggle(undefined);
       fetchUsers();
     } catch (error) {
-      console.error("Failed to toggle user status", error);
+      console.error("Error al cambiar el estado del usuario", error);
     }
   };
 
@@ -212,7 +213,7 @@ export const UsersView: React.FC = () => {
                     {user.name}
                   </h3>
                   <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md mt-1 inline-block">
-                    {user.role}
+                    {formatRole(user.role)}
                   </span>
                 </div>
                 <div className="flex gap-1">

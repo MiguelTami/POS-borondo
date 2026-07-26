@@ -29,11 +29,20 @@ import {
 } from "../services/order.service";
 import { tableService } from "@/features/tables/services/table.service";
 import type { Table } from "@/features/tables/types/table.types";
+import { formatOrderStatus, formatSubOrderStatus } from "@/lib/posLabels";
+
+type OrderFilter = "ALL" | "PENDING" | "PAID";
+
+const orderFilterLabels: Record<OrderFilter, string> = {
+  ALL: "Todas",
+  PENDING: "Pendientes",
+  PAID: "Pagadas",
+};
 
 export function ActiveOrdersView() {
   const { activeShift, setActiveShift, isLoading, setLoading } =
     useShiftStore();
-  const [filter, setFilter] = useState("All Orders");
+  const [filter, setFilter] = useState<OrderFilter>("ALL");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [openingShift, setOpeningShift] = useState(false);
@@ -132,7 +141,7 @@ export function ActiveOrdersView() {
       fetchOrders();
     } catch (error: any) {
       console.error(error);
-      setError(error?.response?.data?.error || "Failed to cancel order");
+      setError(error?.response?.data?.error || "Error al cancelar la orden");
     }
   };
 
@@ -145,7 +154,7 @@ export function ActiveOrdersView() {
       fetchOrders();
     } catch (error: any) {
       console.error(error);
-      setError(error?.response?.data?.error || "Failed to pay order");
+      setError(error?.response?.data?.error || "Error al pagar la orden");
     }
   };
 
@@ -308,12 +317,12 @@ export function ActiveOrdersView() {
     .map((order) => {
       // Filtramos las subórdenes para que el cajero solo vea las pertinentes
       const visibleSubOrders = (order.subOrders || []).filter((sub) => {
-        if (filter === "Pending")
+        if (filter === "PENDING")
           return (
             sub.status === "SENT_TO_CASHIER" || sub.status === "SENT_TO_KITCHEN"
           );
-        if (filter === "Paid") return sub.status === "PAID";
-        // All Orders: mostrar ambas
+        if (filter === "PAID") return sub.status === "PAID";
+        // Todas: mostrar ambas
         return (
           sub.status === "SENT_TO_CASHIER" ||
           sub.status === "SENT_TO_KITCHEN" ||
@@ -361,7 +370,7 @@ export function ActiveOrdersView() {
             </p>
           </div>
           <div className="inline-flex items-center bg-white p-1 rounded-full shadow-sm">
-            {["All Orders", "Pending", "Paid"].map((tab) => (
+            {(Object.keys(orderFilterLabels) as OrderFilter[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
@@ -371,7 +380,7 @@ export function ActiveOrdersView() {
                     : "text-gray-500 hover:text-gray-900"
                 }`}
               >
-                {tab}
+                {orderFilterLabels[tab]}
               </button>
             ))}
           </div>
@@ -422,7 +431,7 @@ export function ActiveOrdersView() {
                             <span
                               className={`px-2 py-1 rounded text-[10px] ${isPaid ? "bg-blue-100 text-blue-700" : order.status === "CANCELLED" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
                             >
-                              {order.status}
+                              {formatOrderStatus(order.status)}
                             </span>
                           </div>
                         </div>
@@ -487,11 +496,7 @@ export function ActiveOrdersView() {
                                   <div
                                     className={`text-[10px] font-bold tracking-wider uppercase mt-1 ${!subPaid ? "text-orange-600" : "text-blue-600"}`}
                                   >
-                                    {sub.status === "SENT_TO_CASHIER"
-                                      ? "POR MANDAR A COCINA"
-                                      : sub.status === "SENT_TO_KITCHEN"
-                                        ? "EN COCINA / POR COBRAR"
-                                        : sub.status}
+                                    {formatSubOrderStatus(sub.status)}
                                   </div>
                                 </div>
                                 {!subPaid ? (
@@ -521,7 +526,7 @@ export function ActiveOrdersView() {
                                         }}
                                         className="px-3 py-1 bg-white border border-gray-200 hover:border-gray-300 text-gray-800 text-xs font-bold rounded-lg shadow-sm"
                                       >
-                                        Pagar Item
+                                        Pagar suborden
                                       </button>
                                     )}
                                   </div>
@@ -769,7 +774,7 @@ export function ActiveOrdersView() {
                   {(!paymentSubOrder.orderItems ||
                     paymentSubOrder.orderItems.length === 0) && (
                     <div className="text-gray-500 italic text-sm">
-                      No items found
+                      No hay productos
                     </div>
                   )}
                 </div>

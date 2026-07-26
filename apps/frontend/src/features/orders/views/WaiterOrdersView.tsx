@@ -10,6 +10,7 @@ import { CreateOrderModal } from "../components/CreateOrderModal";
 import { useAuthStore } from "../../auth/slices/authStore";
 import { tableService } from "@/features/tables/services/table.service";
 import type { Table } from "@/features/tables/types/table.types";
+import { formatOrderStatus, formatSubOrderStatus } from "@/lib/posLabels";
 
 export function WaiterOrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -166,9 +167,7 @@ export function WaiterOrdersView() {
                       </div>
                       <div className="text-xs text-gray-500 mt-1 flex justify-between">
                         <span>
-                          {sub.status === "SENT_TO_CASHIER"
-                            ? "Por Cobrar"
-                            : sub.status}
+                          {formatSubOrderStatus(sub.status)}
                         </span>
                         <span className="font-semibold text-gray-900">
                           $
@@ -189,7 +188,7 @@ export function WaiterOrdersView() {
                     Estado
                   </span>
                   <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold uppercase tracking-wider">
-                    {order.status}
+                    {formatOrderStatus(order.status)}
                   </span>
                 </div>
                 {order.status !== "PAID" && (

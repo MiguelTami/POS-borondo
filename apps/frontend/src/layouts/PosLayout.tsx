@@ -1,9 +1,10 @@
 import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import { LogOut, User as UserIcon } from "lucide-react";
+import { useState } from "react";
 import { useAuthStore } from "../features/auth/slices/authStore";
 import { useShiftStore } from "../features/shifts/slices/shiftStore";
 import { CloseShiftModal } from "../features/shifts/components/CloseShiftModal";
-import { useState } from "react";
+import { formatRole } from "../lib/posLabels";
 
 export function PosLayout() {
   const logout = useAuthStore((state) => state.logout);
@@ -72,7 +73,7 @@ export function PosLayout() {
               <div className="flex items-center gap-3 pl-6 border-l border-gray-200 h-10">
                 <span className="text-sm font-bold text-gray-700 flex items-center gap-2 bg-gray-50 py-1.5 px-3 rounded-full">
                   <UserIcon className="w-4 h-4 text-blue-500" />{" "}
-                  {user?.name || "Usuario"} ({user?.role})
+                  {user?.name || "Usuario"} ({formatRole(user?.role)})
                 </span>
                 <button
                   onClick={handleLogout}
@@ -87,7 +88,6 @@ export function PosLayout() {
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="flex-1 w-full bg-[#F6F7F9] overflow-hidden flex flex-col">
         <Outlet />
       </main>
