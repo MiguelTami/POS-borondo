@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   MoreVertical,
   CheckCircle2,
@@ -38,6 +38,35 @@ const orderFilterLabels: Record<OrderFilter, string> = {
   PENDING: "Pendientes",
   PAID: "Pagadas",
 };
+
+const statusPriority: Record<string, number> = {
+  SENT_TO_CASHIER: 0,
+  SENT_TO_KITCHEN: 1,
+  OPEN: 2,
+  PAID: 3,
+  CANCELLED: 4,
+};
+
+function getOrderPriority(order: Order) {
+  const subOrderPriorities = (order.subOrders || []).map(
+    (sub) => statusPriority[sub.status] ?? 99,
+  );
+
+  if (subOrderPriorities.length > 0) {
+    return Math.min(...subOrderPriorities);
+  }
+
+  return statusPriority[order.status] ?? 99;
+}
+
+function sortOrdersForCashier(orders: Order[]) {
+  return [...orders].sort((a, b) => {
+    const priorityDiff = getOrderPriority(a) - getOrderPriority(b);
+    if (priorityDiff !== 0) return priorityDiff;
+
+    return b.id - a.id;
+  });
+}
 
 export function ActiveOrdersView() {
   const { activeShift, setActiveShift, isLoading, setLoading } =
@@ -239,8 +268,8 @@ export function ActiveOrdersView() {
             Caja Cerrada
           </h1>
           <p className="mb-8 text-sm text-gray-500 leading-relaxed">
-            Actualmente no hay ningún turno activo. Debes abrir un nuevo turno
-            en caja para empezar a ver, gestionar y cobrar órdenes.
+            Actualmente no hay ningÃºn turno activo. Debes abrir un nuevo turno
+            en caja para empezar a ver, gestionar y cobrar Ã³rdenes.
           </p>
           <Button
             onClick={() => setIsOpenShiftModalOpen(true)}
@@ -313,26 +342,29 @@ export function ActiveOrdersView() {
     (o) => o.shiftId?.toString() === activeShift?.id?.toString(),
   );
 
-  const filteredOrders = shiftOrders
-    .map((order) => {
-      // Filtramos las subórdenes para que el cajero solo vea las pertinentes
-      const visibleSubOrders = (order.subOrders || []).filter((sub) => {
-        if (filter === "PENDING")
+  const filteredOrders = sortOrdersForCashier(
+    shiftOrders
+      .map((order) => {
+        // Filtramos las subórdenes para que el cajero solo vea las pertinentes
+        const visibleSubOrders = (order.subOrders || []).filter((sub) => {
+          if (filter === "PENDING")
+            return (
+              sub.status === "SENT_TO_CASHIER" ||
+              sub.status === "SENT_TO_KITCHEN"
+            );
+          if (filter === "PAID") return sub.status === "PAID";
+          // Todas: mostrar ambas
           return (
-            sub.status === "SENT_TO_CASHIER" || sub.status === "SENT_TO_KITCHEN"
+            sub.status === "SENT_TO_CASHIER" ||
+            sub.status === "SENT_TO_KITCHEN" ||
+            sub.status === "PAID"
           );
-        if (filter === "PAID") return sub.status === "PAID";
-        // Todas: mostrar ambas
-        return (
-          sub.status === "SENT_TO_CASHIER" ||
-          sub.status === "SENT_TO_KITCHEN" ||
-          sub.status === "PAID"
-        );
-      });
+        });
 
-      return { ...order, subOrders: visibleSubOrders };
-    })
-    .filter((order) => order.subOrders.length > 0); // Mostrar la órden solo si tiene subórdenes válidas para el cajero
+        return { ...order, subOrders: visibleSubOrders };
+      })
+      .filter((order) => order.subOrders.length > 0),
+  ); // Mostrar la orden solo si tiene subórdenes válidas para el cajero
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[#F6F7F9] relative">
@@ -359,12 +391,12 @@ export function ActiveOrdersView() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-1">
-              Órdenes Activas
+              Ã“rdenes Activas
             </h1>
             <p className="text-gray-500 text-sm">
               Manejando actualmente{" "}
               <span className="font-semibold text-blue-600">
-                {filteredOrders.length} órdenes
+                {filteredOrders.length} Ã³rdenes
               </span>{" "}
               en el sistema.
             </p>
@@ -388,13 +420,13 @@ export function ActiveOrdersView() {
 
         {loadingOrders ? (
           <div className="flex justify-center p-12 text-gray-500">
-            Cargando órdenes...
+            Cargando Ã³rdenes...
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
             {filteredOrders.length === 0 ? (
               <div className="col-span-full text-center py-12 text-gray-400">
-                No hay órdenes pendientes en este turno. (Si crees que es un
+                No hay Ã³rdenes pendientes en este turno. (Si crees que es un
                 error, verifica la terminal/consola F12).
               </div>
             ) : (
@@ -564,7 +596,7 @@ export function ActiveOrdersView() {
                                     </div>
                                     {item.notes && (
                                       <div className="pl-4 mt-0.5 text-amber-600 italic">
-                                        ↳ {item.notes}
+                                        â†³ {item.notes}
                                       </div>
                                     )}
                                   </div>
@@ -696,10 +728,10 @@ export function ActiveOrdersView() {
               <AlertTriangle className="w-8 h-8 text-orange-600" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">
-              ¿Enviar a la Cocina?
+              Â¿Enviar a la Cocina?
             </h2>
             <p className="text-sm text-gray-500 mb-8">
-              Esto imprimirá la comanda para preparar la sub-orden.
+              Esto imprimirÃ¡ la comanda para preparar la sub-orden.
             </p>
             <div className="flex justify-center gap-4 mt-6">
               <Button
@@ -793,7 +825,7 @@ export function ActiveOrdersView() {
 
               <div className="mb-6">
                 <div className="text-sm font-bold text-gray-400 tracking-wider uppercase mb-3">
-                  Método de Pago
+                  MÃ©todo de Pago
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <button
@@ -827,7 +859,7 @@ export function ActiveOrdersView() {
                     }`}
                   >
                     <Smartphone className="w-6 h-6" />
-                    <span className="text-[10px] font-bold">MÓVIL</span>
+                    <span className="text-[10px] font-bold">MÃ“VIL</span>
                   </button>
                 </div>
               </div>
@@ -867,10 +899,10 @@ export function ActiveOrdersView() {
               <CheckCircle2 className="w-8 h-8 text-blue-600" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">
-              ¿Confirmar Pago de Orden?
+              Â¿Confirmar Pago de Orden?
             </h2>
             <p className="text-sm text-gray-500 mb-8">
-              Estás a punto de marcar toda la orden #{confirmPayOrder} como
+              EstÃ¡s a punto de marcar toda la orden #{confirmPayOrder} como
               pagada.
             </p>
             <div className="flex justify-center gap-4 mt-6">
@@ -899,11 +931,11 @@ export function ActiveOrdersView() {
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">
-              ¿Cancelar Orden?
+              Â¿Cancelar Orden?
             </h2>
             <p className="text-sm text-gray-500 mb-8">
-              Estás a punto de cancelar toda la orden #{confirmCancelOrder}.
-              Esta acción no se puede deshacer.
+              EstÃ¡s a punto de cancelar toda la orden #{confirmCancelOrder}.
+              Esta acciÃ³n no se puede deshacer.
             </p>
             <div className="flex justify-center gap-4 mt-6">
               <Button
@@ -926,3 +958,5 @@ export function ActiveOrdersView() {
     </div>
   );
 }
+
+
