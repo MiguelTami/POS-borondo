@@ -130,13 +130,13 @@ export function CreateOrderModal({
         if (sub.id !== activeSubOrderId) return sub;
 
         const newItems = [...sub.items];
-        
+
         const itemToUpdate = newItems[currentIndex];
         if (itemToUpdate) {
-            newItems[currentIndex] = {
+          newItems[currentIndex] = {
             ...itemToUpdate,
             notes: tempNote.trim() || undefined,
-            };
+          };
         }
 
         return { ...sub, items: newItems };
@@ -314,7 +314,7 @@ export function CreateOrderModal({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[#f0f2f5] w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+      <div className="bg-[#f0f2f5] w-full max-w-[96vw] h-[94vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
         {error && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md animate-in slide-in-from-top-4 fade-in">
             <Alert
@@ -335,8 +335,15 @@ export function CreateOrderModal({
           </div>
         )}
 
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-20 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors text-gray-600"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
         {/* Header */}
-        <div className="bg-white px-6 py-4 flex flex-col border-b border-gray-200 gap-4">
+        <div className="bg-white px-6 py-3 flex flex-col border-b border-gray-200 gap-3 mr-[520px]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <h2 className="text-2xl font-bold text-gray-900">
@@ -347,7 +354,7 @@ export function CreateOrderModal({
             </div>
             <button
               onClick={onClose}
-              className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors text-gray-600"
+              className="hidden"
             >
               <X className="w-6 h-6" />
             </button>
@@ -361,7 +368,7 @@ export function CreateOrderModal({
                   ? `(Mesa ${tables.find((t) => t.id === selectedTableId)?.number})`
                   : ""}
               </h3>
-              <div className="flex gap-3 overflow-x-auto p-2 pb-4 scrollbar-hide">
+              <div className="flex gap-3 overflow-x-auto p-1 pb-2 scrollbar-hide">
                 {tables.map((t) => {
                   const isSelected = selectedTableId === t.id;
                   const isAvailable = t.status === "AVAILABLE";
@@ -389,9 +396,9 @@ export function CreateOrderModal({
         </div>
 
         {/* Body content */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 min-h-0 overflow-hidden pr-[520px]">
           {/* Left panel: Products explorer */}
-          <div className="flex-1 flex flex-col p-6 overflow-hidden">
+          <div className="flex-1 flex flex-col p-5 overflow-hidden">
             {/* Search & Categories */}
             <div className="mb-6 space-y-4">
               <div className="relative max-w-md">
@@ -471,9 +478,9 @@ export function CreateOrderModal({
           </div>
 
           {/* Right panel: Active Cart & Suborders */}
-          <div className="w-[400px] bg-white border-l border-gray-200 flex flex-col">
+          <div className="absolute right-0 top-0 bottom-0 w-[520px] bg-white border-l border-gray-200 flex flex-col min-h-0 pt-20">
             {/* Suborders Tabs */}
-            <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center gap-2 overflow-x-auto">
+            <div className="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-2 overflow-x-auto shrink-0">
               {subOrders.map((sub) => (
                 <button
                   key={sub.id}
@@ -495,7 +502,7 @@ export function CreateOrderModal({
             {/* Cart Header */}
             {activeSubOrder ? (
               <>
-                <div className="p-5 flex justify-between items-center">
+                <div className="px-5 py-3 flex justify-between items-center shrink-0">
                   <h3 className="font-black text-gray-800 tracking-tight uppercase text-sm">
                     Carrito: {activeSubOrder.label}
                   </h3>
@@ -516,14 +523,14 @@ export function CreateOrderModal({
                 </div>
 
                 {/* Cart Items */}
-                <div className="flex-1 overflow-y-auto px-5 space-y-3 pb-6">
+                <div className="flex-1 min-h-0 overflow-y-auto px-5 space-y-3 pb-5">
                   {activeSubOrder.items.map((item, index) => (
                     <div
                       key={`${item.product.id}-${index}`}
-                      className="flex flex-col p-3 rounded-xl border border-gray-100 bg-gray-50/50"
+                      className="flex flex-col p-4 rounded-xl border border-gray-100 bg-gray-50/50"
                     >
                       <div className="flex justify-between items-start mb-1">
-                        <span className="font-bold text-sm text-gray-800 flex-1 pr-2">
+                        <span className="font-bold text-base text-gray-800 flex-1 pr-2">
                           {item.product.name}
                         </span>
                         <span className="font-bold text-gray-900">
@@ -576,19 +583,19 @@ export function CreateOrderModal({
                   ))}
 
                   {activeSubOrder.items.length === 0 && (
-                    <div className="text-center text-gray-400 py-10 text-sm">
+                    <div className="text-center text-gray-400 py-16 text-sm">
                       Carrito vacío. Selecciona productos.
                     </div>
                   )}
                 </div>
 
                 {/* Footer Summary */}
-                <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-4px_10px_rgba(0,0,0,0.02)] mt-auto">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-500 font-semibold text-sm">
+                <div className="p-4 bg-white border-t border-gray-100 shadow-[0_-4px_10px_rgba(0,0,0,0.02)] mt-auto shrink-0">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-gray-500 font-semibold text-xs">
                       Subtotal ({activeSubOrder.label})
                     </span>
-                    <span className="text-gray-800 font-bold">
+                    <span className="text-gray-800 font-bold text-sm">
                       $
                       {getSubOrderTotal(activeSubOrder).toLocaleString(
                         undefined,
@@ -596,10 +603,10 @@ export function CreateOrderModal({
                       )}
                     </span>
                   </div>
-                  <div className="flex justify-between mt-4 pt-4 border-t border-gray-100">
-                    <span className="text-gray-900 font-black text-lg">
+                  <div className="flex justify-between mt-3 pt-3 border-t border-gray-100">
+                    <span className="text-gray-900 font-black text-base">
                       Total Global{" "}
-                      <span className="text-xs font-normal text-gray-500 block">
+                      <span className="text-[11px] font-normal text-gray-500 block">
                         Todas las subórdenes
                       </span>
                     </span>
@@ -616,7 +623,7 @@ export function CreateOrderModal({
                   <Button
                     onClick={handleSubmitOrder}
                     disabled={isLoading || selectedTableId === ""}
-                    className="w-full h-14 mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-blue-200 transition-all"
+                    className="w-full h-12 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-blue-200 transition-all"
                   >
                     {isLoading ? "Enviando..." : "Enviar Pedido"}
                   </Button>
