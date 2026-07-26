@@ -430,7 +430,7 @@ export function ActiveOrdersView() {
             Cargando Ã³rdenes...
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 items-start">
             {filteredOrders.length === 0 ? (
               <div className="col-span-full text-center py-12 text-gray-400">
                 No hay Ã³rdenes pendientes en este turno. (Si crees que es un
@@ -455,7 +455,7 @@ export function ActiveOrdersView() {
                 return (
                   <div
                     key={order.id}
-                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col"
+                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col h-fit"
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
@@ -497,7 +497,7 @@ export function ActiveOrdersView() {
                     </div>
 
                     {/* Suborders list */}
-                    <div className="flex-1 space-y-3 mt-2">
+                    <div className="space-y-3 mt-2">
                       {order.subOrders?.map((sub) => {
                         const subPaid = isSubOrderPaid(sub);
                         const isKitchenSendable =
